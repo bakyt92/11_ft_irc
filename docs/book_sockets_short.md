@@ -129,9 +129,6 @@ struct sockaddr_storage{
 * используют User Datagram Protocol, UDP (не TCP)
 * нужны, когда недоступен TCP стек или когда допускаeтся потеря нескольких пакетов (игры, звук, видео)
 
-## raw sockets
-* internet-socket
-
 ## Инкапсуляция данных
 ![Screenshot from 2024-04-06 17-00-28](https://github.com/akostrik/IRC-fork/assets/22834202/2697a7e0-024c-48ff-a907-42b82bd057a1)
 1. пакет рождён
