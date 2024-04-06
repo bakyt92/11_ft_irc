@@ -171,7 +171,7 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
     - в Порядок Байтов Хоста, когда они оттуда придут
     - если вам захочется поработать с плавающей запятой, см. Сериализация
 * IPv6 имеет адрес и номер порта также, как IPv4
-* преобразование типов IP-адреса
+* преобразование формы записи IP-адреса
   + упаковывать IP-адрес в long оператором `<<` нет нужды
   + `inet_pton()`
     - pton = presentation to network
@@ -185,24 +185,24 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
   + эти функции работают только с цифровыми IP адресами, не с именами хостов для DNS серверов типа `www.example.com`
   + для `www.example.com` надо использовать `getaddrinfo()`
   + устаревшие функции, не работаюьт с IPv6: `inet_addr()`, `inet_aton()`, `inet_ntoa()`
-* пример `10.12.110.57` -> struct
+* пример преобразования `10.12.110.57` -> `struct sockaddr_in`  
 ```
 struct sockaddr_in  sa;        
 inet_pton(AF_INET, “192.0.2.1”, &(sa.sin_addr));   
 ```
-* пример `2001:db8:63b3:1::3490` -> struct
+* пример преобразования `2001:db8:63b3:1::3490` -> `struct sockaddr_in6`
 ```
 struct sockaddr_in6 sa6;   
 inet_pton(AF_INET6, “2001:db8:63b3:1::3490”, &(sa6.sin6_addr));
 ```
-* пример `struct sockaddr_in` -> `10.12.110.57`
+* пример преобразования `struct sockaddr_in` -> `10.12.110.57`
 ```
 charIPv4            ip4[INET_ADDRSTRLEN];                    // место для строки IPv4
 struct sockaddr_in  sa;                                      // предположительно чем-то загружено
 inet_ntop(AF_INET, &(sa.sin_addr), ip4, INET_ADDRSTRLEN);
 printf(“The IPv4 address is: %s\n”, ip4);
 ```
-* пример `struct sockaddr_in6` -> `2001:db8:63b3:1::3490`
+* пример преобразования `struct sockaddr_in6` -> `2001:db8:63b3:1::3490`
 ```
 charIPv6            ip6[INET6_ADDRSTRLEN];                   // место для строки IPv6
 struct sockaddr_in6 sa6;                                     // предположительно чем-то загружено
