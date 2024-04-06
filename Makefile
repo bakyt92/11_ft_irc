@@ -3,11 +3,13 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ufitzhug <ufitzhug@student.42.fr>          +#+  +:+       +#+         #
+#    By: akostrik <akostrik@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/06 16:20:23 by ufitzhug          #+#    #+#              #
-#    Updated: 2024/04/06 16:22:15 by ufitzhug         ###   ########.fr        #
+#    Updated: 2024/04/06 16:24:47 by akostrik         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME 
+
+OBJ = 
