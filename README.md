@@ -9,4 +9,4 @@ https://www.youtube.com/watch?v=I9o-oTdsMgI (инструкция и видео)
 https://www.youtube.com/watch?v=gntyAFoZp-E (основы, что и в методичке, ток на английском)  
 https://www.youtube.com/watch?v=I9o-oTdsMgI  
 https://www.youtube.com/@edueventsmow/videos  
-(Краткое содержание: Сетевое программирование от Биджа. Использование	Интернет Сокетов.)[https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md]   
+[Краткое содержание: Сетевое программирование от Биджа. Использование	Интернет Сокетов.](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
