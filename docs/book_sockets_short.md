@@ -15,7 +15,7 @@ https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf
 * для загрузки страниц web браузерами по HTTP протоколу
   + если подключиться к web сайту по telnet-у и, напечатать “GET / HTTP/1.0”, получишь html
 * The Transmission Control Protocol, TCP
-* TCP обеспечивает появление ваших последовательно и без ошибок
+* TCP обеспечивает появление данных последовательно и без ошибок
 
 ## datagram socket
 * internet-socket
