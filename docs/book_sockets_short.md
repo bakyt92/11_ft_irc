@@ -96,6 +96,34 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
 понадобится
   + можно выделить для себя адреса в сети, которая не доступна снаружи
 
+## системные вызовы
+* ядро берет власть и выполняет всю работу за вас автомагически
+* здесь системные вызовы расположены примерно в том порядке, в каком к ним надо обращаться в программе
+* здесь в примерах не включена необходимая проверка на ошибки
+### getaddrinfo()
+* поиск имён DNS и служб
+* заполняет структуры
+* параметры
+  + node: имя или IP адрес хоста
+  + service: номер порта или имя службы, например `http`, `ftp`, `telnet`, `smtp` (см. `/etc/services`)
+  + hints: указывает на struct addrinfo, которую вы уже заполнили нужной информацией
+* возвращает указатель на связанный список результатов
+```
+int             status;
+struct addrinfo hints;
+struct addrinfo *servinfo;                                          // укажет на результат
+
+memset(&hints, 0, sizeof hints);
+hints.ai_family   = AF_UNSPEC;                                      // IPv4 либо IPv6
+hints.ai_socktype = SOCK_STREAM;                                    // потоковый сокет TCP
+hints.ai_flags   = AI_PASSIVE;                                      // записать мой IP для меня
+
+if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) { // servinfo указывает на связанный список из 1 или более struct addrinfo
+  fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+  exit(1);
+}
+freeaddrinfo(servinfo);                                             // освободить связанный список
+```  
 ## типы данных, применяемых в интерфейсе сокетов (можно не читать)
 ### 1. дескриптор сокета: `int`
 ### 2. addrinfo
