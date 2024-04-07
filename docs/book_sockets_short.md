@@ -109,8 +109,7 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
   + hints: указывает на struct addrinfo, которую вы уже заполнили нужной информацией
 * возвращает указатель на связанный список результатов
   
-Пример: сервер, который хочет слушать порт 3490 вашего IP адреса (в действительности “слушания” или установки сети не происходит, просто
-заполняются структуры)
+Пример: сервер, слушает порт 3490 вашего IP адреса (в действительности “слушания” или установки сети не происходит, просто заполняются структуры)
 ```
 int             status;
 struct addrinfo hints;
@@ -128,7 +127,7 @@ if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
 // servinfo указывает на связанный список из 1 или более struct addrinfo
 freeaddrinfo(servinfo);                                             // освободить связанный список
 ```  
-Пример: клиент, который хочет подсоединиться к серверу “www.example.net” порт 3490 (это не настоящее подключение, а заполнение структур)
+Пример: клиент, подсоединяется к серверу “www.example.net” порт 3490 (это не настоящее подключение, а заполнение структур)
 ```
 int             status;
 struct addrinfo hints;
@@ -139,6 +138,48 @@ hints.ai_family   = AF_UNSPEC;
 hints.ai_socktype = SOCK_STREAM;
 status = getaddrinfo("www.example.net", "3490", &hints, &servinfo); // готовьтесь к соединению
 // servinfo указывает на связанный список из 1 или более struct addrinfo
+```
+Пример: программа выводит IP адреса заданного в командной строке хоста (1 аргумент)
+```
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
+int main(int argc, char *argv[]) {
+  struct addrinfo hints, *res, *p;
+  int             status;
+  char            ipstr[INET6_ADDRSTRLEN];
+
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family    = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+    return 2;
+  }
+  printf("IP addresses for %s:\n\n", argv[1]);
+  for(p = res;p != NULL; p = p->ai_next) {
+    void *addr;
+    char *ipver;
+    if (p->ai_family == AF_INET) { // в IPv4 и IPv6 поля разные
+      struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+      addr = &(ipv4->sin_addr);
+      ipver = "IPv4";
+    } else {
+      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+      addr = &(ipv6->sin6_addr);
+      ipver = "IPv6";
+    }
+    inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr); // перевести IP в строку и распечатать
+    printf(" %s: %s\n", ipver, ipstr);
+  }
+  freeaddrinfo(res);
+  return 0;
+}
 ```
 ## типы данных, применяемых в интерфейсе сокетов (можно не читать)
 ### 1. дескриптор сокета: `int`
