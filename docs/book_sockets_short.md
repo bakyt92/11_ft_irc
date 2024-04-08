@@ -279,6 +279,33 @@ listen();
     - accept() не запишет в addr больше, чем указано, байт
     - если запишет меньше указанного байт, то изменит значение addrlen
 * в случае ошибки возвращает -1 и устанавливает errno
+* кто-то пытается подключиться вызовом connect() к вашей машине на порт, который вы слушаете вызовом listen():
+  + это соединение будет поставлено в очередь ждать accept()-а
+  + вы вызываете accept() и говорите ему принять ожидающие подключения
+  + accept() вернёт новый файловый дескриптор сокета для использования с одним подключением
+  + у вас появилось два файловых дескриптора сокета: исходный слушает новые подключения, а вновь созданный готов к send() и recv()
+Пример
+```
+#define MYPORT "3490"                                               // номер моего порта для подключения пользователей
+#define BACKLOG 10                                                  // размер очереди ожидающих подключений
+int main(void) {
+struct sockaddr_storage their_addr;
+socklen_t addr_size;
+
+struct addrinfo hints, *res;
+int sockfd, new_fd;
+memset(&hints, 0, sizeof hints);
+hints.ai_family = AF_UNSPEC;
+hints.ai_socktype = SOCK_STREAM;
+hints.ai_flags = AI_PASSIVE;                                         // заполнить мой IP для меня
+getaddrinfo(NULL, MYPORT, &hints, &res);                             // заполнить адресные структуры
+sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
+bind(sockfd, res->ai_addr, res->ai_addrlen);
+listen(sockfd, BACKLOG);
+addr_size = sizeof their_addr;
+new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size); // // принять входящие подключения
+// связываемся по дескриптору сокета new_fd!
+```
 
 ### send() и recv()
 ### close()	
