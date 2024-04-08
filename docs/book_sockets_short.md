@@ -402,7 +402,8 @@ int main(void) {
   sa.sa_handler = sigchld_handler;                              // удалить мёртвые процессы
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
-  if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+  if (sigaction(SIGCHLD, &sa, NULL) == -1) {                    // уборка зомби, которые появляются при завершении
+потомка после fork()
     perror("sigaction");
     exit(1);
   }
