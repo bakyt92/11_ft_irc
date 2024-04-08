@@ -147,10 +147,8 @@ int main(int argc, char *argv[]) {
   memset(&hints, 0, sizeof hints);
   hints.ai_family    = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
-  if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
-    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-    return 2;
-  }
+  if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) 
+    return (fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status)), 2);
   printf("IP addresses for %s:\n\n", argv[1]);
   for(p = res;p != NULL; p = p->ai_next) {
     void *addr;
