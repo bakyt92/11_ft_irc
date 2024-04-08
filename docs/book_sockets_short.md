@@ -293,11 +293,11 @@ ina.sin_addr.s_addr;                    // 4-байтный IP адрес (в П
 ### 6. sockaddr_in6
   + только для IPv6
 ```
-struct sockaddr_in6 {
+struct sockaddr_in6 {                  
   u_int16_t       sin6_family;          // семейство адресов, AF_INET6
   u_int16_t       sin6_port;            // номер порта, Порядок Байтов Сети
   u_int32_t       sin6_flowinfo;        // потоковая информация IPv6
-  struct in6_addr sin6_addr;            // адрес IPv6, можно записать глобальную переменную in6addr_any, можно использовать макрос IN6ADDR_ANY_INIT (≈ INADDR_AN` для IPv4) 
+  struct in6_addr sin6_addr;            // (???) адрес IPv6, можно записать глобальную переменную in6addr_any, можно использовать макрос IN6ADDR_ANY_INIT (≈ INADDR_AN` для IPv4) 
   u_int32_t       sin6_scope_id;        // Scope ID
 };
 ```
