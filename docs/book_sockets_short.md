@@ -97,7 +97,7 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
 * ядро выполняет всю работу за вас
 * здесь системные вызовы расположены примерно в том порядке, в каком к ним надо обращаться в программе
 * здесь в примерах не включена проверка на ошибки
-* я добавила в этот раздел функции, которые есть в задании (но нет в книге): setsockopt(), getsockname(), getprotobyname(), gethostbyname(), freeaddrinfo(), inet_addr(), inet_ntoa(), signal(), sigaction(), lseek(), fstat(), fcntl(), poll() or equivalent
+* я добавила в этот раздел функции, которые есть в задании (но нет в книге): setsockopt(), getsockname(), getprotobyname(), gethostbyname(), freeaddrinfo(), signal(), sigaction(), lseek(), fstat(), fcntl(), poll() or equivalent
 * я не включила в этот раздел функции, которых нет в задании (но есть в книге): sendto(), recvfrom(), shutdown(), getpeername(), gethostname()
 
 ### getaddrinfo()
@@ -250,8 +250,6 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 ### getprotobyname()
 ### gethostbyname()
 ### freeaddrinfo()
-### inet_addr()
-### inet_ntoa()
 ### signal()
 ### sigaction()
 ### lseek()
