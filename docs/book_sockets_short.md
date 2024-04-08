@@ -119,24 +119,21 @@ memset(&hints, 0, sizeof hints);
 hints.ai_family   = AF_UNSPEC;                                      // мне всё равно IPv4 либо IPv6
 hints.ai_socktype = SOCK_STREAM;                                    // потоковый сокет TCP
 hints.ai_flags    = AI_PASSIVE;                                     // назначить структурам сокета адрес моего локального хостазаписать мой IP для меня
-
-if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) {
+if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) { // servinfo указывает на связанный список из 1 или более struct addrinfo
   fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
   exit(1);
 }
-// servinfo указывает на связанный список из 1 или более struct addrinfo
 freeaddrinfo(servinfo);                                             // освободить связанный список
 ```  
 Пример: клиент, подсоединяется к серверу “www.example.net” порт 3490 (это не настоящее подключение, а заполнение структур)
 ```
-int             status;
 struct addrinfo hints;
-struct addrinfo *servinfo; // укажет на результат
+struct addrinfo *servinfo;                                             // укажет на результат
 
 memset(&hints, 0, sizeof hints);
 hints.ai_family   = AF_UNSPEC;
 hints.ai_socktype = SOCK_STREAM;
-status = getaddrinfo("www.example.net", "3490", &hints, &servinfo); // готовьтесь к соединению
+int status = getaddrinfo("www.example.net", "3490", &hints, &servinfo); // готовьтесь к соединению
 // servinfo указывает на связанный список из 1 или более struct addrinfo
 ```
 Пример: программа выводит IP адреса заданного в командной строке хоста (1 аргумент)
@@ -182,11 +179,10 @@ int main(int argc, char *argv[]) {
 
 Пример: взять данные из результатов вызова getaddrinfo() и передать их socket()
 ```
-int             s;
-struct addrinfo hints, *res;                                     // полагаем, что “hints" уже заполнена
+struct addrinfo hints, *res;                                              // полагаем, что “hints" уже заполнена
 
-getaddrinfo("www.example.com", "http", &hints, &res);            // проверить выход getaddrinfo() на ошибки
-s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);  // и просмотреть список "res" на действительный элемент, не полагаясь на то, что это первый
+getaddrinfo("www.example.com", "http", &hints, &res);                     // проверить выход getaddrinfo() на ошибки
+int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);  // просмотреть список res на действительный элемент, не полагаясь на то, что это первый
 ```
 ### bind()	На каком я порте?
 * чтобы слушать (`listen()`) входные подключения, сервер связывает сокет с портом на вашей локальной машине
@@ -209,23 +205,21 @@ if (setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
 Пример: привяжем сокет к порту 3490 хоста, на котором выполняется программа
 ```
 struct addrinfo hints, *res;
-int             sockfd;
 
 // заполнить адресные структуры с помощью getaddrinfo():
 memset(&hints, 0, sizeof hints);
 hints.ai_family   = AF_UNSPEC;
 hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags    = AI_PASSIVE;                                      // привязаться к IP хоста, на котором выполняется
-getaddrinfo(NULL, "3490", &hints, &res);                             // если хотите соединиться с отдельным локальным IP адресом, укажите IP адрес в первом аргументе getaddrinfo()
-sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
-bind(sockfd, res->ai_addr, res->ai_addrlen);                         // связать с портом, полученным из getaddrinfo()
+hints.ai_flags    = AI_PASSIVE;                                          // привязаться к IP хоста, на котором выполняется
+getaddrinfo(NULL, "3490", &hints, &res);                                 // если хотите соединиться с отдельным локальным IP адресом, укажите IP адрес в первом аргументе getaddrinfo()
+int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
+bind(sockfd, res->ai_addr, res->ai_addrlen);                             // связать с портом, полученным из getaddrinfo()
 ```
 Пример: в книжке помечен как устаревший, но в нашем задании есть эти функции. Заполняем sockaddr_in вручную. Это специфично для IPv4, дляIPv6 тоже можно так делать. 
 ```
-int                sockfd;
 struct sockaddr_in my_addr;
 
-sockfd                  = socket(PF_INET, SOCK_STREAM, 0);
+int sockfd              = socket(PF_INET, SOCK_STREAM, 0);
 my_addr.sin_family      = AF_INET;
 my_addr.sin_port        = htons(MYPORT);                     // порядок байт сети
 my_addr.sin_addr.s_addr = inet_addr("10.12.110.57");         // можно INADDR_ANY
@@ -245,13 +239,12 @@ bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 Пример: подключим сокет к “www.example.com”, порт 3490
 ```
 struct addrinfo hints, *res;
-int             sockfd;
 
 memset(&hints, 0, sizeof hints);    
 hints.ai_family     = AF_UNSPEC;
 hints.ai_socktype = SOCK_STREAM;
 getaddrinfo("www.example.com", "3490", &hints, &res); // заполняем адресные структуры
-sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
+int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
 connect(sockfd, res->ai_addr, res->ai_addrlen);
 ```
 ### listen()
@@ -286,25 +279,24 @@ listen();
   + у вас появилось два файловых дескриптора сокета: исходный слушает новые подключения, а вновь созданный готов к send() и recv()
 Пример
 ```
-#define MYPORT "3490"                                               // номер моего порта для подключения пользователей
-#define BACKLOG 10                                                  // размер очереди ожидающих подключений
+#define MYPORT "3490"                                                // номер моего порта для подключения пользователей
+#define BACKLOG 10                                                   // размер очереди ожидающих подключений
 int main(void) {
-struct sockaddr_storage their_addr;
-socklen_t addr_size;
+  struct sockaddr_storage their_addr;
+  struct addrinfo         hints, *res;
 
-struct addrinfo hints, *res;
-int sockfd, new_fd;
-memset(&hints, 0, sizeof hints);
-hints.ai_family = AF_UNSPEC;
-hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;                                         // заполнить мой IP для меня
-getaddrinfo(NULL, MYPORT, &hints, &res);                             // заполнить адресные структуры
-sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
-bind(sockfd, res->ai_addr, res->ai_addrlen);
-listen(sockfd, BACKLOG);
-addr_size = sizeof their_addr;
-new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size); // // принять входящие подключения
-// связываемся по дескриптору сокета new_fd!
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family   = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags    = AI_PASSIVE;                                      // заполнить мой IP для меня
+  getaddrinfo(NULL, MYPORT, &hints, &res);                             // заполнить адресные структуры
+  int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
+  bind(sockfd, res->ai_addr, res->ai_addrlen);
+  listen(sockfd, BACKLOG);
+  socklen_t addr_size = sizeof their_addr;
+  int new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size); // // принять входящие подключения
+  // связываемся по дескриптору сокета new_fd
+}
 ```
 
 ### send() и recv()
