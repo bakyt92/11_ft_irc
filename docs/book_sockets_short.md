@@ -16,7 +16,7 @@ https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf
   + если подключиться к web сайту по telnet-у и, напечатать “GET / HTTP/1.0”, получишь html
 * The Transmission Control Protocol (TCP) обеспечивает появление данных последовательно и без ошибок
 
-### datagram socket
+### datagram socket (кажется нам не нужно)
 * internet-socket
 * “неподключаемый” (без установки логического соединения)
   + не открываете точку подключения, как при потоковых сокетах
