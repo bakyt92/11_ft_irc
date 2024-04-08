@@ -141,14 +141,6 @@ status = getaddrinfo("www.example.net", "3490", &hints, &servinfo); // гото�
 ```
 Пример: программа выводит IP адреса заданного в командной строке хоста (1 аргумент)
 ```
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-
 int main(int argc, char *argv[]) {
   struct addrinfo hints, *res, *p;
   int             status;
