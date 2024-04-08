@@ -226,6 +226,18 @@ getaddrinfo(NULL, "3490", &hints, &res);                             // если
 sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
 bind(sockfd, res->ai_addr, res->ai_addrlen);                         // связать с портом, полученным из getaddrinfo()
 ```
+Пример: в книжке помечен как устаревший, но в нашем задании есть эти функции. Заполняем sockaddr_in вручную. Это специфично для IPv4, дляIPv6 тоже можно так делать. 
+```
+int                sockfd;
+struct sockaddr_in my_addr;
+
+sockfd                  = socket(PF_INET, SOCK_STREAM, 0);
+my_addr.sin_family      = AF_INET;
+my_addr.sin_port        = htons(MYPORT);                     // порядок байт сети
+my_addr.sin_addr.s_addr = inet_addr("10.12.110.57");         // можно INADDR_ANY
+memset(my_addr.sin_zero, '\0', sizeof my_addr.sin_zero);
+bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
+```
 ### connect()
 ### listen()
 ### accept()
