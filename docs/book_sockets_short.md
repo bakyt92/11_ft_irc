@@ -352,7 +352,7 @@ struct sockaddr_storage{
 };
 ```
 
-### преобращоыния формы записи IP-адреса
+### преобразования формы записи IP-адреса
 + упаковывать IP-адрес в long оператором `<<` нет нужды
 + `inet_pton()`
   - pton = presentation to network
