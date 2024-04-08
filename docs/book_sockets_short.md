@@ -137,7 +137,7 @@ hints.ai_socktype = SOCK_STREAM;
 int status = getaddrinfo("www.example.net", "3490", &hints, &servinfo); // готовьтесь к соединению
 // servinfo указывает на связанный список из 1 или более struct addrinfo
 ```
-Пример: программа выводит IP адреса заданного в командной строке хоста (1 аргумент)
+Пример: программа выводит IP адрес заданного в командной строке хоста (1 аргумент)
 ```
 int main(int argc, char *argv[]) {
   struct addrinfo hints, *res, *p;
