@@ -126,7 +126,7 @@ if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)) != 0) { // servinfo 
 }
 freeaddrinfo(servinfo);                                             // освободить связанный список
 ```  
-Пример: клиент, подсоединяется к серверу “www.example.net” порт 3490 (это не настоящее подключение, а заполнение структур)
+Пример: заполнение структур клиента для соединия с сервером “www.example.net”, порт 3490
 ```
 struct addrinfo hints;
 struct addrinfo *servinfo;                                             // укажет на результат
