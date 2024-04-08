@@ -9,7 +9,7 @@ https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf
 * `netstat` список открытых сокетов в системе
 * сокет - ключевой компонент для обмена данными между разными системами  
 * установить своё значение таймаута для TCP или UDP сокета
-  + 1 вариант: setsockopt()с SO_RCVTIMEO и SO_SNDTIMEO, но нк все системы поддердивают
+  + 1 вариант: setsockopt() с SO_RCVTIMEO и SO_SNDTIMEO, но не все системы поддерживают
   + 2 вариант: использовать `alarm()` или `setitimer()`
 
 ### stream socket
