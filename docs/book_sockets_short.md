@@ -233,6 +233,23 @@ memset(my_addr.sin_zero, '\0', sizeof my_addr.sin_zero);
 bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr);
 ```
 ### connect()
+* параметры (всё это можно получить из `getaddrinfo()`):
+  + файловый дескриптор сокета нашего соседа, возвращённый вызовом socket()
+  + struct sockaddr , содержащая порт и IP адрес назначения
+  + длина этой структуры в байтах
+  + 
+Пример: подключим сокет к “www.example.com”, порт 3490
+```
+struct addrinfo hints, *res;
+int             sockfd;
+
+memset(&hints, 0, sizeof hints);    
+hints.ai_family     = AF_UNSPEC;
+hints.ai_socktype = SOCK_STREAM;
+getaddrinfo("www.example.com", "3490", &hints, &res); // заполняем адресные структуры
+sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // создать сокет
+connect(sockfd, res->ai_addr, res->ai_addrlen);
+```
 ### listen()
 ### accept()
 ### send() и recv()
