@@ -20,7 +20,7 @@ https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf
   + если подключиться к web сайту по telnet-у и, напечатать “GET / HTTP/1.0”, получишь html
 * The Transmission Control Protocol (TCP) обеспечивает появление данных последовательно и без ошибок
 
-### datagram socket (кажется нам не нужно)
+### datagram socket (нам не нужно)
 * internet-socket
 * “неподключаемый” (без установки логического соединения)
   + не открываете точку подключения, как при потоковых сокетах
@@ -36,23 +36,6 @@ https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf
 * используют IP маршрутизацию
 * используют User Datagram Protocol, UDP (не TCP)
 * нужны, когда недоступен TCP стек или когда допускаeтся потеря нескольких пакетов (игры, звук, видео)
-
-## инкапсуляция данных
-![Screenshot from 2024-04-06 17-00-28](https://github.com/akostrik/IRC-fork/assets/22834202/2697a7e0-024c-48ff-a907-42b82bd057a1)
-1. пакет рождён
-2. пакет завёрнут (инкапсулирован) в заголовок (реже и хвостик) протоколом первого уровня (скажем, TFTP)
-3. вся штучка (включая TFTP заголовок) инкапсулируется следующим протоколом (скажем, UDP)
-4. снова следующим (IP)
-5. снова протоколом аппаратного (физического) уровня (скажем, Ethernet)
-
-Layered Network Model (aka “ISO/OSI”), 7 уровней:
-* Приложений (telnet, ftp, ...)
-* Представления
-* Сессии
-* Транспортный (TCP, UDP)
-* Сетевой (IP и маршрутизация)
-* Данных
-* Физический (уровень доступа к сети, Ethernet, wi-fi, ...)
 
 ## IP	адрес, порт
 * система маршрутизации сетей Internet Protocol Version 4, IPv4
@@ -84,206 +67,6 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
     - если вам захочется поработать с плавающей запятой, см. Сериализация
 * IPv6 имеет адрес и номер порта также, как IPv4
 * параграф "4. Прыжок из IPv4 в IPv6" нам не нужен, там описывают, как менять код, предназначенный для IPv4, чтобы они работал с IPv6
-
-## частные (= отключённые) сети	(кажется нам не нужно)
-* брандмауэр скрывает сеть от остального мира
-* брандмауэр транслирует “внутренние” IP адреса во “внешние” (известные всему миру) IP адреса с помощью процесса Network Address Translation (NAT)
-* начинающему не нужно беспокоиться об NAT
-* Например:
-  + есть брандмауэр, два статичных IPv4 адреса, выделенных мне DSL компанией, и 7 компьютеров в сети
-  + два компьютера не могут иметь одинаковый адрес
-  + они находятся в частной сети с выделенными для неё 24 миллионами IP адресов
-  + если я вхожу в удалённый компьютер - он говорит мне, что я вошёл с `192.0.2.33`, публичного IP, который мне выделил мой провайдер
-  + если я спрашиваю у моего локального компьютера его адрес, он отвечает `10.0.0.5`
-  + брандмауэр + NAT транслируют один IP адрес в другой
-* номера частных сетей: наиболее частые `10.x.x.x` и `192.168.x.x`, менее распространены `172.y.x.x`, y от 16 до 31
-* адреса `10.x.x.x` зарезервированны, используются в полностью отключённых сетях либо за брандмауэрами
-  + сетям за брандмауэром не нужно быть одной из этих зарезервированных сетей, но обычно это так
-* IPv6 тоже имеет частные сети
-  + начинаются с `fdxx:`
-  + NAT и IPv6 как правило не смешиваются, однако у вас будет столько адресов, что NAT больше не
-понадобится
-  + можно выделить для себя адреса в сети, которая не доступна снаружи
-* Я под брандмауэром - как указать людям за ним мой IP адрес, чтобы они подключились к моей машине?
-  + цель брандмауэра - предотвратить подключение людей за брандмауэром к машинам под ним
-  + разрешение такого подключения рассматривается как брешь в безопасности
-  + брандмауэр использует маскарадинг, NAT, ...:
-  + обойти можно так: напишите программу так, чтобы инициатором соединения всегда были вы
-  + или так: попросите системного администратора проткнуть дыру в брандмауэре, чтобы люди могли к вам подключаться
-    - брандмауэр может пробираться к вам либо через свои NAT программы, либо через прокси, либо через нечто подобное
-    - вы должны быть уверены, что не даёте злоумашенникам доступа во внутреннюю сеть
-    - сделать программы безопасными труднее, чем кажется
-
-## Архитектура Клиент­‐Сервер 	
-* пара клиент-сервер могут говорить на SOCK_STREAM, SOCK_DGRAM или чём угодно, если они говорят на одном языке
-* например:
-  + telnet/telnetd
-  + ftp/ftpd (когда вы используете ftp, есть удалённая программа ftpd, которая обслуживает вас)
-  + Firefox/Apache
-* Как запустить клиент и сервер если у меня только один компьютер?
-  + Cеть для написания сетевых программ не нужна.
-  + Все машины имеют закольцованное (loopback) сетевое “устройство”, которое сидит в ядре и претендует на звание сетевой карты (это интерфейс “lo” в таблице маршрутизации).
-  + Вносить изменения в программу, чтобы она работала на отдельной, не подключённой к сети машине, не нужно.
-  + Два варианта:
-    - запустите клиент в одном окне и сервер в другом
-    - запустите сервер в фоновом режиме (“server &”) и клиент в том же окне
-  + с loopback-устройством вы можете задавать `client login_name` или `client localhost` (???)
-* часто один сервер обслуживает множество клиентов:
-  + сервер ждёт подключения
-  + принимает его (`accept()`)
-  + запускает процесс-потомок для его обслуживания (`fork()`)
-* серверу может принять от клиента команды и выполниь их:
-  + вариант, когда клиент подключается, посылает данные и закрывает соединение, для последующих вызовов
-клиент подключается вновь
-  + клиент:
-    - подключается к серверу (connect())
-    - посылает (send(“/sbin/ls > /tmp/client.out”))
-    - закрывает соединение (close())
-  + сервер:
-    - принимает соединение от клиента (accept())
-    - получает командную строку (recv(str))
-    - закрывает соединение (close())
-    - запускает команду (system(str))
-  + позволить серверу выполнять команды клиента с помощью `system()` небеопасно:
-    - если клиент пришлёт `rm -rf ~`, это удалит всё
-    - если сервер разрешает клиенту прислать команду с безопасной утилитой `foobar` и клиент пришлёт `foobar; rm -rf ~`, то тоже проблема
-    - решение: вставлять `\` перед всеми не алфавитно-цифровыми символами (включая пробелы) в аргументах команды
-
-Пример сервера потокового сокета:
-```
-#define PORT "3490"  // порт для подключения пользователей
-#define BACKLOG 10   // размер очереди ожидающих подключений
-
-void sigchld_handler(int s) {
-  while(waitpid(-1, NULL, WNOHANG) > 0);
-}
-
-void *get_in_addr(struct sockaddr *sa) { // получить sockaddr, IPv4 или IPv6
-  if (sa->sa_family == AF_INET)
-    return &(((struct sockaddr_in*)sa)->sin_addr);
-  return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-int main(void) {
-  int                     sockfd, new_fd, rv, yes=1;                // слушать на sock_fd, новое подключение на new_fd
-  struct addrinfo         hints, *servinfo, *p;
-  struct sockaddr_storage their_addr;                                // адресная информация подключившегося
-  socklen_t               sin_size;
-  struct sigaction        sa;
-  char                    s[INET6_ADDRSTRLEN];
-
-  memset(&hints, 0, sizeof hints);
-  hints.ai_family   = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags    = AI_PASSIVE;                                    // использовать мой IP
-  if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
-    return (fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)), 1);
-  for(p = servinfo; p != NULL; p = p->ai_next) {                     // цикл по всем результатам и связывание с первым возможным
-    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-      perror("server: socket");
-      continue;
-    }
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-      perror("setsockopt");
-      exit(1);
-    }
-    if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-      close(sockfd);
-      perror("server: bind");
-      continue;
-    }
-    break;
-  }
-  if (p == NULL)
-    return (fprintf(stderr, "server: failed to bind\n"), 2);
-  freeaddrinfo(servinfo);
-  if (listen(sockfd, BACKLOG) == -1) {
-    perror("listen");
-    exit(1);
-  }
-  sa.sa_handler = sigchld_handler;                              // удалить мёртвые процессы
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_RESTART;
-  if (sigaction(SIGCHLD, &sa, NULL) == -1) {                    // уборка зомби, которые появляются при завершении
-потомка после fork()
-    perror("sigaction");
-    exit(1);
-  }
-  printf("server: waiting for connections…\n");
-  while(1) {                                                    // главный цикл accept()
-  sin_size = sizeof their_addr;
-  new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-  if (new_fd == -1) {
-    perror("accept");
-    continue;
-  }
-  inet_ntop(their_addr.ss_family,
-  get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
-  printf("server: got connection from %s\n", s);
-  if (!fork()) {                                               // порождённый процесс
-    close(sockfd);                                             // его слушать не нужно
-    if (send(new_fd, "Hello, world!", 13, 0) == -1)
-      perror("send");
-    close(new_fd);
-    exit(0);
-    }
-  }
-  close(new_fd);                                               // родителю это не нужно
-  return 0;
-}
-```
-Пример клиента потокового сокета:
-```
-#define PORT "3490"                                            // порт для подключения клиентов
-#define MAXDATASIZE 100                                        // максимальная длина принимаемых за раз данных
-void *get_in_addr(struct sockaddr *sa) {                       // получить sockaddr, IPv4 или IPv6
-  if (sa->sa_family == AF_INET) 
-    return &(((struct sockaddr_in*)sa)->sin_addr);
-  return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-int main(int argc, char *argv[]) {
-  int             sockfd, numbytes, rv;
-  char            buf[MAXDATASIZE];
-  struct addrinfo hints, *servinfo, *p;
-  char            s[INET6_ADDRSTRLEN];
-
-  if (argc != 2) {
-    fprintf(stderr,"usage: client hostname\n");
-    exit(1);
-    }
-  memset(&hints, 0, sizeof hints);
-  hints.ai_family   = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) 
-    return (fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)), 1);
-  for(p = servinfo; p != NULL; p = p->ai_next) {                        // цикл по всем результатам и связывание с первым возможным
-    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-      perror("client: socket");
-      continue;
-    }
-    if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-      close(sockfd);
-      perror("client: connect");
-      continue;
-    }
-    break;
-  }
-  if (p == NULL)
-    return (fprintf(stderr, "client: failed to connect\n"), 2);
-  inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
-  printf("client: connecting to %s\n", s);
-  freeaddrinfo(servinfo);
-  if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-    perror("recv");
-    exit(1);
-  }
-  buf[numbytes] = ’\0’;
-  printf("client: received ’%s’\n",buf);
-  close(sockfd);
-  return 0;
-}
-```
 
 ## системные вызовы и функции
 * выполняет работу системного вызова выполняет ядро
@@ -629,7 +412,23 @@ struct addrinfo {
   + для работы со структурой sockaddr
   + только для IPv4
   + “in” = “Internet”
-  + указатель на sockaddr_in может быть приведен к указателю на sockaddr, и наоборот
+  + указатель на sockaddr_in может быть приведен к указателю на sockaddr, и наоборот## инкапсуляция данных (кажется нам не нужно)
+![Screenshot from 2024-04-06 17-00-28](https://github.com/akostrik/IRC-fork/assets/22834202/2697a7e0-024c-48ff-a907-42b82bd057a1)
+1. пакет рождён
+2. пакет завёрнут (инкапсулирован) в заголовок (реже и хвостик) протоколом первого уровня (скажем, TFTP)
+3. вся штучка (включая TFTP заголовок) инкапсулируется следующим протоколом (скажем, UDP)
+4. снова следующим (IP)
+5. снова протоколом аппаратного (физического) уровня (скажем, Ethernet)
+
+Layered Network Model (aka “ISO/OSI”), 7 уровней:
+1. Приложений (telnet, ftp, ...)
+2. Представления
+3. Сессии
+4. Транспортный (TCP, UDP)
+5. Сетевой (IP и маршрутизация)
+6. Данных
+7. Физический (уровень доступа к сети, Ethernet, wi-fi, ...)
+
   + `connect()` требует `struct sockaddr*`, вы можете пользоваться структурой `sockaddr_in`
   + позволяет обращаться к элементам адреса сокета
   + `sin_zero` включён для расширения длины структуры до длины sockaddr
@@ -737,6 +536,223 @@ struct sockaddr_in6 sa6;                                     // предполо
 inet_ntop(AF_INET6,&(sa6.sin6_addr), ip6, INET6_ADDRSTRLEN);
 printf(“The IPv6 address is: %s\n”, ip6);
 ```
+## Архитектура Клиент­‐Сервер 	
+* пара клиент-сервер могут говорить на SOCK_STREAM, SOCK_DGRAM или чём угодно, если они говорят на одном языке
+* например:
+  + telnet/telnetd
+  + ftp/ftpd (когда вы используете ftp, есть удалённая программа ftpd, которая обслуживает вас)
+  + Firefox/Apache
+* Как запустить клиент и сервер если у меня только один компьютер?
+  + Cеть для написания сетевых программ не нужна.
+  + Все машины имеют закольцованное (loopback) сетевое “устройство”, которое сидит в ядре и претендует на звание сетевой карты (это интерфейс “lo” в таблице маршрутизации).
+  + Вносить изменения в программу, чтобы она работала на отдельной, не подключённой к сети машине, не нужно.
+  + Два варианта:
+    - запустите клиент в одном окне и сервер в другом
+    - запустите сервер в фоновом режиме (“server &”) и клиент в том же окне
+  + с loopback-устройством вы можете задавать `client login_name` или `client localhost` (???)
+* часто один сервер обслуживает множество клиентов:
+  + сервер ждёт подключения
+  + принимает его (`accept()`)
+  + запускает процесс-потомок для его обслуживания (`fork()`)
+* серверу может принять от клиента команды и выполниь их:
+  + вариант, когда клиент подключается, посылает данные и закрывает соединение, для последующих вызовов
+клиент подключается вновь
+  + клиент:
+    - подключается к серверу (connect())
+    - посылает (send(“/sbin/ls > /tmp/client.out”))
+    - закрывает соединение (close())
+  + сервер:
+    - принимает соединение от клиента (accept())
+    - получает командную строку (recv(str))
+    - закрывает соединение (close())
+    - запускает команду (system(str))
+  + позволить серверу выполнять команды клиента с помощью `system()` небеопасно:
+    - если клиент пришлёт `rm -rf ~`, это удалит всё
+    - если сервер разрешает клиенту прислать команду с безопасной утилитой `foobar` и клиент пришлёт `foobar; rm -rf ~`, то тоже проблема
+    - решение: вставлять `\` перед всеми не алфавитно-цифровыми символами (включая пробелы) в аргументах команды
+
+Пример сервера потокового сокета:
+```
+#define PORT "3490"  // порт для подключения пользователей
+#define BACKLOG 10   // размер очереди ожидающих подключений
+
+void sigchld_handler(int s) {
+  while(waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+void *get_in_addr(struct sockaddr *sa) { // получить sockaddr, IPv4 или IPv6
+  if (sa->sa_family == AF_INET)
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+  return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+int main(void) {
+  int                     sockfd, new_fd, rv, yes=1;                // слушать на sock_fd, новое подключение на new_fd
+  struct addrinfo         hints, *servinfo, *p;
+  struct sockaddr_storage their_addr;                                // адресная информация подключившегося
+  socklen_t               sin_size;
+  struct sigaction        sa;
+  char                    s[INET6_ADDRSTRLEN];
+
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family   = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags    = AI_PASSIVE;                                    // использовать мой IP
+  if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
+    return (fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)), 1);
+  for(p = servinfo; p != NULL; p = p->ai_next) {                     // цикл по всем результатам и связывание с первым возможным
+    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+      perror("server: socket");
+      continue;
+    }
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+      perror("setsockopt");
+      exit(1);
+    }
+    if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+      close(sockfd);
+      perror("server: bind");
+      continue;
+    }
+    break;
+  }
+  if (p == NULL)
+    return (fprintf(stderr, "server: failed to bind\n"), 2);
+  freeaddrinfo(servinfo);
+  if (listen(sockfd, BACKLOG) == -1) {
+    perror("listen");
+    exit(1);
+  }
+  sa.sa_handler = sigchld_handler;                              // удалить мёртвые процессы
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_RESTART;
+  if (sigaction(SIGCHLD, &sa, NULL) == -1) {                    // уборка зомби, которые появляются при завершении
+потомка после fork()
+    perror("sigaction");
+    exit(1);
+  }
+  printf("server: waiting for connections…\n");
+  while(1) {                                                    // главный цикл accept()
+  sin_size = sizeof their_addr;
+  new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+  if (new_fd == -1) {
+    perror("accept");
+    continue;
+  }
+  inet_ntop(their_addr.ss_family,
+  get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
+  printf("server: got connection from %s\n", s);
+  if (!fork()) {                                               // порождённый процесс
+    close(sockfd);                                             // его слушать не нужно
+    if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      perror("send");
+    close(new_fd);
+    exit(0);
+    }
+  }
+  close(new_fd);                                               // родителю это не нужно
+  return 0;
+}
+```
+Пример клиента потокового сокета:
+```
+#define PORT "3490"                                            // порт для подключения клиентов
+#define MAXDATASIZE 100                                        // максимальная длина принимаемых за раз данных
+void *get_in_addr(struct sockaddr *sa) {                       // получить sockaddr, IPv4 или IPv6
+  if (sa->sa_family == AF_INET) 
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+  return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+int main(int argc, char *argv[]) {
+  int             sockfd, numbytes, rv;
+  char            buf[MAXDATASIZE];
+  struct addrinfo hints, *servinfo, *p;
+  char            s[INET6_ADDRSTRLEN];
+
+  if (argc != 2) {
+    fprintf(stderr,"usage: client hostname\n");
+    exit(1);
+    }
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family   = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) 
+    return (fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv)), 1);
+  for(p = servinfo; p != NULL; p = p->ai_next) {                        // цикл по всем результатам и связывание с первым возможным
+    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+      perror("client: socket");
+      continue;
+    }
+    if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+      close(sockfd);
+      perror("client: connect");
+      continue;
+    }
+    break;
+  }
+  if (p == NULL)
+    return (fprintf(stderr, "client: failed to connect\n"), 2);
+  inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
+  printf("client: connecting to %s\n", s);
+  freeaddrinfo(servinfo);
+  if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+    perror("recv");
+    exit(1);
+  }
+  buf[numbytes] = ’\0’;
+  printf("client: received ’%s’\n",buf);
+  close(sockfd);
+  return 0;
+}
+```
+
+## инкапсуляция данных (кажется нам не нужно)
+![Screenshot from 2024-04-06 17-00-28](https://github.com/akostrik/IRC-fork/assets/22834202/2697a7e0-024c-48ff-a907-42b82bd057a1)
+1. пакет рождён
+2. пакет завёрнут (инкапсулирован) в заголовок (реже и хвостик) протоколом первого уровня (скажем, TFTP)
+3. вся штучка (включая TFTP заголовок) инкапсулируется следующим протоколом (скажем, UDP)
+4. снова следующим (IP)
+5. снова протоколом аппаратного (физического) уровня (скажем, Ethernet)
+
+Layered Network Model (aka “ISO/OSI”), 7 уровней:
+1. Приложений (telnet, ftp, ...)
+2. Представления
+3. Сессии
+4. Транспортный (TCP, UDP)
+5. Сетевой (IP и маршрутизация)
+6. Данных
+7. Физический (уровень доступа к сети, Ethernet, wi-fi, ...)
+
+## частные (= отключённые) сети	(кажется нам не нужно)
+* брандмауэр скрывает сеть от остального мира
+* брандмауэр транслирует “внутренние” IP адреса во “внешние” (известные всему миру) IP адреса с помощью процесса Network Address Translation (NAT)
+* начинающему не нужно беспокоиться об NAT
+* Например:
+  + есть брандмауэр, два статичных IPv4 адреса, выделенных мне DSL компанией, и 7 компьютеров в сети
+  + два компьютера не могут иметь одинаковый адрес
+  + они находятся в частной сети с выделенными для неё 24 миллионами IP адресов
+  + если я вхожу в удалённый компьютер - он говорит мне, что я вошёл с `192.0.2.33`, публичного IP, который мне выделил мой провайдер
+  + если я спрашиваю у моего локального компьютера его адрес, он отвечает `10.0.0.5`
+  + брандмауэр + NAT транслируют один IP адрес в другой
+* номера частных сетей: наиболее частые `10.x.x.x` и `192.168.x.x`, менее распространены `172.y.x.x`, y от 16 до 31
+* адреса `10.x.x.x` зарезервированны, используются в полностью отключённых сетях либо за брандмауэрами
+  + сетям за брандмауэром не нужно быть одной из этих зарезервированных сетей, но обычно это так
+* IPv6 тоже имеет частные сети
+  + начинаются с `fdxx:`
+  + NAT и IPv6 как правило не смешиваются, однако у вас будет столько адресов, что NAT больше не
+понадобится
+  + можно выделить для себя адреса в сети, которая не доступна снаружи
+* Я под брандмауэром - как указать людям за ним мой IP адрес, чтобы они подключились к моей машине?
+  + цель брандмауэра - предотвратить подключение людей за брандмауэром к машинам под ним
+  + разрешение такого подключения рассматривается как брешь в безопасности
+  + брандмауэр использует маскарадинг, NAT, ...:
+  + обойти можно так: напишите программу так, чтобы инициатором соединения всегда были вы
+  + или так: попросите системного администратора проткнуть дыру в брандмауэре, чтобы люди могли к вам подключаться
+    - брандмауэр может пробираться к вам либо через свои NAT программы, либо через прокси, либо через нечто подобное
+    - вы должны быть уверены, что не даёте злоумашенникам доступа во внутреннюю сеть
+    - сделать программы безопасными труднее, чем кажется
+
 ## прочее
 * Блокировка
   + ≈ сон
@@ -759,5 +775,7 @@ printf(“The IPv6 address is: %s\n”, ip6);
   + анализатор пакетов переключает интерфейс в беспорядочный режим => ОС получает все ходящие по проводам пакеты
   + нужно иметь сокет некоторого типа, через который можете читать эти данные
   + действия зависят от платформы
+
+
   + Google “windows promiscuous ioctl”
   + http://interactive.linuxjournal.com/article/4659	
