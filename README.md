@@ -10,3 +10,4 @@ https://www.youtube.com/watch?v=gntyAFoZp-E (основы, что и в мето
 https://www.youtube.com/watch?v=I9o-oTdsMgI  
 https://www.youtube.com/@edueventsmow/videos  
 [Краткое содержание: Сетевое программирование от Биджа. Использование	Интернет Сокетов.](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
+Заметки Ани (кроме книги) https://github.com/akostrik/IRC-fork/blob/master/README.md  
