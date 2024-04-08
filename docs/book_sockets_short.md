@@ -779,3 +779,4 @@ Layered Network Model (aka “ISO/OSI”), 7 уровней:
 
   + Google “windows promiscuous ioctl”
   + http://interactive.linuxjournal.com/article/4659	
+* я не прочитала страницы 38 до 63, скорее всего они не понадобятся
