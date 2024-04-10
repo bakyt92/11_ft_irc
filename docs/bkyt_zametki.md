@@ -119,7 +119,7 @@ struct sockaddr_storage{
 
 Для ipv6 - используется функция **inet_ntop()**(“ntop” означает “network to presentation” или можете называть “network to printable”
 
-Детализация функции **getaddrinfo()**
+### Детализация функции **getaddrinfo()**
 ```
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -128,4 +128,24 @@ struct sockaddr_storage{
  const char *service, // например, "http" или номер порта
  const struct addrinfo *hints,
  struct addrinfo **res);
+```
+
+gai_strerror() - позволяет распечатать ошибку. 
+
+### Пример запуска процесса подключения клиента к серверу:
+
+Вот пример вызова если вы клиент, который хочет подсоединиться к определённому
+серверу, скажем, “www.example.net” порт 3490. Опять же это не настоящее подключение,
+а заполнение структур, которые мы используем позднее:
+```
+int status;
+struct addrinfo hints;
+ struct addrinfo *servinfo; // укажет на результат
+ memset(&hints, 0, sizeof hints); // очистка структуры
+ hints.ai_family = AF_UNSPEC; // IPv4 либо IPv6
+ hints.ai_socktype = SOCK_STREAM; // потоковый сокет TCP
+ // готовьтесь к соединению
+ status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
+ // servinfo теперь указывает на связанный список из 1 или более struct addrinfo
+ // и т.д.
 ```
