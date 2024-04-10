@@ -118,3 +118,14 @@ struct sockaddr_storage{
 называть “printable to network”, если так проще запомнить.
 
 Для ipv6 - используется функция **inet_ntop()**(“ntop” означает “network to presentation” или можете называть “network to printable”
+
+Детализация функции **getaddrinfo()**
+```
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+ int getaddrinfo(const char *node, // например, "www.example.com" или IP
+ const char *service, // например, "http" или номер порта
+ const struct addrinfo *hints,
+ struct addrinfo **res);
+```
