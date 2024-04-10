@@ -103,3 +103,18 @@ struct in6_addr {
  unsigned char s6_addr[16]; // адрес IPv6
 }
 ```
+
+```
+struct sockaddr_storage{
+ sa_family_t ss_family; // семейство адресов
+ // это выравнивание длины, зависит от реализации, проигнорируйте
+ char __ss_pad1[SS_PAD1SIZE];
+ int64_t __ss_align;
+ char __ss_pad2[SS_PAD2SIZE];
+ };
+```
+
+Функция **inet_pton()** преобразует IP адрес в записи “цифрыточки” в структуру struct in_addr либо struct in6_addr в зависимости от указанных AF_INET или AF_INET6. (“pton” означает “presentation to network” или можете
+называть “printable to network”, если так проще запомнить.
+
+Для ipv6 - используется функция **inet_ntop()**(“ntop” означает “network to presentation” или можете называть “network to printable”
