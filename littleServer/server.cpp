@@ -18,6 +18,7 @@
 
 void sigchld_handler(int s) {
   while(waitpid(-1, NULL, WNOHANG) > 0);
+  (void)s;
 }
 
 void *get_in_addr(struct sockaddr *sa) { // получить sockaddr, IPv4 или IPv6
@@ -66,8 +67,7 @@ int main(void) {
   sa.sa_handler = sigchld_handler;                              // удалить мёртвые процессы
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
-  if (sigaction(SIGCHLD, &sa, NULL) == -1) {                    // уборка зомби, которые появляются при завершении
-потомка после fork()
+  if (sigaction(SIGCHLD, &sa, NULL) == -1) {                    // уборка зомби, которые появляются при завершении потомка после fork()
     perror("sigaction");
     exit(1);
   }

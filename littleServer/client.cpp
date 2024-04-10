@@ -1,3 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
 #define PORT "3490"                                            // порт для подключения клиентов
 #define MAXDATASIZE 100                                        // максимальная длина принимаемых за раз данных
 void *get_in_addr(struct sockaddr *sa) {                       // получить sockaddr, IPv4 или IPv6
@@ -42,7 +53,7 @@ int main(int argc, char *argv[]) {
     perror("recv");
     exit(1);
   }
-  buf[numbytes] = ’\0’;
+  buf[numbytes] = '\0';
   printf("client: received ’%s’\n",buf);
   close(sockfd);
   return 0;
