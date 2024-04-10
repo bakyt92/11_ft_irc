@@ -13,7 +13,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define PORT "3490"  // порт для подключения пользователей
+#define PORT "3490"
 #define BACKLOG 10   // размер очереди ожидающих подключений
 
 void sigchld_handler(int s) {
@@ -21,14 +21,14 @@ void sigchld_handler(int s) {
   (void)s;
 }
 
-void *get_in_addr(struct sockaddr *sa) { // получить sockaddr, IPv4 или IPv6
+void *get_in_addr(struct sockaddr *sa) {                             // получить sockaddr, IPv4 или IPv6
   if (sa->sa_family == AF_INET)
     return &(((struct sockaddr_in*)sa)->sin_addr);
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
 int main(void) {
-  int                     sockfd, new_fd, rv, yes=1;                // слушать на sock_fd, новое подключение на new_fd
+  int                     sockfd, new_fd, rv, yes=1;                 // слушать на sock_fd, новое подключение на new_fd
   struct addrinfo         hints, *servinfo, *p;
   struct sockaddr_storage their_addr;                                // адресная информация подключившегося
   socklen_t               sin_size;
@@ -82,8 +82,8 @@ int main(void) {
   inet_ntop(their_addr.ss_family,
   get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
   printf("server: got connection from %s\n", s);
-  if (!fork()) {                                               // порождённый процесс
-    close(sockfd);                                             // его слушать не нужно
+  if (!fork()) {                                                // порождённый процесс
+    close(sockfd);                                              // его слушать не нужно
     if (send(new_fd, "Hello, world!", 13, 0) == -1)
       perror("send");
     close(new_fd);
