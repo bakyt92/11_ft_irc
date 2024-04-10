@@ -36,8 +36,9 @@ _Как потоковые сокеты достигают столь высок
 Дескриптор сокета носит тип int. 
 
 Структура для подготовки адресных стрктур сокета для дальнейшего использования 
-
-struct addrinfo {
+```
+struct addrinfo 
+{
  int ai_flags; // AI_PASSIVE, AI_CANONNAME, т.д.
  int ai_family; // AF_INET, AF_INET6, AF_UNSPEC
  int ai_socktype; // SOCK_STREAM, SOCK_DGRAM
@@ -47,6 +48,8 @@ struct addrinfo {
  char *ai_canonname; // полное каноническое имя хоста
  struct addrinfo *ai_next; // связанный список, следующий
  };
+```
+
 
 
 
