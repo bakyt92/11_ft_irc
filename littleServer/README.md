@@ -5,4 +5,4 @@
 `make`  
 `./server`
 * Во втором терминале:  
-  `client localhost`
+`./client localhost`
