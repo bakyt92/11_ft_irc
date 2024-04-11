@@ -1,6 +1,7 @@
+Используем клиент https://kiwiirc.com/nextclient/    
 https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
 https://modern.ircdocs.horse/   
- https://irc.dalexhd.dev/index.html  
+https://irc.dalexhd.dev/index.html  
 https://beej.us/guide/bgnet/html/  
 https://github.com/shuygena/intra42_ru_guides?tab=readme-ov-file#irc (много информации по проектам)  
 https://rbellero.notion.site/School-21-b955f2ea0c1c45b981258e1c41189ca4   
