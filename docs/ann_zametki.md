@@ -18,6 +18,9 @@ https://www.lissyara.su/doc/rfc/rfc1459/
     - tcp's out-of-band data. In TCP frame header, there is a flag `urg_data`, it  means this frame has higher priority to delivery
     - Once kernel received a urg_data maked frame, it set a POLLPRI flag
   + If you use POLLPRI only, poll() will return only if there is urgent data to read, but ignore normal data
+* the struct `pollfd`
+  + for monitoring file descriptors for I/O events
+  + it’s commonly employed with the `poll()` to perform multiplexed I/O => efficiently wait for events on multiple file descriptors simultaneously without having to resort to blocking I/O operations
 
 
 ## Заметки Бориса
