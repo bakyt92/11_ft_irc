@@ -20,7 +20,13 @@ https://www.lissyara.su/doc/rfc/rfc1459/
   + If you use POLLPRI only, poll() will return only if there is urgent data to read, but ignore normal data
 * the struct `pollfd`
   + for monitoring file descriptors for I/O events
-  + it’s commonly employed with the `poll()` to perform multiplexed I/O => efficiently wait for events on multiple file descriptors simultaneously without having to resort to blocking I/O operations
+  + employed with the `poll()` => efficiently wait for events on multiple file descriptors simultaneously without having to resort to blocking I/O operations
+  + `fd` the file descriptor to be monitored
+  + `events` a bitmask specifies the events to monitor for the given file descriptor (read, write, error, hang-up events)
+    - like POLLIN:(any readable data available) or POLLHUP:(file descriptor was “hung up” or closed)
+  + `revents` a bitmask indicating the events that occurred for the given file descriptor
+    - the events that triggered the poll
+    - is filled in by the poll() function upon return 
 
 
 ## Заметки Бориса
