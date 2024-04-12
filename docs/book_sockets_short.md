@@ -3,11 +3,12 @@
 https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf  
 
 ## socket
+* socket is an endpoint that enables two processes to communicate with each other, either on the same machine or across a network
+* сокет - ключевой компонент для обмена данными между разными системами  
 * как Unix-программа выполняет любую операцию ввода/вывода? чтением или записью в дескриптор файла
 * дескриптор файла = целое число, связанное с открытым файлом
 * файл = реальный файл на дискеь сетевое подключение, FIFO, конвейер, терминал, и всё, что угодно
 * `netstat` список открытых сокетов в системе
-* сокет - ключевой компонент для обмена данными между разными системами  
 * установить своё значение таймаута для TCP или UDP сокета
   + 1 вариант: setsockopt() с SO_RCVTIMEO и SO_SNDTIMEO, но не все системы поддерживают
   + 2 вариант: использовать `alarm()` или `setitimer()`
