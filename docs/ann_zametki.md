@@ -9,42 +9,14 @@ https://www.lissyara.su/doc/rfc/rfc1459/
 * Команда должна содержать правильную IRC-команду или трехзначное число, представленное в ASCII-тексте.
 * IRC-сообщения всегда выглядят как строки символов, заканчивающихся парой символов CR-LF и длиной строки, не превышающей 512 символов (в 512 входят CR-LF). Так что, максимальная длина строки для команд и параметров - 510 символов.
 * Перенос строки невозможен.
-
-## `poll()` syscall
-* `POLLIN` = any readable data available
-  + If you use POLLIN only, poll() will return if there is data or urgent data to read
-* `POLLPRI` = there is urgent data to read
-  + urgent data:
-    - tcp's out-of-band data. In TCP frame header, there is a flag `urg_data`, it  means this frame has higher priority to delivery
-    - Once kernel received a urg_data maked frame, it set a POLLPRI flag
-  + If you use POLLPRI only, poll() will return only if there is urgent data to read, but ignore normal data
-* the struct `pollfd`
-  + for monitoring file descriptors for I/O events
-  + employed with the `poll()` => efficiently wait for events on multiple file descriptors simultaneously without having to resort to blocking I/O operations
-  + `fd` the file descriptor to be monitored
-  + `events` a bitmask specifies the events to monitor for the given file descriptor (read, write, error, hang-up events)
-    - like POLLIN:(any readable data available) or POLLHUP:(file descriptor was “hung up” or closed)
-  + `revents` a bitmask indicating the events that occurred for the given file descriptor
-    - the events that triggered the poll
-    - is filled in by the poll() function upon return 
-
-
-## Заметки Бориса
-*. Client - добавить _fd с геттером
-*. Поковырять скорость обработки команд в процессоре (по ощущениям каждая команда около 1с обрабатывается).
-     Убедиться, что Response не создается повторно, оптимизировать поиск и вызов классов команд.
-   Со скоростью отработки команды все ок (до 100 микросекунд)
-
-* Изменить порядок обработки авторизации клиента - при неверном пароле дальше не обрабатывать команды.
-   Это в случае, если приходят команды пачкой /PASS/NICK/USER
-   По идее если клиент подключился, у него статус isActive = false пока не введет правильный пароль. В таком статусе
-   никакие команды от него приниматься не должны.
-* DONE ClientCollection.cpp, line 51:
-   if (_it != _clientMap.end()) заменить на if (_it == _clientMap.end()) return (1);
-*. Заменить _kernel.set -> _kernel._set и поменять везде в классах ссылки
-*. NEED_INFO Нужен метод Client* Channel::findClient();
-*. Добавить в Client flag +v
-*. Переделать Response::getResponse для случая если код 0, не добавляем code и не добавляем _reply[code]
-*. Добавить Client.AwayMessage()
-*. Добавить назначение оператора в QUIT
-*. (method isChanopNick() ?? )Операторов Channel надо сделать вектором и добавить метод поиска клиента среди операторов
+ 
+## poll() 
+* attend que l'un des descripteurs de fichier parmi un ensemble soit prêt pour effectuer des entrées-sorties
+* l'ensemble des descripteurs de fichier à surveiller est indiqué dans l'argument fds qui est un tableau de structures nfds du type :
+```
+struct pollfd {
+    int   fd;         
+    short events;     /* Événements attendus    */
+    short revents;    /* Événements détectés    */
+};
+```
