@@ -129,7 +129,6 @@ struct sockaddr_storage{
  const struct addrinfo *hints,
  struct addrinfo **res);
 ```
-
 gai_strerror() - позволяет распечатать ошибку. 
 
 ### Пример запуска процесса подключения клиента к серверу:
@@ -149,3 +148,76 @@ struct addrinfo hints;
  // servinfo теперь указывает на связанный список из 1 или более struct addrinfo
  // и т.д.
 ```
+
+### Пример функции socket
+
+```
+#include <sys/types.h>
+ #include <sys/socket.h>
+ int socket(int domain, int type, int protocol); 
+```
+
+Для запуска сокета необходимо взять данные из результатов вызова getaddrinfo() и передать их socket(), прямо как здесь:
+```
+int s;
+ struct addrinfo hints, *res;
+ // поиск
+ // [полагаем, что структура “hints" уже заполнена]
+ getaddrinfo("www.example.com", "http", &hints, &res);
+ // [нужно проверить выход getaddrinfo() на ошибки и просмотреть
+ // связанный список "res" на действительный элемент, не полагаясь
+ // на то, что это первый (как во многих других примерах.)]
+ // [Примеры смотри в разделе Клиент-Сервер.]
+s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+```
+socket() просто возвращает вам дескриптор сокета, который вы можете позже использовать в системных вызовах или -1 в случае ошибки. Глобальная переменная
+errno содержит код ошибки (см. подробности в *man* странице errno и кратких заметках по использованию errno в многопоточных программах.)
+
+
+Подключение сокета через команду *connect* - подключаем всокет к example.com 
+```
+struct addrinfo hints, *res; int sockfd;
+// сначала заполнить адресные структуры с помощью getaddrinfo():
+memset(&hints, 0, sizeof hints); hints.ai_family = AF_UNSPEC; hints.ai_socktype = SOCK_STREAM;
+getaddrinfo("www.example.com", "3490", &hints, &res);
+// создать сокет:
+sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); // подключить!
+connect(sockfd, res->ai_addr, res->ai_addrlen);
+```
+
+Вызов listen() очаровательно прост, но требует некоторого разъяснения: 
+```
+int listen(int sockfd, int backlog);
+```
+- sockfd это обычный файловый дескриптор сокета из системного вызова socket().
+- backlog это число разрешённых входных подключений во входной очереди. 
+
+### accept ()
+
+```
+#include <string.h> 
+#include <sys/types.h> 
+#include <sys/socket.h> 
+#include <netinet/in.h>
+#define MYPORT "3490"
+#define BACKLOG 10 
+int main(void)
+{
+// номер моего порта для подключения пользователей // размер очереди ожидающих подключений
+struct sockaddr_storage their_addr; socklen_t addr_size;
+struct addrinfo hints, *res; int sockfd, new_fd;
+// !! не забудьте проверить ошибки для этих вызовов !!
+// сначала заполнить адресные структуры с помощью getaddrinfo():
+memset(&hints, 0, sizeof hints);
+hints.ai_family = AF_UNSPEC; // использовать либо IPv4 либо IPv6 hints.ai_socktype = SOCK_STREAM;
+hints.ai_flags = AI_PASSIVE; // заполнить мой IP для меня
+getaddrinfo(NULL, MYPORT, &hints, &res); // создать сокет, связать и слушать:
+sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol); bind(sockfd, res->ai_addr, res->ai_addrlen);
+listen(sockfd, BACKLOG);
+// принять входящие подключения:
+addr_size = sizeof their_addr;
+new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
+// связываемся по дескриптору сокета new_fd!
+}
+```
+
