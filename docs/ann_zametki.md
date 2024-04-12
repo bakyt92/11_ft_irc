@@ -9,8 +9,18 @@ https://www.lissyara.su/doc/rfc/rfc1459/
 * Команда должна содержать правильную IRC-команду или трехзначное число, представленное в ASCII-тексте.
 * IRC-сообщения всегда выглядят как строки символов, заканчивающихся парой символов CR-LF и длиной строки, не превышающей 512 символов (в 512 входят CR-LF). Так что, максимальная длина строки для команд и параметров - 510 символов.
 * Перенос строки невозможен.
- 
-Заметки Бориса
+
+## `poll()` syscall
+* `POLLIN` = any readable data available
+  + If you use POLLIN only, poll() will return if there is data or urgent data to read
+* `POLLPRI` = there is urgent data to read
+  + urgent data:
+    - tcp's out-of-band data. In TCP frame header, there is a flag `urg_data`, it  means this frame has higher priority to delivery
+    - Once kernel received a urg_data maked frame, it set a POLLPRI flag
+  + If you use POLLPRI only, poll() will return only if there is urgent data to read, but ignore normal data
+
+
+## Заметки Бориса
 *. Client - добавить _fd с геттером
 *. Поковырять скорость обработки команд в процессоре (по ощущениям каждая команда около 1с обрабатывается).
      Убедиться, что Response не создается повторно, оптимизировать поиск и вызов классов команд.
