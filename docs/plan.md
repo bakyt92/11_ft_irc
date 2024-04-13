@@ -47,6 +47,7 @@
 ## Протестировать
 * `nick   an   `
 * `nick '`
+* сразу после pass, nick, user пустая строка
 
 ## Инфо
 Используем клиент https://kiwiirc.com/nextclient/    
