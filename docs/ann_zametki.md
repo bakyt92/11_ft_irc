@@ -7,7 +7,7 @@
 * Команда должна содержать правильную IRC-команду или трехзначное число, представленное в ASCII-тексте.
 * IRC-сообщения всегда выглядят как строки символов, заканчивающихся парой символов CR-LF и длиной строки, не превышающей 512 символов (в 512 входят CR-LF). Так что, максимальная длина строки для команд и параметров - 510 символов.
 * Перенос строки невозможен.
-* Internet Relay Chat Protocol - RFC 1459
+* Internet Relay Chat Protocol - RFC 1459 https://www.lissyara.su/doc/rfc/rfc1459/ 
  
 ## poll() 
 * attend que l'un des descripteurs de fichier parmi un ensemble soit prêt pour effectuer des entrées-sorties
