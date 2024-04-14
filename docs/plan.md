@@ -50,7 +50,7 @@
 * `PASS`, `pass` и `paSS` должны одинаково рабоатть?
 * сразу после pass, nick, user пустая строка
 * команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
-* перед отправкой и при получении числа пропустить через htons(), htonl(), ntohs(), ntohl()
+* что мы отправляем только строки (если числа, htons(), htonl(), ntohs(), ntohl())
 * Don't pass int&, it can't be bound to a constant or temporary because those can't be modified - use const int& instead
 * где нужны модификаторы `const`?
 * нужно ли нам что-то делать с префиксом? можно просто игнорировать? тут непонятно написано https://www.lissyara.su/doc/rfc/rfc1459/
