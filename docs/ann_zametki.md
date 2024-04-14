@@ -24,7 +24,11 @@
   + `PRIVMSG jto@localhost :Hello`       a message to a user "jto" on server localhost
   + `PRIVMSG kalt%localhost`             a message to a user on the local server with username of "kalt", and connected from the localhost
   + `PRIVMSG Wiz!jto@localhost :Hello` a message to the user with nickname Wiz who is connected from the localhostand has the username "jto"
-
+* Сообщение NOTICE используеьтся подобно PRIVMSG.
+  + Отличия между ними в том, что на NOTICE-сообщение ждать автоматического ответа бесполезно.
+  + Это правило распространяется и на серверы, - они не должны отсылать обратно сообщения-NOTICE клиентам, содержащие ошибки.
+  + Обьект этого правила заключается в петле между клиентом, автоматически посылающим что-либо в ответ на что-либо полученное.
+  + Обычно это используется автоматами (клиентами с AI или другой интерактивной программой, управляющей их действиями).
   
 ## poll() 
 * attend que l'un des descripteurs de fichier parmi un ensemble soit prêt pour effectuer des entrées-sorties
