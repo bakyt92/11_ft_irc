@@ -60,7 +60,8 @@
 * удостовериться, что одна команда не может быть разделена на два буфера
 * почему send иногда без флагов, иногда с флагом MSG_NOSIGNAL
   + нашла: MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
-  + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
+  + don't generate a SIGPIPE signal if the peer has closed the connection
+  + почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
 
 ## Инфо
 Используем клиент https://kiwiirc.com/nextclient/    
