@@ -59,6 +59,8 @@
 * почему у Бориса буфер для получения команд unsigned char*, в этом есть какой-то смысл?
 * удостовериться, что одна команда не может быть разделена на два буфера
 * почему send иногда без флагов, иногда с флагом MSG_NOSIGNAL
+  + нашла: MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
+  + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
 
 ## Инфо
 Используем клиент https://kiwiirc.com/nextclient/    
