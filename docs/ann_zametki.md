@@ -19,6 +19,12 @@
      + до 15 параметров
 * Перенос строки невозможен
 * `<reply> ::= <nick>['*'] '=' <hostname>` '*' обозначает, что клиент зарегистрирован как IRC-оператор
+* Специальнае случаи, которые навернео нам не нужны
+  + `:Angel!localhost PRIVMSG Wiz`       a message from Angel to Wiz
+  + `PRIVMSG jto@localhost :Hello`       a message to a user "jto" on server localhost
+  + `PRIVMSG kalt%localhost`             a message to a user on the local server with username of "kalt", and connected from the localhost
+  + `PRIVMSG Wiz!jto@localhost :Hello` a message to the user with nickname Wiz who is connected from the localhostand has the username "jto"
+
   
 ## poll() 
 * attend que l'un des descripteurs de fichier parmi un ensemble soit prêt pour effectuer des entrées-sorties
