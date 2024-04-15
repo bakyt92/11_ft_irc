@@ -28,12 +28,7 @@
 6. Обработка различных команд IRC, таких как PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE и PRIVMSG
 
 ## Разобраться
-* `PASS`, `pass` и `paSS` должны одинаково рабоатть?
-* команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
-* не нужны htons(), htonl(), ntohs(), ntohl()
-* don't pass int&, it can't be bound to a constant or temporary because those can't be modified - use const int& instead
 * где нужны модификаторы `const`?
-* нужно ли нам что-то делать с префиксом? тут не понятно https://www.lissyara.su/doc/rfc/rfc1459/
 * почему у Бориса когда сервер получает данные из сокета, он их записывает в буфер размером 1024. После этого делает split буфера - разделяет (по разделителю пробелу) команду и аргументы, сохраняет это в векторе. И после этого проверяет каждый аргумент, не длиннее ли он 512 байт. 
 Но тут https://www.lissyara.su/doc/rfc/rfc1459/ написано, что максимальная длина команды вместе с аргументами это 512.
 * почему у Бориса буфер для получения команд unsigned char*, в этом есть какой-то смысл?
@@ -42,15 +37,13 @@
   + MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
   + don't generate a SIGPIPE signal if the peer has closed the connection
   + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
-* должна ли команда PRIVMSG понимать маски и обобые случаи?
+* должна ли наша команда PRIVMSG понимать маски и обобые случаи?
   + `:Alice PRIVMSG Bob :Hello are you receiving this message ?` Сообщение от Alice к Bob
   + `PRIVMSG Alice :yes I'm receiving it !receiving it !'u>(768u+1n) .br`                                Сообщение к Angel
   + `PRIVMSG jto@tolsun.oulu.fi :Hello !` Сообщение от клиента на сервер tolsun.oulu.fi с именем "jto";
   + `PRIVMSG $*.fi :Server tolsun.oulu.fi rebooting.` Сообщение ко всем, кто находится на серверах, попадающих под маску *.fi
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет подстроку `"${receiver}"`
-* Если мы упомнем одного и того же олкчателя два раза в команде PRIVMSG, должно ли прийти сообщение два раза? У Бориса кажется в такое случае приходит один раз.
-* Какие сообщения сервер выдаёт при ошибках (неправильное имя канала, нерпавлиьнй пароль и т.д.)
 * Я просто закоментировала две строки, это нормально?
 ```
 //   if (fcntl(fdS, F_SETFL, O_NONBLOCK)) /// ???
@@ -58,7 +51,7 @@
 ```
 * что нам обеспечивает отсутсвие блокировки? `fcntl()` ? `struct pollfd`? `poll()`? 
                                
-## Протестировать
+## Протестировать нашу программу и реальный сервер
 * `nick   an   `
 * `nick '`
 *
@@ -67,7 +60,12 @@ $> nc 127.0.0.1 6667
 com^Dman^Dd
 ```
 * use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`
-* сразу после pass, nick, user пустая строка  
+* пустая строка  
+* `PASS`, `pass` и `paSS` должны одинаково рабоатть?
+* команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
+* Если мы упомнем одного и того же получателя два раза в команде PRIVMSG, должно ли прийти сообщение два раза? У Бориса кажется в такое случае приходит один раз.
+* Какие сообщения сервер выдаёт при ошибках (неправильное имя канала, нерпавлиьнй пароль и т.д.)
+* нужно ли нам что-то делать с префиксом? тут не понятно https://www.lissyara.su/doc/rfc/rfc1459/
 
   
 ## Инфо
