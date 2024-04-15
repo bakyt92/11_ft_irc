@@ -65,6 +65,7 @@
   + `PRIVMSG jto@tolsun.oulu.fi :Hello !` Сообщение от клиента на сервер tolsun.oulu.fi с именем "jto";
   + `PRIVMSG $*.fi :Server tolsun.oulu.fi rebooting.` Сообщение ко всем, кто находится на серверах, попадающих под маску *.fi
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
+* Борис проверяет, нет ли в сообщеии подстроки `"${receiver}"`, нужно ли это нам? 
                                
 ## Протестировать
 * `nick   an   `
