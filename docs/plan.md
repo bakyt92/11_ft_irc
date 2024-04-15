@@ -44,25 +44,33 @@
 
 Сокет - это конечная точка обмена данными между двумя системами. Это ключевой компонент для обмена данными между разными системами с использованием протоколов TCP и UDP. Сокеты используются в программировании для обеспечения коммуникации между сервером и клиентом.
 
-## Проверить
-* `nick   an   `
-* `nick '`
+## Разобраться
 * `PASS`, `pass` и `paSS` должны одинаково рабоатть?
-* сразу после pass, nick, user пустая строка
 * команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
-* что мы отправляем только строки (если числа, htons(), htonl(), ntohs(), ntohl())
-* Don't pass int&, it can't be bound to a constant or temporary because those can't be modified - use const int& instead
+* не нужны htons(), htonl(), ntohs(), ntohl()
+* don't pass int&, it can't be bound to a constant or temporary because those can't be modified - use const int& instead
 * где нужны модификаторы `const`?
-* нужно ли нам что-то делать с префиксом? можно просто игнорировать? тут непонятно написано https://www.lissyara.su/doc/rfc/rfc1459/
+* нужно ли нам что-то делать с префиксом? тут не понятно https://www.lissyara.su/doc/rfc/rfc1459/
 * почему у Бориса когда сервер получает данные из сокета, он их записывает в буфер размером 1024. После этого делает split буфера - разделяет (по разделителю пробелу) команду и аргументы, сохраняет это в векторе. И после этого проверяет каждый аргумент, не длиннее ли он 512 байт. 
 Но тут https://www.lissyara.su/doc/rfc/rfc1459/ написано, что максимальная длина команды вместе с аргументами это 512.
 * почему у Бориса буфер для получения команд unsigned char*, в этом есть какой-то смысл?
 * удостовериться, что одна команда не может быть разделена на два буфера
-* почему send иногда без флагов, иногда с флагом MSG_NOSIGNAL
-  + нашла: MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
+* почему у Борсиа send иногда без флагов, иногда с флагом MSG_NOSIGNAL
+  + MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
   + don't generate a SIGPIPE signal if the peer has closed the connection
-  + почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
+  + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
 
+## Протестировать
+* `nick   an   `
+* `nick '`
+* ```
+$> nc 127.0.0.1 6667
+com^Dman^Dd
+```
+* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`
+* сразу после pass, nick, user пустая строка  
+
+  
 ## Инфо
 Используем клиент https://kiwiirc.com/nextclient/    
 https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
