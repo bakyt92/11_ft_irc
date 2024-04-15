@@ -59,7 +59,13 @@
   + MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
   + don't generate a SIGPIPE signal if the peer has closed the connection
   + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
-
+* должна ли команда PRIVMSG понимать маски и обобые случаи?
+  + `:Alice PRIVMSG Bob :Hello are you receiving this message ?` Сообщение от Alice к Bob
+  + `PRIVMSG Alice :yes I'm receiving it !receiving it !'u>(768u+1n) .br`                                Сообщение к Angel
+  + `PRIVMSG jto@tolsun.oulu.fi :Hello !` Сообщение от клиента на сервер tolsun.oulu.fi с именем "jto";
+  + `PRIVMSG $*.fi :Server tolsun.oulu.fi rebooting.` Сообщение ко всем, кто находится на серверах, попадающих под маску *.fi
+  + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
+                               
 ## Протестировать
 * `nick   an   `
 * `nick '`
