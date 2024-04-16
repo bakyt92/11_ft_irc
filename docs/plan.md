@@ -38,6 +38,7 @@
   + **You must deal with message boundaries yourself**.
 * All I/O operations must be non-blocking - всё ли ок с этим у нас?
 * `valgrind`
+* Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`? 
   
 ## Разобраться или доделать (не очень важное)
 * должна ли наша команда PRIVMSG понимать маски и обобые случаи?
