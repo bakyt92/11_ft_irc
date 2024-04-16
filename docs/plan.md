@@ -35,7 +35,7 @@
   + You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
   + You could send 100 1 byte chunks and receive 4 25 byte messages.
   + **You must deal with message boundaries yourself**.
-  + То есть вроде одна команда может оказаться разбита на несколько сообщений. Кажется у Бориса этоне учитывается.
+  + То есть вроде одна команда может оказаться разбита на несколько сообщений. Кажется у Бориса это не учитывается.
 
 ## Разобраться (не очень важные вопросы)
 * должна ли наша команда PRIVMSG понимать маски и обобые случаи?
