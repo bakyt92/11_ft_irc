@@ -54,7 +54,6 @@
   + don't generate a SIGPIPE signal if the peer has closed the connection
   + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
 * Я просто закоментировала `fcntl`, нормально ли это?
-* нужно ли нам что-то делать с префиксом? тут не понятно https://www.lissyara.su/doc/rfc/rfc1459/
                                
 ## Протестировать нашу программу и реальный сервер
 * много инфо тут [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt) 
