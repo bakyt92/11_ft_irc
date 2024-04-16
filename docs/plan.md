@@ -1,8 +1,7 @@
 ## План 
 1. Найти ИРК рабочий и попробовать запустить https://github.com/AhmedFatir/ft_irc
-2. Используем клиент https://kiwiirc.com/nextclient/
-3. Настя и вся команда - разберет серверную часть, все прочитаем гайд на 100 стр. 
-4. Найти видео - разобраться в концепции
+2. Настя и вся команда - разберет серверную часть, все прочитаем гайд на 100 стр. 
+3. Найти видео - разобраться в концепции
 
 ## Три основные части проекта:
 1. Создайте все необходимые классы и методы для проекта.
@@ -80,18 +79,18 @@ https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848
 https://modern.ircdocs.horse/   
 https://irc.dalexhd.dev/index.html  
 https://beej.us/guide/bgnet/html/  
-https://github.com/shuygena/intra42_ru_guides?tab=readme-ov-file#irc (много информации по проектам)  
 https://rbellero.notion.site/School-21-b955f2ea0c1c45b981258e1c41189ca4   
 https://www.notion.so/FT_IRC-c71ec5dfc6ae46509fb281acfb0e9e29?pvs=4  
 https://www.youtube.com/watch?v=I9o-oTdsMgI (инструкция и видео)   
 https://www.youtube.com/watch?v=gntyAFoZp-E (основы, что и в методичке, ток на английском)  
 https://www.youtube.com/watch?v=I9o-oTdsMgI  
 https://www.youtube.com/@edueventsmow/videos  
-https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
 https://www.youtube.com/watch?v=I9o-oTdsMgI&list=PLUJCSGGiox1Q-QvHfMMydtoyEa1IEzeLe&index=1   
+https://github.com/shuygena/intra42_ru_guides?tab=readme-ov-file#irc (много информации по проектам)  
+https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
 https://github.com/marineks/Ft_irc  
-ответы клиента из документации https://datatracker.ietf.org/doc/html/rfc2812  
-[Краткое содержание: Сетевое программирование от Биджа. Использование	Интернет Сокетов.](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
+[Сетевое программирование от Биджа. Использование	Интернет Сокетов. (кратко)](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 [Аня разбирает код тут](https://github.com/akostrik/IRC-fork/blob/master/README.md)  
 [Internet Relay Chat Protocol - RFC 1459](https://www.lissyara.su/doc/rfc/rfc1459)  
+[RCF 2812](https://datatracker.ietf.org/doc/html/rfc2812)  
 
