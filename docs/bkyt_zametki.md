@@ -1,5 +1,7 @@
 Заметки по книге 
 
+https://datatracker.ietf.org/doc/html/rfc2812 - документация по чату. 
+
 Два типа сокетов
 
 **1. Stream sockets**
