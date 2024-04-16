@@ -70,6 +70,7 @@
   + `nick   an   `
   + `nick '`
   + `com^Dman^Dd` (* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`)
+  + `PASS ` (с пробелом) должна отвечать "неправильный пароль" или "не хватает аргументов"?
   
 ## Инфо
 Используем клиент https://kiwiirc.com/nextclient/    
