@@ -70,6 +70,7 @@
   + `nick '`
   + `com^Dman^Dd` (* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`)
   + `PASS ` (с пробелом) должна отвечать "неправильный пароль" или "не хватает аргументов"?
+  + `USER al 0 * Alice`, потом опять`USER al 0 * Alice`
 
 ## Просмотреть группу в дискорд
 
