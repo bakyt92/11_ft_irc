@@ -29,14 +29,14 @@
 ## Разобраться или доделать (важное)
 * обработку префиксов, напрмимер `:Alice NICK Bob` Alice изменяет свой никнейм на Bob (`:Alice` это префикс)
   + https://www.lissyara.su/doc/rfc/rfc1459/
-* одна команда может оказаться разбитой на несколько сообщений
+* одна команда может оказаться разбитой на несколько сообщений или нет ???
   + Кажется у Бориса это не учитывается
   + TCP is a streaming protocol, not a message protocol.
   + The only guarantee is that you send n bytes, you will receive n bytes in the same order.
   + You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
   + You could send 100 1 byte chunks and receive 4 25 byte messages.
   + **You must deal with message boundaries yourself**.
-* All I/O operations must be non-blocking
+* All I/O operations must be non-blocking - всё ли ок с этим у нас?
   
 ## Разобраться или доделать (не очень важное)
 * должна ли наша команда PRIVMSG понимать маски и обобые случаи?
@@ -62,7 +62,7 @@
 * `PASS`, `pass` и `paSS` должны одинаково рабоатть?
 * Нестандартные ситуации
   + неправильное имя канала
-  + неправлиьнй пароль
+  + неправлиьнй пароль (по RCF 1459 и RCF 2812 не понятно!)
   + очень длинное собщение
   + пустая строка
   + `PRIVMSG alice,alice hello`
