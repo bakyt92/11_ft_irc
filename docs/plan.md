@@ -71,7 +71,9 @@
   + `nick '`
   + `com^Dman^Dd` (* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`)
   + `PASS ` (с пробелом) должна отвечать "неправильный пароль" или "не хватает аргументов"?
-  
+
+## Просмотреть группу в дискорд
+
 ## Инфо
 Используем клиент https://kiwiirc.com/nextclient/    
 https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
@@ -85,9 +87,10 @@ https://www.youtube.com/watch?v=I9o-oTdsMgI (инструкция и видео)
 https://www.youtube.com/watch?v=gntyAFoZp-E (основы, что и в методичке, ток на английском)  
 https://www.youtube.com/watch?v=I9o-oTdsMgI  
 https://www.youtube.com/@edueventsmow/videos  
-https://simple.wikipedia.org/wiki/List_of_Internet_Relay_Chat_commands   
 https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
 https://www.youtube.com/watch?v=I9o-oTdsMgI&list=PLUJCSGGiox1Q-QvHfMMydtoyEa1IEzeLe&index=1   
+https://github.com/marineks/Ft_irc  
+судя по видео gmorra одно из ключевых это реализовать ответы для клиента из документации https://datatracker.ietf.org/doc/html/rfc2812  
 [Краткое содержание: Сетевое программирование от Биджа. Использование	Интернет Сокетов.](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 [Аня разбирает код тут](https://github.com/akostrik/IRC-fork/blob/master/README.md)  
 [Internet Relay Chat Protocol - RFC 1459](https://www.lissyara.su/doc/rfc/rfc1459)  
