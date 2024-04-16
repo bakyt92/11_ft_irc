@@ -36,27 +36,17 @@
   + You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
   + You could send 100 1 byte chunks and receive 4 25 byte messages.
   + **You must deal with message boundaries yourself**.
-* All I/O operations must be non-blocking - всё ли ок с этим у нас?
 * `valgrind`
 * Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`? 
+* должна ли наша команда PRIVMSG понимать маски?
+  + `:Alice PRIVMSG Bob :Hello` Сообщение от Alice к Bob
+  + `PRIVMSG Alice :Hello'u>(768u+1n) .br` Сообщение к Alice
+  + `PRIVMSG serverName@tolsun.oulu.fi :Hello` Сообщение от клиента на сервер tolsun.oulu.fi с именем "serverName";
+  + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
+  + Борис проверяет `"${receiver}"`- это вроде маска сервера, но у нас один сервер, нам наверное то не нужно
   
 ## Разобраться или доделать (не очень важное)
-* должна ли наша команда PRIVMSG понимать маски и обобые случаи?
-  + `:Alice PRIVMSG Bob :Hello are you receiving this message ?` Сообщение от Alice к Bob
-  + `PRIVMSG Alice :yes I'm receiving it !receiving it !'u>(768u+1n) .br`                                Сообщение к Angel
-  + `PRIVMSG jto@tolsun.oulu.fi :Hello !` Сообщение от клиента на сервер tolsun.oulu.fi с именем "jto";
-  + `PRIVMSG $*.fi :Server tolsun.oulu.fi rebooting.` Сообщение ко всем, кто находится на серверах, попадающих под маску *.fi
-  + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
-  + Борис проверяет подстроку `"${receiver}"`
-* нужны ли где-то модификаторы `const`?
-* у Бориса когда сервер получает данные из сокета, он их записывает в буфер размером 1024. После этого делает split буфера - разделяет (по разделителю пробелу) команду и аргументы, сохраняет это в векторе. И после этого проверяет каждый аргумент, не длиннее ли он 512 байт. 
-Но тут https://www.lissyara.su/doc/rfc/rfc1459/ написано, что максимальная длина команды вместе с аргументами это 512.
-* почему у Бориса буфер для получения команд unsigned char*, в этом есть какой-то смысл?
-* почему у Борсиа send иногда без флагов, иногда с флагом MSG_NOSIGNAL
-  + MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
-  + don't generate a SIGPIPE signal if the peer has closed the connection
-  + но почему у него иногда 0, иногда MSG_NOSIGNAL в send()?
-* Я просто закоментировала `fcntl`, нормально ли это?
+* All I/O operations must be non-blocking - всё ли ок с этим у нас?
                                
 ## Протестировать нашу программу и реальный сервер
 * [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt)
