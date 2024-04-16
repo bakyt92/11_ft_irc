@@ -27,18 +27,19 @@
 Отправляйте личные сообщения другим пользователям.  
 Обработка различных команд IRC, таких как PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE и PRIVMSG  
 
-## Доделать
+## Доделать (важное)
 * обработку префиксов, напрмимер `:Alice NICK Bob` Alice изменяет свой никнейм на Bob (`:Alice` это префикс)
   + https://www.lissyara.su/doc/rfc/rfc1459/
-* одна команда может оказаться разбита на несколько сообщений
+* одна команда может оказаться разбитой на несколько сообщений
   + Кажется у Бориса это не учитывается
   + TCP is a streaming protocol, not a message protocol.
   + The only guarantee is that you send n bytes, you will receive n bytes in the same order.
   + You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
   + You could send 100 1 byte chunks and receive 4 25 byte messages.
   + **You must deal with message boundaries yourself**.
+* All I/O operations must be non-blocking
   
-## Разобраться или доделать (не очень важные вопросы)
+## Разобраться или доделать (не очень важное)
 * должна ли наша команда PRIVMSG понимать маски и обобые случаи?
   + `:Alice PRIVMSG Bob :Hello are you receiving this message ?` Сообщение от Alice к Bob
   + `PRIVMSG Alice :yes I'm receiving it !receiving it !'u>(768u+1n) .br`                                Сообщение к Angel
