@@ -270,4 +270,22 @@ gethostbyname() для определения IP адреса вашей лок�
 select() даёт вам возможность следить за несколькими сокетами одновременно. Она скажет вам какие готовы для чтения, какие для записи, а какие возбудили исключение,
 если вы действительно хотите это знать.
 
-### 
+### poll()
+
+       poll() performs a similar task to select(2): it waits for one of
+       a set of file descriptors to become ready to perform I/O.  The
+       Linux-specific epoll(7) API performs a similar task, but offers
+       features beyond those found in poll().
+
+       The set of file descriptors to be monitored is specified in the
+       fds argument, which is an array of structures of the following
+       form:
+```
+           struct pollfd {
+               int   fd;         /* file descriptor */
+               short events;     /* requested events */
+               short revents;    /* returned events */
+           };
+```
+       The caller should specify the number of items in the fds array in
+       nfds.
