@@ -37,6 +37,7 @@
   + You could send 100 1 byte chunks and receive 4 25 byte messages.
   + **You must deal with message boundaries yourself**.
 * All I/O operations must be non-blocking - всё ли ок с этим у нас?
+* `valgrind`
   
 ## Разобраться или доделать (не очень важное)
 * должна ли наша команда PRIVMSG понимать маски и обобые случаи?
