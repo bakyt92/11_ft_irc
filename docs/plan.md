@@ -57,7 +57,8 @@
 * Я просто закоментировала `fcntl`, нормально ли это?
                                
 ## Протестировать нашу программу и реальный сервер
-* много инфо тут [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt) 
+* [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt)
+* [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
 * команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
 * `PASS`, `pass` и `paSS` должны одинаково рабоатть?
 * Нестандартные ситуации
