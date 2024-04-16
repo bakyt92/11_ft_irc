@@ -90,7 +90,7 @@ https://www.youtube.com/@edueventsmow/videos
 https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
 https://www.youtube.com/watch?v=I9o-oTdsMgI&list=PLUJCSGGiox1Q-QvHfMMydtoyEa1IEzeLe&index=1   
 https://github.com/marineks/Ft_irc  
-судя по видео gmorra одно из ключевых это реализовать ответы для клиента из документации https://datatracker.ietf.org/doc/html/rfc2812  
+ответы клиента из документации https://datatracker.ietf.org/doc/html/rfc2812  
 [Краткое содержание: Сетевое программирование от Биджа. Использование	Интернет Сокетов.](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 [Аня разбирает код тут](https://github.com/akostrik/IRC-fork/blob/master/README.md)  
 [Internet Relay Chat Protocol - RFC 1459](https://www.lissyara.su/doc/rfc/rfc1459)  
