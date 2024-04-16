@@ -1,0 +1,21 @@
+; cmd		| author	| test			| comment
+; PASS			boris		OK
+; NICK			boris		OK
+; USER			boris		OK
+; OPER			boris		???
+; QUIT			denis		OK
+; JOIN			masha		IN PROGRESS
+; PART			denis		OK
+; MODE			boris		KO			не работают флаги +/-o, l, v; не тестировала +/-b;
+; TOPIC			boris		OK
+; NAMES			boris		OK
+; LIST			boris		OK
+; INVITE		boris		OK
+; KICK			denis		OK			выводит странное сообщение в ответе
+; PRIVMSG		denis		OK			что значит отправить по маске, но не использовать * и ? (отправку по маске НЕ тестировала)
+; NOTICE		denis		OK
+; WHO			boris
+; PING			denis
+; USERHOST		denis
+; PONG			denis
+; RESTART		denis
