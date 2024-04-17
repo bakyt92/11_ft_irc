@@ -10,17 +10,6 @@ void Server::sigHandler(int sig) {
   (void)sig;
 }
 
-int raiseError(string msg, bool isSysErr, bool isFatal) {
-  if (isSysErr)
-    perror(msg.c_str());
-  else
-    std::cerr << msg;
-  if (isFatal)
-    // delete this ?
-    exit(EXIT_FAILURE);
-  return 0;
-}
-
 std::vector<string> split(string s, char delim) {
   std::vector<string> parts;
   for (size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
@@ -58,7 +47,7 @@ Cli* Server::getCli(string &name) {
   return NULL;
 }
 
-string toString(vector<string> v) {// только для отладки
+string toString(vector<string> v) { // только для отладки
   string res = "";
   for (vector<string>::iterator it = v.begin(); it != v.end(); it++)
     res += "[" + *it + "] ";
@@ -66,16 +55,15 @@ string toString(vector<string> v) {// только для отладки
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
-Server::Server(string port, string pass_) : pass(pass_) {
+Server::Server(string port_, string pass_) : port(port_), pass(pass_) {}
+
+void Server::init() {
   try {
-    signal(SIGINT,  sigHandler);
-    signal(SIGQUIT, sigHandler);
+    signal(SIGINT,  sigHandler); // SIGQUIT ?
   }
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
-  int fdServ;
-  vector<struct pollfd> polls;
   struct addrinfo ai;
   std::memset(&ai, 0, sizeof(ai));
   ai.ai_family   = AF_INET;
@@ -83,66 +71,68 @@ Server::Server(string port, string pass_) : pass(pass_) {
   ai.ai_flags    = AI_PASSIVE;
   struct addrinfo *list_ai;
   if (getaddrinfo(NULL, port.c_str(), &ai, &list_ai))
-    raiseError("getaddrinfo", true, true);
+    throw(std::runtime_error("getaddrinfo"));
   struct addrinfo *it = NULL;
   int opt = 1;
   for (it = list_ai; it != NULL; it = it->ai_next) {
-    if ((fdServ = socket(it->ai_family, it->ai_socktype, it->ai_protocol)) < 0) 
-      raiseError("socket", true, false);
-    else if (setsockopt(fdServ, SOL_SOCKET, SO_REUSEADDR , &opt, sizeof(opt)))
-      raiseError("setsockopt", true, false);
-    else if (bind(fdServ, it->ai_addr, it->ai_addrlen)) {
-      close(fdServ);
-      raiseError("bind", true, it->ai_next == NULL ? true : false);
+    if ((fdForNewClis = socket(it->ai_family, it->ai_socktype, it->ai_protocol)) < 0) 
+      throw(std::runtime_error("socket"));
+    else if (setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR , &opt, sizeof(opt)))
+      throw(std::runtime_error("setsockopt"));
+    else if (bind(fdForNewClis, it->ai_addr, it->ai_addrlen)) { 
+      close(fdForNewClis);
+      it->ai_next == NULL ? throw(std::runtime_error("bind")) : perror("bind"); 
     }
     else
       break ;
   }
   freeaddrinfo(list_ai);
-  if (listen(fdServ, 10))
-    raiseError("listen", true, true);
-  struct pollfd pollServ = {fdServ, POLLIN, 0};
-  polls.push_back(pollServ);                                                                   
+  if (listen(fdForNewClis, 10))
+    throw(std::runtime_error("listen"));
+  struct pollfd pollServ = {fdForNewClis, POLLIN, 0};
+  polls.push_back(pollServ);
+}
+
+void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     if (poll(polls.data(), polls.size(), 1) > 0) {              // poll() в сокетах есть какие-то данные
       std::vector<struct pollfd> pollsCopy = polls;
       for (std::vector<struct pollfd>::iterator poll = pollsCopy.begin(); poll != pollsCopy.end(); poll++) { // check sockets
-        if (poll->revents & POLLIN && poll->fd == fdServ) {     // новый клиент подключился к сокету fdServ
+        if (poll->revents & POLLIN && poll->fd == fdForNewClis) {     // новый клиент подключился к сокету fdServ
           cout << poll->fd << " new cli\n";
           struct sockaddr sa; 
           socklen_t       saLen = sizeof(sa);
-          int fdCli = accept(poll->fd, &sa, &saLen);
-          if (fdCli == -1) { 
-            raiseError("accept", true, false);  
-            continue;
-          }         
-          struct Cli newCli = {fdCli, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr), false, "", "", "", std::set<string>()};
-          clis[fdCli] = &newCli;
-          struct pollfd pollCli = {fdCli, POLLIN, 0};
-          polls.push_back(pollCli);
+          fdForMsgs = accept(poll->fd, &sa, &saLen);
+          if (fdForMsgs == -1)
+            perror("accept");
+          else {
+            struct Cli newCli = {fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr), false, "", "", "", std::set<string>()};
+            clis[fdForMsgs] = &newCli;
+            struct pollfd pollCli = {fdForMsgs, POLLIN, 0};
+            polls.push_back(pollCli);
+          }
         }
-        else if (poll->revents & POLLIN && poll->fd != fdServ) { // клиент прислал сообщение на выделенный ему сокет
+        else if (poll->revents & POLLIN && poll->fd != fdForNewClis) { // клиент прислал сообщение в свой fdForMsgs
           cout << poll->fd << " msg\n";
-          cli = clis.at(poll->fd);
+          if (!(cli = clis.at(poll->fd)))
+            continue ;
           cout << poll->fd << " cli.fd = " << (cli ? cli->fd : -1) << endl;
-          if (!cli)
-            continue;
           vector<unsigned char> buf(512);
           cout << poll->fd << " recv\n";
           int bytes = recv(cli->fd, buf.data(), buf.size(), 0); 
           cout << poll->fd << " bytes =  " << bytes << endl;
           if (bytes < 0) 
-            raiseError("recv", true, false);
-          if (bytes == 0)                                          // клиент отключился
+            perror("recv");
+          else if (bytes == 0)                                         // клиент отключился
             execQuit();
           else {
             string bufS = string(buf.begin(), buf.end());
             bufS.resize(bytes);
-            std::vector<string> cmds = split(bufS, '\n');           // if empty ? 
+            std::vector<string> cmds = split(bufS, '\n');             // if empty ? 
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               cout << "I execute " << *cmd << endl;
-              args = split(*cmd, ' ');                             // if (args[0][0] == ':') args.erase(args.begin()); // нужен ли префикс?
+              args = split(*cmd, ' ');                                // if (args[0][0] == ':') args.erase(args.begin()); // нужен ли префикс?
               exec();
             }
           }

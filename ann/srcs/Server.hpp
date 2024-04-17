@@ -45,7 +45,11 @@ struct Chan {
 
 class Server {
 private:
+  string                   port;
   string                   pass;
+  int                      fdForNewClis;    // один общий для всех клиентов
+  int                      fdForMsgs;       // у каждого киента свой
+  vector<struct pollfd>    polls;
   map<int, Cli* >          clis;
   map<string, Chan*>       chs;
   vector<string>           args;  // the command being treated at the moment, args[0] = command
@@ -53,7 +57,9 @@ private:
 public:
                            Server(string port, string pass);
                            ~Server(); 
-   static  void                     sigHandler(int sig);
+  static  void             sigHandler(int sig);
+  void                     init();
+  void                     run();
   Cli*                     getCli(string &name);
   int                      exec(); 
   int                      execPass();

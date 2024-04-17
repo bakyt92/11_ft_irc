@@ -7,6 +7,8 @@ int main(int argc, char *argv[]) {
     std::cout << "Invalid arguments. Run ./ircserv <port> <password> (port number (should be between 1024 and 49151)\n";
     return 0;
   }
-  Server(argv[1], argv[2]);
+  Server s = Server(argv[1], argv[2]);
+  s.init();
+  s.run();
   return 0; 
 }
