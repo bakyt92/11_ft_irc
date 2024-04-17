@@ -12,6 +12,7 @@
 # include <set>
 # include <sys/poll.h>
 # include <vector>
+# include <unistd.h>
 using std::map;
 using std::set;
 using std::vector;
