@@ -20,16 +20,18 @@ using std::string;
 using std::cout;
 using std::endl;
 using std::numeric_limits;
-extern bool sigReceived;
+
+bool sigReceived;
 
 struct Cli {
+  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), nick(""), uName(""), rName(""), invitations(set<string>()) {};
   int                      fd;
   string                   host;  // = fdServ ?
   bool                     passOk;
   string                   nick;
   string                   uName;
   string                   rName;
-  std::set<string>         invitations;
+  set<string>              invitations;
 };
 
 struct Chan {

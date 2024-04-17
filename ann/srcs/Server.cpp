@@ -5,7 +5,7 @@ Server::~Server() {
 }
 
 void Server::sigHandler(int sig) {
-  std::cout << std::endl << "Signal Received!" << std::endl;
+  std::cout << std::endl << "Signal Received" << std::endl;
   sigReceived = true;
   (void)sig;
 }
@@ -64,6 +64,7 @@ void Server::init() {
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
+  sigReceived = false;
   struct addrinfo ai;
   std::memset(&ai, 0, sizeof(ai));
   ai.ai_family   = AF_INET;
@@ -89,35 +90,35 @@ void Server::init() {
   freeaddrinfo(list_ai);
   if (listen(fdForNewClis, 10))
     throw(std::runtime_error("listen"));
-  struct pollfd pollServ = {fdForNewClis, POLLIN, 0};
-  polls.push_back(pollServ);
+  struct pollfd pollForNeewClis = {fdForNewClis, POLLIN, 0};
+  polls.push_back(pollForNeewClis);
 }
 
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     if (poll(polls.data(), polls.size(), 1) > 0) {              // poll() в сокетах есть какие-то данные
-      std::vector<struct pollfd> pollsCopy = polls;
-      for (std::vector<struct pollfd>::iterator poll = pollsCopy.begin(); poll != pollsCopy.end(); poll++) { // check sockets
-        if (poll->revents & POLLIN && poll->fd == fdForNewClis) {     // новый клиент подключился к сокету fdServ
-          cout << poll->fd << " new cli\n";
+      for (std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+        if((poll->revents & POLLIN)) cout << poll->fd << " данные в сокете " << endl;
+      for (std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
+        if ((poll->revents & POLLIN) && poll->fd == fdForNewClis) {     // новый клиент подключился к сокету fdServ
           struct sockaddr sa; 
           socklen_t       saLen = sizeof(sa);
           fdForMsgs = accept(poll->fd, &sa, &saLen);
+          cout << poll->fd << " new cli, fdForMsgs = " << fdForMsgs << endl;
           if (fdForMsgs == -1)
             perror("accept");
           else {
-            struct Cli newCli = {fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr), false, "", "", "", std::set<string>()};
-            clis[fdForMsgs] = &newCli;
-            struct pollfd pollCli = {fdForMsgs, POLLIN, 0};
-            polls.push_back(pollCli);
+            struct Cli *newCli = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr)); 
+            clis[fdForMsgs] = newCli;
+            struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
+            polls.push_back(pollForMsgs);
           }
+          break ;
         }
-        else if (poll->revents & POLLIN && poll->fd != fdForNewClis) { // клиент прислал сообщение в свой fdForMsgs
-          cout << poll->fd << " msg\n";
+        else if ((poll->revents & POLLIN) && poll->fd != fdForNewClis) { // клиент прислал сообщение в свой fdForMsgs
           if (!(cli = clis.at(poll->fd)))
             continue ;
-          cout << poll->fd << " cli.fd = " << (cli ? cli->fd : -1) << endl;
           vector<unsigned char> buf(512);
           cout << poll->fd << " recv\n";
           int bytes = recv(cli->fd, buf.data(), buf.size(), 0); 
@@ -137,7 +138,6 @@ void Server::run() {
             }
           }
         }
-      }
     }
     usleep(1000);
   }
@@ -172,8 +172,6 @@ int Server::exec() {
 int Server::execPass() { 
   if (args.size() < 2)
     return send_(cli->fd, "PASS :Not enough parameters\n");               // ERR_NEEDMOREPARAMS 
-  //if (args[1] != pass)
-  //  return send_(cli->fd, ":Password incorrect\n");                     // ERR_PASSWDMISMATCH  ?
   if (cli->passOk)
     return send_(cli->fd, ":You may not reregister\n");                   // ERR_ALREADYREGISTRED 
   cli->passOk = true;
@@ -497,4 +495,15 @@ int Server::execKick() {
       }
   }
   return 0;
+}
+
+int main(int argc, char *argv[]) {
+  if (argc != 3) {   //if (atoi(argv[1].c_str()) < 1024 || atoi(argv[1].c_str()) > 49151) 
+    std::cout << "Invalid arguments. Run ./ircserv <port> <password> (port number (should be between 1024 and 49151)\n";
+    return 0;
+  }
+  Server s = Server(argv[1], argv[2]);
+  s.init();
+  s.run();
+  return 0; 
 }
