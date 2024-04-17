@@ -98,14 +98,11 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     if (poll(polls.data(), polls.size(), 1) > 0) {              // poll() в сокетах есть какие-то данные
-      for (std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
-        if((poll->revents & POLLIN)) cout << poll->fd << " данные в сокете " << endl;
       for (std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
         if ((poll->revents & POLLIN) && poll->fd == fdForNewClis) {     // новый клиент подключился к сокету fdServ
           struct sockaddr sa; 
           socklen_t       saLen = sizeof(sa);
           fdForMsgs = accept(poll->fd, &sa, &saLen);
-          cout << poll->fd << " new cli, fdForMsgs = " << fdForMsgs << endl;
           if (fdForMsgs == -1)
             perror("accept");
           else {
@@ -120,9 +117,7 @@ void Server::run() {
           if (!(cli = clis.at(poll->fd)))
             continue ;
           vector<unsigned char> buf(512);
-          cout << poll->fd << " recv\n";
           int bytes = recv(cli->fd, buf.data(), buf.size(), 0); 
-          cout << poll->fd << " bytes =  " << bytes << endl;
           if (bytes < 0) 
             perror("recv");
           else if (bytes == 0)                                         // клиент отключился
@@ -187,7 +182,7 @@ int Server::execNick() {
   for (std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if (itCli->second->nick.size() == args[1].size()) {
       bool nickInUse = true;
-      for (size_t i = -1; i < args[1].size(); i++)
+      for (size_t i = 0; i < args[1].size(); i++)
         if (std::tolower(args[1][i]) != std::tolower(itCli->second->nick[i]))
           nickInUse = false;
       if (nickInUse)
@@ -212,10 +207,10 @@ int Server::execUser() { // args[2] у нас не испольутеся
   return 0;
 }
 
-// ERR_NOTOPLEVEL ERR_WILDTOPLEVEL ещё есть эти две, кажется они нам не нужны       
+// ERR_NOTOPLEVEL ERR_WILDTOPLEVEL кажется не нужны       
 int Server::execPrivmsg() {
-  if (cli->passOk)
-    return send_(cli->fd, cli->nick + " :User not logged in" );            // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
+  if (!cli->passOk || cli->nick == "" || cli->uName == "") // ?
+    return send_(cli->fd, cli->nick + " :User not logged in\n" );         // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if (args.size() == 1) 
     return send_(cli->fd, ":No recipient given (" + args[0] + ")\n");     // ERR_NORECIPIENT
   if (args.size() == 2)
@@ -229,7 +224,7 @@ int Server::execPrivmsg() {
     if(!getCli(*to))
       send_(cli->fd, *to + " :No such nick/channel\n");                   // ERR_NOSUCHNICK
     else
-      send_((getCli(*to))->fd, ":" + cli->nick + "!" + cli->rName + "@" + cli->host + getCli(*to)->nick + " :" + args[2] + "\n");
+      send_((getCli(*to))->fd, ":" + cli->nick + "!" + cli->rName + "@" + cli->host + " " + getCli(*to)->nick + " :" + args[2] + "\n");
   return 0;
 }
 

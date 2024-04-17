@@ -26,7 +26,7 @@ bool sigReceived;
 struct Cli {
   Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), nick(""), uName(""), rName(""), invitations(set<string>()) {};
   int                      fd;
-  string                   host;  // = fdServ ?
+  string                   host;
   bool                     passOk;
   string                   nick;
   string                   uName;
