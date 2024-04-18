@@ -23,6 +23,13 @@ std::vector<string> split(string s, char delim) {
   return parts;
 }
 
+Cli* Server::getCli(string &name) {
+  for(map<int, Cli* >::iterator cli = clis.begin(); cli != clis.end(); cli++)
+    if (cli->second->nick == name)
+      return cli->second;
+  return NULL;
+}
+
 int send_(Cli *cli, string msg) {
   if (msg != "")
     send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
@@ -41,11 +48,10 @@ int send_(map<int, Cli*> clis, string msg) {
   return 0;
 }
 
-Cli* Server::getCli(string &name) {
-  for(map<int, Cli* >::iterator cli = clis.begin(); cli != clis.end(); cli++)
-    if (cli->second->nick == name)
-      return cli->second;
-  return NULL;
+int send_(Ch *ch, string msg) {
+  for (set<Cli*>::iterator cli = ch->clis.begin(); cli != ch->clis.end(); cli++) 
+    send_(*cli, msg);
+  return 0;
 }
 
 string toString(vector<string> v) { // только для отладки
@@ -222,7 +228,7 @@ int Server::execPrivmsg() {
     if (((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
       send_(cli, *to + " :No such nick/channel\n");                         // ERR_NOSUCHNICK
     else if ((*to)[0] == '#')
-      send_(chs[*to]->clis, cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
+      send_(chs[*to], cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
     else
       send_(getCli(*to), cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
   return 0;
@@ -232,9 +238,9 @@ int Server::execPrivmsg() {
 // Если JOIN прошла хорошо, пользователь получает топик канала и список пользователей на канале 
 int Server::execJoin() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
-    return send_(cli, cli->nick + " :User not logged in\n" );           // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
+    return send_(cli, cli->nick + " :User not logged in\n" );               // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(args.size() < 2)
-    return send_(cli, "USER :Not enough parameters\n");                 // ERR_NEEDMOREPARAMS 
+    return send_(cli, "USER :Not enough parameters\n");                     // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(args[1], ',');
   //vector<string> passes  = args.size() > 2 ? split(args[2], ',') : vector<string>();
   //passes.insert(passes.end(), chNames.size() - passes.size(), 0);
@@ -247,17 +253,17 @@ int Server::execJoin() {
     if(chs.find(*chName) == chs.end() && (chName->size() > 200 || ((*chName)[0] != '&' && (*chName)[0] != '#'))) // & ?
       send_(cli, *chName + " :Cannot join channel (bad channel name)\n"); // ?
     else if (chs.find(*chName) == chs.end())
-      chs[*chName] = new Ch(cli); // copy Cli ?                             // ERR_NOSUCHCHANNEL ? 
+      chs[*chName] = new Ch(cli);                                           // ERR_NOSUCHCHANNEL ? 
     if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
       send_(cli, *chName + " :Cannot join channel (+k)\n");                 // ERR_BADCHANNELKEY
-    else if(chs[*chName]->clis.size() >= chs[*chName]->limit) 
+    else if(chs[*chName]->size() >= chs[*chName]->limit) 
       send_(cli, *chName + " :Cannot join channel (+l)\n");                 // ERR_CHANNELISFULL
     else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
       send_(cli, *chName + " :Cannot join channel (+i)\n");                 // ERR_INVITEONLYCHAN
     else {
       chs[*chName]->clis.insert(cli);
-      send_(chs[*chName]->clis, cli->nick + " JOIN :" + *chName + "\n");
-      send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n");     // как выглядит mode?
+      send_(chs[*chName], cli->nick + " JOIN :" + *chName + "\n");
+      send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n");    // как выглядит mode?
     }
   }
   return 1;

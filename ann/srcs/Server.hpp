@@ -46,6 +46,7 @@ struct Ch {
   unsigned int             limit; // l
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
+  unsigned int             size() { return clis.size(); }
 };
 
 class Server {
