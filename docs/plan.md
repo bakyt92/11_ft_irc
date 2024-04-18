@@ -26,18 +26,16 @@
 Отправляйте личные сообщения другим пользователям.  
 Обработка различных команд IRC, таких как PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE и PRIVMSG  
 
-## Разобраться или доделать (важное)
-* обработку префиксов, напрмимер `:Alice NICK Bob` Alice изменяет свой никнейм на Bob (`:Alice` это префикс)
+## Разобраться или доделать
+* нужна ли нам обработка префиксов, напрмимер `:Alice NICK Bob` Alice изменяет свой никнейм на Bob (`:Alice` это префикс)
   + https://www.lissyara.su/doc/rfc/rfc1459/
 * одна команда может оказаться разбитой на несколько сообщений или нет ???
   + Кажется у Бориса это не учитывается
-  + TCP is a streaming protocol, not a message protocol.
-  + The only guarantee is that you send n bytes, you will receive n bytes in the same order.
-  + You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
-  + You could send 100 1 byte chunks and receive 4 25 byte messages.
-  + **You must deal with message boundaries yourself**.
-* `valgrind`
-* Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`? 
+  + TCP is a streaming protocol, not a message protocol
+    - The only guarantee is that you send n bytes, you will receive n bytes in the same order.
+    - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
+    - You could send 100 1 byte chunks and receive 4 25 byte messages.
+    - **You must deal with message boundaries yourself**.
 * должна ли наша команда PRIVMSG понимать маски?
   + `:Alice PRIVMSG Bob :Hello` Сообщение от Alice к Bob
   + `PRIVMSG Alice :Hello'u>(768u+1n) .br` Сообщение к Alice
@@ -45,8 +43,7 @@
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`- это вроде маска сервера, но у нас один сервер, нам наверное то не нужно
   + je te conseille de faire uniquement (https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890)
-  
-## Разобраться или доделать (не очень важное)
+* `valgrind` (в конце)
 * All I/O operations must be non-blocking - всё ли ок с этим у нас?
                                
 ## Протестировать нашу программу и реальный сервер
@@ -54,6 +51,9 @@
 * [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
 * команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
 * `PASS`, `pass` и `paSS` должны одинаково рабоатть?
+* Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`?
+* Что происходит, когда канал `news` уже существует, а ты создаёшь ещё один канал `news`?
+* Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`? 
 * Нестандартные ситуации
   + неправильное имя канала
   + неправлиьнй пароль (по RCF 1459 и RCF 2812 не понятно!)
