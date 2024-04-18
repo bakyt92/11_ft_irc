@@ -64,6 +64,7 @@
   + `com^Dman^Dd` (* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`)
   + `PASS ` (с пробелом)
   + `USER al 0 * Alice`, потом опять`USER al 0 * Alice`
+  + `JOIN #myChannel,#myChannel`
   + Verify that the poll() is called every time before each accept, read/recv, write/send. After these calls, errno should not be used to trigger specific action (e.g. like reading again after errno == EAGAIN). (checklist)
   + The server can handle multiple connections at the same time. The server should not block. It should be able to answer all demands. Do some test with the IRC client and nc at the same time. (checklist)
   + Join a channel. Ensure that all messages from one client on that channel are sent to all other clients that joined the channel. (checklist)
