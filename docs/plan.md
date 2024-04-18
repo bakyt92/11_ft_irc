@@ -79,6 +79,7 @@
   + Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested (remove one point for each feature that is not working). (checklist)
   + канал `news` уже существует, а ты создаёшь ещё один канал `news`
   + можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`
+  + более 15 параметров
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
