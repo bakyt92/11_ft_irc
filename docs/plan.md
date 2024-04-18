@@ -41,7 +41,7 @@
   + `PRIVMSG Alice :Hello'u>(768u+1n) .br` Сообщение к Alice
   + `PRIVMSG serverName@tolsun.oulu.fi :Hello` Сообщение от клиента на сервер tolsun.oulu.fi с именем "serverName";
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
-  + Борис проверяет `"${receiver}"`- это вроде маска сервера, но у нас один сервер, нам наверное то не нужно
+  + Борис проверяет `"${receiver}"`- это вроде маска сервера, но у нас один сервер, нам наверное не нужно
   + je te conseille de faire uniquement (https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890)
 * `valgrind` (в конце)
 * All I/O operations must be non-blocking - всё ли ок с этим у нас?
