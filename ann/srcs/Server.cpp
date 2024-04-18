@@ -231,7 +231,7 @@ int Server::execPrivmsg() {
 }
 
 // ERR_BADCHANMASK ?
-// Если JOIN прошла хорошо, пользователь получает топик канала (используя RPL_TOPIC) и список пользователей на канале (используя RPL_NAMREPLY) 
+// Если JOIN прошла хорошо, пользователь получает топик канала и список пользователей на канале 
 // вмещает в себе MODE KICK PART QUIT PRIVMSG ?
 int Server::execJoin() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
