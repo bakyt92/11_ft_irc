@@ -42,9 +42,10 @@
   + `PRIVMSG serverName@tolsun.oulu.fi :Hello` Сообщение от клиента на сервер tolsun.oulu.fi с именем "serverName";
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`- это вроде маска сервера, но у нас один сервер, нам наверное не нужно
-  + je te conseille de faire uniquement (https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890)
+  + je te conseille de faire uniquement `#` (https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890)
 * `valgrind` (в конце)
 * All I/O operations must be non-blocking - всё ли ок с этим у нас?
+* Просмотреть группу в дискорд
                                
 ## Протестировать нашу программу и реальный сервер
 * [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt)
@@ -76,8 +77,6 @@
   + Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested (remove one point for each feature that is not working). (checklist)
   + канал `news` уже существует, а ты создаёшь ещё один канал `news`
   + можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`
-
-## Просмотреть группу в дискорд
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
