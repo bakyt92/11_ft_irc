@@ -24,18 +24,21 @@ using std::numeric_limits;
 bool sigReceived;
 
 struct Cli {
-  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), nick(""), uName(""), rName(""), invitations(set<string>()) {};
+  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), nick(""), uName(""), rName(""), invits(set<string>()) {};
   int                      fd;
   string                   host;
   bool                     passOk;
   string                   nick;
   string                   uName;
   string                   rName;
-  set<string>              invitations;
+  set<string>              invits;
 };
 
-struct Chan {
-  string                   name;
+struct Ch {
+  Ch(Cli* adm) : topic(""), optI(false), optT(false), pass(""), limit(numeric_limits<unsigned int>::max()) {
+    clis.insert(adm);
+    adms.insert(adm);
+  };
   string                   topic;
   bool                     optI;  // i option
   bool                     optT;  // t
@@ -53,7 +56,7 @@ private:
   int                      fdForMsgs;       // у каждого киента свой
   vector<struct pollfd>    polls;
   map<int, Cli* >          clis;
-  map<string, Chan*>       chs;
+  map<string, Ch*>         chs;
   vector<string>           args;  // the command being treated at the moment, args[0] = command
   Cli                      *cli;  // the client  being treated at the moment
 public:

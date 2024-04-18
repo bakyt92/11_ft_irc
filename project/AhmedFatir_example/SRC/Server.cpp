@@ -16,7 +16,7 @@ Server &Server::operator=(Server const &src){
 		this->password = src.password;
 		this->clients = src.clients;
 		this->channels = src.channels;
-		this->fds = src.fds;
+		this->polls = src.polls;
 		this->isBotfull = src.isBotfull;
 	}
 	return *this;
@@ -55,7 +55,7 @@ void Server::SetPassword(std::string password){this->password = password;}
 std::string Server::GetPassword(){return this->password;}
 void Server::AddClient(Client newClient){this->clients.push_back(newClient);}
 void Server::AddChannel(Channel newChannel){this->channels.push_back(newChannel);}
-void Server::AddFds(pollfd newFd){this->fds.push_back(newFd);}
+void Server::AddFds(pollfd newFd){this->polls.push_back(newFd);}
 //---------------//Setters
 //---------------//Remove Methods
 void Server::RemoveClient(int fd){
@@ -71,9 +71,9 @@ void Server::RemoveChannel(std::string name){
 	}
 }
 void Server::RemoveFds(int fd){
-	for (size_t i = 0; i < this->fds.size(); i++){
-		if (this->fds[i].fd == fd)
-			{this->fds.erase(this->fds.begin() + i); return;}
+	for (size_t i = 0; i < this->polls.size(); i++){
+		if (this->polls[i].fd == fd)
+			{this->polls.erase(this->polls.begin() + i); return;}
 	}
 }
 void	Server::RmChannels(int fd){
@@ -148,16 +148,16 @@ void Server::init(int port, std::string pass)
 	std::cout << "Waiting to accept a connection...\n";
 	while (Server::Signal == false)
 	{
-		if((poll(&fds[0],fds.size(),-1) == -1) && Server::Signal == false)
+		if((poll(&polls[0],polls.size(),-1) == -1) && Server::Signal == false)
 			throw(std::runtime_error("poll() faild"));
-		for (size_t i = 0; i < fds.size(); i++)
+		for (size_t i = 0; i < polls.size(); i++)
 		{
-			if (fds[i].revents & POLLIN)
+			if (polls[i].revents & POLLIN)
 			{
-				if (fds[i].fd == server_fdsocket)
+				if (polls[i].fd == server_fdsocket)
 					this->accept_new_client();
 				else
-					this->reciveNewData(fds[i].fd);
+					this->reciveNewData(polls[i].fd);
 			}
 		}
 	}
@@ -184,7 +184,7 @@ void Server::set_sever_socket()
 	new_cli.fd = server_fdsocket;
 	new_cli.events = POLLIN;
 	new_cli.revents = 0;
-	fds.push_back(new_cli);
+	polls.push_back(new_cli);
 }
 
 void Server::accept_new_client()
@@ -203,7 +203,7 @@ void Server::accept_new_client()
 	cli.SetFd(incofd);
 	cli.setIpAdd(inet_ntoa((cliadd.sin_addr)));
 	clients.push_back(cli);
-	fds.push_back(new_cli);
+	polls.push_back(new_cli);
 	std::cout << GRE << "Client <" << incofd << "> Connected" << WHI << std::endl;
 }
 

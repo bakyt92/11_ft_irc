@@ -39,7 +39,7 @@ private:
 	std::string password;
 	std::vector<Client> clients;
 	std::vector<Channel> channels;
-	std::vector<struct pollfd> fds;
+	std::vector<struct pollfd> polls;
 	struct sockaddr_in add;
 	struct sockaddr_in cliadd;
 	struct pollfd new_cli;
