@@ -39,7 +39,7 @@
 * должна ли PRIVMSG понимать маски и особые формы записи?
   + `:Alice PRIVMSG Bob :Hello` Сообщение от Alice к Bob
   + `PRIVMSG Alice :Hello'u>(768u+1n) .br` Сообщение к Alice
-  + `PRIVMSG serverName@tolsun.oulu.fi :Hello` Сообщение от клиента на сервер tolsun.oulu.fi с именем "serverName";
+  + `PRIVMSG serverName@tolsun.oulu.fi :Hello` Сообщение от клиента на сервер tolsun.oulu.fi с именем "serverName" (наверное нам не нужно от клиента на сервер, т.к. у нас один сервер)
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`- это вроде маска сервера, но у нас один сервер, нам наверное не нужно
   + je te conseille de faire uniquement `#` (https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890)
