@@ -35,7 +35,7 @@ struct Cli {
 };
 
 struct Ch {
-  Ch(Cli* adm) : topic(""), optI(false), optT(false), pass(""), limit(numeric_limits<unsigned int>::max()) {
+  Ch(Cli* adm) : topic(""), optI(false), optT(false), pass(""), limit(3) { // limit(numeric_limits<unsigned int>::max()
     clis.insert(adm);
     adms.insert(adm);
   };

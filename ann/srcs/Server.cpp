@@ -23,9 +23,15 @@ std::vector<string> split(string s, char delim) {
   return parts;
 }
 
-int send_(int fd, string msg) {
+int send_(int fd, string msg) { // лишнее?
   if (msg != "")
     send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+  return 0;
+}
+
+int send_(Cli *cli, string msg) {
+  if (msg != "")
+    send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
 }
 
@@ -163,24 +169,24 @@ int Server::exec() {
     return execPrivmsg();
   if (args[0] == "MODE")  
     return execMode();
-  return send_(cli->fd, ": server 421 " + cli->nick + " " + args[0] + " ERR_UNKNOWNCOMMAND\n");
+  return send_(cli, ": server 421 " + cli->nick + " " + args[0] + " ERR_UNKNOWNCOMMAND\n");
 }
 
 int Server::execPass() { 
   if (args.size() < 2)
-    return send_(cli->fd, "PASS :Not enough parameters\n");                 // ERR_NEEDMOREPARAMS 
+    return send_(cli, "PASS :Not enough parameters\n");                 // ERR_NEEDMOREPARAMS 
   if (cli->passOk)
-    return send_(cli->fd, ":You may not reregister\n");                     // ERR_ALREADYREGISTRED 
+    return send_(cli, ":You may not reregister\n");                     // ERR_ALREADYREGISTRED 
   cli->passOk = true;
   return 0;
 }
 
 int Server::execNick() {
-  if (args.size() < 2) 
-    return send_(cli->fd, ":No nickname given\n");                          // ERR_NONICKNAMEGIVEN
+  if (args.size() < 2 || args[1].size() == 0) 
+    return send_(cli, ":No nickname given\n");                          // ERR_NONICKNAMEGIVEN
   for (size_t i = 0; i < args[1].size() && args[1].size() <= 9; ++i)
-    if (string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(args[1][i]) == string::npos) // 9 chars: a-z A-Z 0-9 - [ ] ^ { }
-       return send_(cli->fd, args[1] + " :Erroneus nickname\n");            // ERR_ERRONEUSNICKNAME
+    if (string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(args[1][i]) == string::npos)
+      return send_(cli, args[1] + " :Erroneus nickname\n");             // ERR_ERRONEUSNICKNAME
   for (std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if (itCli->second->nick.size() == args[1].size()) {
       bool nickInUse = true;
@@ -193,7 +199,7 @@ int Server::execNick() {
   }
   cli->nick = args[1];
   if (cli->uName != "")
-    send_(cli->fd, cli->nick + " " + cli->uName + "\n");
+    send_(cli, cli->nick + " " + cli->uName + "\n");
   return 0;
 }
 
@@ -205,7 +211,7 @@ int Server::execUser() { // args[2] у нас не испольутеся
   cli->uName = args[1];
   cli->rName = args[4];
   if (cli->nick != "")
-    send_(cli->fd, cli->nick + " " + cli->uName + "\n");
+    send_(cli, cli->nick + " " + cli->uName + "\n");
   return 0;
 }
 
@@ -219,47 +225,45 @@ int Server::execPrivmsg() {
     return send_(cli->fd, ":No text to send\n");                            // ERR_NOTEXTTOSEND
   vector<string> tos = split(args[1], ',');
   for (vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    //if (to->compare(0, 2, "#*") == 0 && !chs.at(*to))                     // a host mask (#<mask>)? или канал?
-    //  send_(cli->fd, *to + " :No such nick/channel\n");                   // ERR_NOSUCHNICK
-    //else if (to->compare(0, 2, "#*") == 0 && chs.at(*to))                 
-    //  send_(chs.at(*to)->clis, ":" + cli->nick + "!" + cli->rName + "@" + cli->host + " PRIVMSG " + ((chs.at(*to)->name == "" ? to->nick : chs.at(*to)->name) + (msg[0] == ':' ? " " : " :") + msg) + "\n");
-    if(!getCli(*to))
-      send_(cli->fd, *to + " :No such nick/channel\n");                     // ERR_NOSUCHNICK
+    if (((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
+      send_(cli, *to + " :No such nick/channel\n");                     // ERR_NOSUCHNICK
+    else if ((*to)[0] == '#')
+      send_(chs[*to]->clis, cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
     else
-      send_((getCli(*to))->fd, ":" + cli->nick + "!" + cli->rName + "@" + cli->host + " " + getCli(*to)->nick + " :" + args[2] + "\n");
+      send_(getCli(*to), cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
   return 0;
 }
 
 // ERR_BADCHANMASK ?
 // Если JOIN прошла хорошо, пользователь получает топик канала и список пользователей на канале 
-// вмещает в себе MODE KICK PART QUIT PRIVMSG ?
 int Server::execJoin() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
     return send_(cli->fd, cli->nick + " :User not logged in\n" );           // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(args.size() < 2)
     return send_(cli->fd, "USER :Not enough parameters\n");                 // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(args[1], ',');
-  vector<string> passes  = args.size() > 2 ? split(args[2], ',') : vector<string>();
+  //vector<string> passes  = args.size() > 2 ? split(args[2], ',') : vector<string>();
   //passes.insert(passes.end(), chNames.size() - passes.size(), 0);
   size_t i = 0;
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++, i++) {
-    cout << "chs.at(*chName) " << *chName << endl;
-    Ch *ch = chs.at(*chName);
-    string pass = passes.size() > i ? passes[i] : "";
-    if(ch == NULL && (chName->size() > 200 || ((*chName)[0] != '&' && (*chName)[0] != '#'))) // & ?
-      send_(cli->fd, *chName + " :Cannot join channel ...\n");             // ?
-    else if (ch == NULL)
+    cout << "chName = " << *chName << endl;
+    if (chs.find(*chName) == chs.end()) cout << "find = NULL\n";
+    //Ch *ch = (chs.find(*chName) != map<string, Ch*>::end) ? chs.find(*chName)->second : NULL;
+    //string pass = passes.size() > i ? passes[i] : "";
+    if(chs.find(*chName) == chs.end() && (chName->size() > 200 || ((*chName)[0] != '&' && (*chName)[0] != '#'))) // & ?
+      send_(cli, *chName + " :Cannot join channel (bad channel name)\n"); // ?
+    else if (chs.find(*chName) == chs.end())
       chs[*chName] = new Ch(cli); // copy Cli ?                             // ERR_NOSUCHCHANNEL ? 
-    else if(ch->pass != "" && pass != ch->pass)
-      send_(cli->fd, *chName + " :Cannot join channel (+k)\n");             // ERR_BADCHANNELKEY
-    else if(ch->clis.size() >= ch->limit)
-      send_(cli->fd, *chName + " :Cannot join channel (+l)\n");             // ERR_CHANNELISFULL
-    else if(ch->optI && cli->invits.find(*chName) == cli->invits.end())     
-      send_(cli->fd, *chName + " :Cannot join channel (+i)\n");             // ERR_INVITEONLYCHAN
+    if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
+      send_(cli, *chName + " :Cannot join channel (+k)\n");             // ERR_BADCHANNELKEY
+    else if(chs[*chName]->clis.size() >= chs[*chName]->limit) 
+      send_(cli, *chName + " :Cannot join channel (+l)\n");             // ERR_CHANNELISFULL
+    else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
+      send_(cli, *chName + " :Cannot join channel (+i)\n");             // ERR_INVITEONLYCHAN
     else {
       chs[*chName]->clis.insert(cli);
-      send_(ch->clis, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + *chName + "\n");
-      send_(cli->fd, *chName + " topic " + chs[*chName]->topic + " mode " + "\n"); // как выглядит mode?
+      send_(chs[*chName]->clis, cli->nick + " JOIN :" + *chName + "\n");
+      send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n"); // как выглядит mode?
     }
   }
   return 1;
