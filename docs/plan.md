@@ -27,8 +27,6 @@
 Обработка различных команд IRC, таких как PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE и PRIVMSG  
 
 ## Разобраться или доделать
-* нужна ли нам обработка префиксов, напрмимер `:Alice NICK Bob` Alice изменяет свой никнейм на Bob (`:Alice` это префикс)
-  + https://www.lissyara.su/doc/rfc/rfc1459/
 * одна команда может оказаться разбитой на несколько сообщений или нет ???
   + Кажется у Бориса это не учитывается
   + TCP is a streaming protocol, not a message protocol
