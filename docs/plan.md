@@ -51,9 +51,6 @@
 * [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
 * команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
 * `PASS`, `pass` и `paSS` должны одинаково рабоатть?
-* Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`?
-* Что происходит, когда канал `news` уже существует, а ты создаёшь ещё один канал `news`?
-* Можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`?
 * Ограничения на имя канала такие же, как на имя пользователя?
 * Нестандартные ситуации
   + неправильное имя канала
@@ -77,7 +74,8 @@
   + Stop a client (^-Z) connected on a channel. Then flood the channel using another client. The server should not hang. When the client is live again, all stored commands should be processed normally. Also, check for memory leaks during this operation. (checklist)
   + Verify that private messages (PRIVMSG) and notices (NOTICE) are **fully functional with different parameters**. (checklist)
   + Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested (remove one point for each feature that is not working). (checklist)
-
+  + канал `news` уже существует, а ты создаёшь ещё один канал `news`
+  + можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`
 
 ## Просмотреть группу в дискорд
 
