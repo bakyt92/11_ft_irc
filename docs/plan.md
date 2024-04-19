@@ -57,7 +57,6 @@
 * [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt)
 * [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
 * команду QUIT получает, даже если клиент не залогинен, а дргуие команды не получет в этой ситуации
-* `PASS`, `pass` и `paSS` должны одинаково рабоатть?
 * Ограничения на имя канала такие же, как на имя пользователя?
 * Нестандартные ситуации
   + неправильное имя канала
@@ -69,7 +68,9 @@
   + `nick '`
   + `com^Dman^Dd` (* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`)
   + `PASS ` (с пробелом)
+  + `PASS`, `pass` и `paSS` должны одинаково рабоатть?
   + `USER al 0 * Alice`, потом опять`USER al 0 * Alice`
+  + `MyChannel` и `myChannel` это один и тот же канал? 
   + `JOIN #myChannel,#myChannel`
   + Verify that the poll() is called every time before each accept, read/recv, write/send. After these calls, errno should not be used to trigger specific action (e.g. like reading again after errno == EAGAIN). (checklist)
   + The server can handle multiple connections at the same time. The server should not block. It should be able to answer all demands. Do some test with the IRC client and nc at the same time. (checklist)
@@ -87,7 +88,7 @@
   + `PASS JOIN` `NICK JOIN` `USER JOIN 0 * JOIN` `JOIN #JOIN` etc
   + более 15 параметров
   + с двоеточием кажется много особых случаев, я пока это вообще не учитывала
-  + в целом, **многое не понятно именно с поведением сервера** (какие точно сообщения в каком случае отправлять, как реагировать на нестандартные ситуации)
+  + в целом, **многое не понятно именно с поведением сервера** (какие точно сообщения в каком случае отправлять, как реагировать на нестандартные ситуации), надо сделать очень много тестов,я многоене понимаю по документу rfc1459
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
