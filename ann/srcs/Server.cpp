@@ -246,22 +246,22 @@ int Server::execJoin() {
   //passes.insert(passes.end(), chNames.size() - passes.size(), 0);
   size_t i = 0;
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++, i++) {
-    cout << "chName = " << *chName << endl;
-    chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName]; // ERR_NOSUCHCHANNEL ? 
-    //Ch *ch = (chs.find(*chName) != map<string, Ch*>::end) ? chs.find(*chName)->second : NULL;
-    //string pass = passes.size() > i ? passes[i] : "";
-    if(chs.find(*chName) == chs.end() && (chName->size() > 200 || (*chName)[0] != '#'))
+    if(chName->size() > 200 || (*chName)[0] != '#') // проверить
       send_(cli, *chName + " :Cannot join channel (bad channel name)\n");   // ?
-    if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-      send_(cli, *chName + " :Cannot join channel (+k)\n");                 // ERR_BADCHANNELKEY
-    else if(chs[*chName]->size() >= chs[*chName]->limit) 
-      send_(cli, *chName + " :Cannot join channel (+l)\n");                 // ERR_CHANNELISFULL
-    else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
-      send_(cli, *chName + " :Cannot join channel (+i)\n");                 // ERR_INVITEONLYCHAN
     else {
-      chs[*chName]->clis.insert(cli);
-      send_(chs[*chName], cli->nick + " JOIN :" + *chName + "\n");
-      send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n");    // как выглядит mode?
+      chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName]; // ERR_NOSUCHCHANNEL ? 
+      //string pass = passes.size() > i ? passes[i] : "";
+      // if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
+      //   send_(cli, *chName + " :Cannot join channel (+k)\n");                 // ERR_BADCHANNELKEY
+      if(chs[*chName]->size() >= chs[*chName]->limit) 
+        send_(cli, *chName + " :Cannot join channel (+l)\n");                 // ERR_CHANNELISFULL
+      else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
+        send_(cli, *chName + " :Cannot join channel (+i)\n");                 // ERR_INVITEONLYCHAN
+      else {
+        chs[*chName]->clis.insert(cli);
+        send_(chs[*chName], cli->nick + " JOIN :" + *chName + "\n");
+        send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n");    // как выглядит mode?
+      }
     }
   }
   return 1;
@@ -272,8 +272,8 @@ int Server::execInvite() {
     return send_(cli, cli->nick + " :User not logged in\n" );               // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(args.size() < 3)
     return send_(cli, "INVITE :Not enough parameters\n");                   // ERR_NEEDMOREPARAMS 
-  if(chs.find(args[2]) == chs.end() || args[2][0] != '#')
-    return send_(cli, "no such channel\n");                                 // ? 
+  if(chs.find(args[2]) == chs.end())
+    return send_(cli, "no such channel\n");                                 // ERR_NOSUCHANNEL ? 
   if(chs[args[2]]->adms.find(cli) == chs[args[2]]->adms.end()) 
     return send_(cli, args[2] + " :You're not channel operator\n");         // ERR_CHANOPRIVSNEEDED
   if(chs[args[2]]->clis.find(cli) == chs[args[2]]->clis.end()) 
@@ -290,25 +290,25 @@ int Server::execTopic() {
     return send_(cli, cli->nick + " :User not logged in\n" );               // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(args.size() < 1)
     return send_(cli, "TOPIC :Not enough parameters\n");                    // ERR_NEEDMOREPARAMS
-  if(chs.find(args[1]) == chs.end() || args[1][0] != '#')
+  if(chs.find(args[1]) == chs.end())
     return send_(cli, "no such channel\n");                                 // ERR_NOSUCHANNEL
-  if(chs[args[2]]->clis.find(cli) == chs[args[2]]->clis.end()) 
+  if(chs[args[1]]->clis.empty()) 
     return send_(cli, args[1] + " :You're not on that channe\n");           // ERR_NOTONCHANNEL
-  if(chs[args[2]]->optT && chs[args[1]]->adms.find(cli) == chs[args[1]]->adms.end()) 
+  if(!chs[args[1]]->clis.empty() &&chs[args[1]]->clis.find(cli) == chs[args[1]]->clis.end()) 
+    return send_(cli, args[1] + " :You're not on that channe\n");           // ERR_NOTONCHANNEL
+  if(chs[args[1]]->optT && chs[args[1]]->adms.find(cli) == chs[args[1]]->adms.end()) 
     return send_(cli, args[1] + " :You're not channel operator\n");         // ERR_CHANOPRIVSNEEDED
-  else if (args.size() == 2) {
+  if (args.size() == 2) {
     chs[args[1]]->topic = "";
     return send_(chs[args[2]], args[1] + " No topic is set\n");             // RPL_NOTOPIC
   }
-  else {
-    chs[args[1]]->topic = args[2];
-    return send_(chs[args[2]], args[1] + " " + args[2] + "\n");             // RPL_TOPIC
-  }
+  chs[args[1]]->topic = args[2];
+  return send_(chs[args[1]], args[1] + " " + args[2] + "\n");              // RPL_TOPIC
 }
 
 int Server::execKick() {
   if (cli->passOk)
-    return send_(cli, cli->nick + " :User not logged in" );            // ERR_NOLOGIN 
+    return send_(cli, cli->nick + " :User not logged in" );                 // ERR_NOLOGIN 
   if (args.size() < 3) 
     return send_(cli, ": 461 KICK ERR_NEEDMOREPARAMS\n");
   std::vector<string> chNames  = split(args[1], ',');
