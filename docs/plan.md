@@ -67,7 +67,7 @@
   + `PRIVMSG alice,alice hello`
   + `nick   an   `
   + `nick '`
-  + `com^Dman^Dd` (* use ctrl+D to send the command in several parts: `com`, then `man`, then `d\n`)
+  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`)
   + `PASS ` (с пробелом)
   + `PASS`, `pass` и `paSS` должны одинаково рабоатть?
   + `USER al 0 * Alice`, потом опять`USER al 0 * Alice`
