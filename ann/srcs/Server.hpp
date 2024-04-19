@@ -47,6 +47,18 @@ struct Ch {
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
   unsigned int             size() { return clis.size(); }
+  void                     erase(string nick_) { 
+                             for(set<Cli*>::iterator it = clis.begin(); it != clis.end(); it++) 
+                               if ((*it)->nick == nick_) { 
+                                 clis.erase(*it); 
+                                 break;
+                               }
+                             for(set<Cli*>::iterator it = adms.begin(); it != adms.end(); it++)
+                               if ((*it)->nick == nick_) {
+                                 adms.erase(*it);
+                                 break;
+                               }
+                           }  
 };
 
 class Server {
@@ -56,7 +68,7 @@ private:
   int                      fdForNewClis;    // один общий для всех клиентов
   int                      fdForMsgs;       // у каждого киента свой
   vector<struct pollfd>    polls;
-  map<int, Cli* >          clis;
+  map<int, Cli*>           clis;
   map<string, Ch*>         chs;
   vector<string>           args;  // the command being treated at the moment, args[0] = command
   Cli                      *cli;  // the client  being treated at the moment
@@ -67,6 +79,7 @@ public:
   void                     init();
   void                     run();
   Cli*                     getCli(string &name);
+  void                     printMe();
   int                      exec(); 
   int                      execPass();
   int                      execNick();

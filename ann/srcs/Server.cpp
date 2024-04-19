@@ -54,11 +54,21 @@ int send_(Ch *ch, string msg) {
   return 0;
 }
 
-string toString(vector<string> v) { // только для отладки
-  string res = "";
-  for (vector<string>::iterator it = v.begin(); it != v.end(); it++)
-    res += "[" + *it + "] ";
-  return res;
+void Server::printMe() { // for debugging only
+  cout << "I execute  : ";
+  for (vector<string>::iterator it = args.begin(); it != args.end(); it++)
+    cout << *it << " ";
+  cout << endl << "My clients : ";
+  for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
+    cout << "[" << it->second->nick << "] ";
+  cout << endl << "My channels: ";
+  for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
+    cout << ch->first << " (";
+    for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
+      cout << (*itCli)->nick << " ";
+    cout << " topic = " << ch->second->topic << ", mode = " << ") ";
+  }
+  cout << endl << endl;
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
@@ -134,10 +144,11 @@ void Server::run() {
             bufS.resize(bytes);
             std::vector<string> cmds = split(bufS, '\n');             // if empty ? 
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
-              cout << "I execute " << *cmd << endl;
               args = split(*cmd, ' ');                                // if (args[0][0] == ':') args.erase(args.begin()); // нужен ли префикс?
-              if (cli)
+              if (cli) {
                 exec();
+                printMe();
+              }
             }
           }
         }
@@ -177,6 +188,8 @@ int Server::execPass() {
     return send_(cli, "PASS :Not enough parameters\n");                     // ERR_NEEDMOREPARAMS 
   if(cli->passOk)
     return send_(cli, ":You may not reregister\n");                         // ERR_ALREADYREGISTRED 
+  if(args[1] != pass)
+    return ;                                                                // ?
   cli->passOk = true;
   return 0;
 }
@@ -215,7 +228,6 @@ int Server::execUser() {
   return 0;
 }
 
-// ERR_NOTOPLEVEL ?   ERR_WILDTOPLEVEL ?    
 int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "") // ?
     return send_(cli, cli->nick + " :User not logged in\n" );               // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
@@ -227,15 +239,13 @@ int Server::execPrivmsg() {
   for (vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
       send_(cli, *to + " :No such nick/channel\n");                         // ERR_NOSUCHNICK
-    else if((*to)[0] == '#')
+    else if((*to)[0] == '#' && chs[*to]->clis.find(cli) != chs[*to]->clis.end()) // ERR_NOTONCHANNEL нужно ?
       send_(chs[*to], cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
     else
       send_(getCli(*to), cli->rName + " PRIVMSG " + *to + " " + args[2] + "\n");
   return 0;
 }
 
-// ERR_BADCHANMASK ?
-// Если JOIN прошла хорошо, пользователь получает топик канала и список пользователей на канале 
 int Server::execJoin() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
     return send_(cli, cli->nick + " :User not logged in\n" );               // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
@@ -252,16 +262,16 @@ int Server::execJoin() {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName]; // ERR_NOSUCHCHANNEL ? 
       //string pass = passes.size() > i ? passes[i] : "";
       // if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-      //   send_(cli, *chName + " :Cannot join channel (+k)\n");                 // ERR_BADCHANNELKEY
+      //   send_(cli, *chName + " :Cannot join channel (+k)\n");            // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit) 
-        send_(cli, *chName + " :Cannot join channel (+l)\n");                 // ERR_CHANNELISFULL
+        send_(cli, *chName + " :Cannot join channel (+l)\n");               // ERR_CHANNELISFULL
       else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
-        send_(cli, *chName + " :Cannot join channel (+i)\n");                 // ERR_INVITEONLYCHAN
+        send_(cli, *chName + " :Cannot join channel (+i)\n");               // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
         send_(chs[*chName], cli->nick + " JOIN :" + *chName + "\n");
-        send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n");    // как выглядит mode?
-      }
+        send_(cli, *chName + " " + chs[*chName]->topic + " mode " + "\n");  // как выглядит mode?
+      }                                                                     // нужно ли исключение "пользователь уже на канале" ?   
     }
   }
   return 1;
@@ -273,7 +283,7 @@ int Server::execInvite() {
   if(args.size() < 3)
     return send_(cli, "INVITE :Not enough parameters\n");                   // ERR_NEEDMOREPARAMS 
   if(chs.find(args[2]) == chs.end())
-    return send_(cli, "no such channel\n");                                 // ERR_NOSUCHANNEL ? 
+    return send_(cli, args[2] + " :No such channel\n");                     // ERR_NOSUCHANNEL ? 
   if(chs[args[2]]->adms.find(cli) == chs[args[2]]->adms.end()) 
     return send_(cli, args[2] + " :You're not channel operator\n");         // ERR_CHANOPRIVSNEEDED
   if(chs[args[2]]->clis.find(cli) == chs[args[2]]->clis.end()) 
@@ -291,10 +301,8 @@ int Server::execTopic() {
   if(args.size() < 1)
     return send_(cli, "TOPIC :Not enough parameters\n");                    // ERR_NEEDMOREPARAMS
   if(chs.find(args[1]) == chs.end())
-    return send_(cli, "no such channel\n");                                 // ERR_NOSUCHANNEL
-  if(chs[args[1]]->clis.empty()) 
-    return send_(cli, args[1] + " :You're not on that channe\n");           // ERR_NOTONCHANNEL
-  if(!chs[args[1]]->clis.empty() &&chs[args[1]]->clis.find(cli) == chs[args[1]]->clis.end()) 
+    return send_(cli, args[1] + " :No such channel\n");                     // ERR_NOSUCHANNEL
+  if(chs[args[1]]->clis.empty() || chs[args[1]]->clis.find(cli) == chs[args[1]]->clis.end()) 
     return send_(cli, args[1] + " :You're not on that channe\n");           // ERR_NOTONCHANNEL
   if(chs[args[1]]->optT && chs[args[1]]->adms.find(cli) == chs[args[1]]->adms.end()) 
     return send_(cli, args[1] + " :You're not channel operator\n");         // ERR_CHANOPRIVSNEEDED
@@ -303,35 +311,68 @@ int Server::execTopic() {
     return send_(chs[args[2]], args[1] + " No topic is set\n");             // RPL_NOTOPIC
   }
   chs[args[1]]->topic = args[2];
-  return send_(chs[args[1]], args[1] + " " + args[2] + "\n");              // RPL_TOPIC
+  return send_(chs[args[1]], args[1] + " " + args[2] + "\n");               // RPL_TOPIC
 }
 
 int Server::execKick() {
-  if (cli->passOk)
-    return send_(cli, cli->nick + " :User not logged in" );                 // ERR_NOLOGIN 
-  if (args.size() < 3) 
-    return send_(cli, ": 461 KICK ERR_NEEDMOREPARAMS\n");
-  std::vector<string> chNames  = split(args[1], ',');
-  std::vector<string> clis = split(args[2], ',');
-  for (vector<string>::iterator it = chNames.begin(); it != chNames.end(); it++) {
-    Ch *ch = chs.at(*it);
-    if (!ch) 
-      send_(cli, ": 403 " + *it + " ERR_NOSUCHCHANNEL\n");
-    else if(std::find(ch->clis.begin(), ch->clis.end(), cli) == ch->clis.end())
-      send_(cli, ": 442 " +  *it + " ERR_NOTONCHANNEL\n");
-    else if (std::find(ch->adms.begin(), ch->adms.end(), cli) == ch->adms.end())
-      send_(cli, ": 482 " + *it + " ERR_CHANOPRIVSNEEDED\n");
-    else
-      for (vector<string>::iterator it = clis.begin(); it != clis.end(); it++) {
-        Cli *cli = getCli(*it);
-        if(std::find(ch->clis.begin(), ch->clis.end(), cli) == ch->clis.end()) {
-          for (set<Cli*>::iterator it = ch->clis.begin(); it != ch->clis.end(); it++)
-            {} // send_((*it)->fd, ": server ! @" + cli->host + " KICK " + ch->name + " " + (args.size() > 3 ? (*it)->nick + " :" + args[3] :  ":" + (*it)->nick) + "\n");
-          // ch->deleteCli(cli);
-          // deleteEmptyCh(*ch);
+  printMe();
+  if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
+    return send_(cli, cli->nick + " :User not logged in\n" );               // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
+  if(args.size() < 3)
+    return send_(cli, "TOPIC :Not enough parameters\n");                    // ERR_NEEDMOREPARAMS
+  std::vector<string> chNames    = split(args[1], ',');
+  std::vector<string> targetClis = split(args[2], ',');
+  for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
+    if(chs.find(*chName) == chs.end())
+      send_(cli, *chName + " :No such channel\n");                          // ERR_NOSUCHANNEL
+    else if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end()) 
+      send_(cli, *chName + " :You're not on that channe\n");                // ERR_NOTONCHANNEL
+    else if(chs[*chName]->optT && chs[*chName]->adms.find(cli) == chs[*chName]->adms.end()) 
+      send_(cli, *chName + " :You're not channel operator\n");              // ERR_CHANOPRIVSNEEDED
+    else {
+      cout << "удаляем клиентов из канала chName = " << *chName << endl;
+      for (vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++) {
+        cout << "  удаляем                                     : " << *targetCli << " ?" << endl;
+        cout << "  chs[*chName]->clis.size()                   = " << chs[*chName]->clis.size() << endl;
+        cout << "  chs[*chName]->clis.find(getCli(*targetCli)) = " << *(chs[*chName]->clis.find(getCli(*targetCli))) << endl;
+        if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
+          cout << "  удаляем !                                   : " << *targetCli << endl;
+          chs[*chName]->erase(*targetCli);                                  // send_(chs[*chName], " KICK \n"); ?
         }
       }
+      // if (chs[*chName]->size() == 0)
+      //   chs.erase(*chName);
+    }
   }
+  return 0;
+}
+
+int Server::execQuit() {
+  for (map<string, Ch*>::iterator itCh = chs.begin(); itCh != chs.end(); itCh++) {
+    Ch *ch = itCh->second;
+    if(!ch || std::find(ch->clis.begin(), ch->clis.end(), cli) == ch->clis.end()) 
+      continue;
+    //send_(ch->clis, ": server ! @" + cli->host + " " + "QUIT " + ch->name + ":" + (args.size() > 1 ? args[1] : "") + "\n");
+    // ch->clis.erase(std::remove(ch->clis.begin(), ch->clis.end(), cli), ch->clis.end());
+    //ch->adms.erase(std::remove(ch->adms.begin(), ch->adms.end(), cli), ch->adms.end());
+    // //if (h->getClis().size() == 0) 
+    //  delete ch; continue;
+    //if (ch->adms.size() == 0) 
+    //  ch->becomesAdmin(cli, ch->clis[i]);
+          // adms.insert(cliTo);
+          // string msg = ":" + from->nick + "!" + from->uName + "@127.0.0.1 MODE " + name + " +o " + cliTo->nick + "\n";
+          // for (set<s_cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
+          //   send(itCli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+          // std::cout << msg;
+    // проверить на привелении адс   if (std::find(adms.begin(), adms.end(), from) == adms.end()) return 1;//ERR_CHANOPRIVSNEEDED;
+    }
+  if(clis.find(cli->fd) == clis.end())
+    return 0;
+  close(clis.find(cli->fd)->first);
+  // if (pollsCLi.find(fd_) == fd_) {
+  //   pollsCLi.erase(pollsCLi. begin() + i);
+  // delete it->second;
+  //clis.erase(clis.find(fd_));
   return 0;
 }
 
@@ -430,35 +471,6 @@ int Server::execMode() {
     //   ch->pass = passes[i];
     //   send_(ch->clis, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + chName + "\n");
     // }
-}
-
-int Server::execQuit() {
-  for (map<string, Ch*>::iterator itCh = chs.begin(); itCh != chs.end(); itCh++) {
-    Ch *ch = itCh->second;
-    if(!ch || std::find(ch->clis.begin(), ch->clis.end(), cli) == ch->clis.end()) 
-      continue;
-    //send_(ch->clis, ": server ! @" + cli->host + " " + "QUIT " + ch->name + ":" + (args.size() > 1 ? args[1] : "") + "\n");
-    // ch->clis.erase(std::remove(ch->clis.begin(), ch->clis.end(), cli), ch->clis.end());
-    //ch->adms.erase(std::remove(ch->adms.begin(), ch->adms.end(), cli), ch->adms.end());
-    // //if (h->getClis().size() == 0) 
-    //  delete ch; continue;
-    //if (ch->adms.size() == 0) 
-    //  ch->becomesAdmin(cli, ch->clis[i]);
-          // adms.insert(cliTo);
-          // string msg = ":" + from->nick + "!" + from->uName + "@127.0.0.1 MODE " + name + " +o " + cliTo->nick + "\n";
-          // for (set<s_cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
-          //   send(itCli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-          // std::cout << msg;
-    // проверить на привелении адс   if (std::find(adms.begin(), adms.end(), from) == adms.end()) return 1;//ERR_CHANOPRIVSNEEDED;
-    }
-  if(clis.find(cli->fd) == clis.end())
-    return 0;
-  close(clis.find(cli->fd)->first);
-  // if (pollsCLi.find(fd_) == fd_) {
-  //   pollsCLi.erase(pollsCLi. begin() + i);
-  // delete it->second;
-  //clis.erase(clis.find(fd_));
-  return 0;
 }
 
 int main(int argc, char *argv[]) {
