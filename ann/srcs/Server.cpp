@@ -329,12 +329,13 @@ int Server::execKick() {
       send_(cli, *chName + " :You're not on that channe\n");                // ERR_NOTONCHANNEL
     else if(chs[*chName]->optT && chs[*chName]->adms.find(cli) == chs[*chName]->adms.end()) 
       send_(cli, *chName + " :You're not channel operator\n");              // ERR_CHANOPRIVSNEEDED
-    else
+    else {
       for (vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++)
         if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end())
           chs[*chName]->erase(*targetCli);                                  // send_(chs[*chName], " KICK \n"); ?
       // if (chs[*chName]->size() == 0)
       //   chs.erase(*chName);
+    }
   }
   return 0;
 }
@@ -356,7 +357,6 @@ int Server::execQuit() {
           // for (set<s_cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
           //   send(itCli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
           // std::cout << msg;
-    // проверить на привелении адс   if (std::find(adms.begin(), adms.end(), from) == adms.end()) return 1;//ERR_CHANOPRIVSNEEDED;
     }
   if(clis.find(cli->fd) == clis.end())
     return 0;
