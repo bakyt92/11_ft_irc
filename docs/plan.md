@@ -27,8 +27,8 @@
 Обработка различных команд IRC, таких как PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE и PRIVMSG  
 
 ## Разобраться или доделать
-* одна команда может оказаться разбитой на несколько сообщений или нет ???
-  + Кажется у Бориса это не учитывается
+* одна команда может оказаться разбитой на несколько сообщений или нет ?
+  + Кажется у Бориса не может
   + TCP is a streaming protocol, not a message protocol
     - The only guarantee is that you send n bytes, you will receive n bytes in the same order.
     - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
