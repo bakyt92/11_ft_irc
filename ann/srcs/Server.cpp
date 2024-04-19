@@ -329,20 +329,12 @@ int Server::execKick() {
       send_(cli, *chName + " :You're not on that channe\n");                // ERR_NOTONCHANNEL
     else if(chs[*chName]->optT && chs[*chName]->adms.find(cli) == chs[*chName]->adms.end()) 
       send_(cli, *chName + " :You're not channel operator\n");              // ERR_CHANOPRIVSNEEDED
-    else {
-      cout << "удаляем клиентов из канала chName = " << *chName << endl;
-      for (vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++) {
-        cout << "  удаляем                                     : " << *targetCli << " ?" << endl;
-        cout << "  chs[*chName]->clis.size()                   = " << chs[*chName]->clis.size() << endl;
-        cout << "  chs[*chName]->clis.find(getCli(*targetCli)) = " << *(chs[*chName]->clis.find(getCli(*targetCli))) << endl;
-        if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          cout << "  удаляем !                                   : " << *targetCli << endl;
+    else
+      for (vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++)
+        if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end())
           chs[*chName]->erase(*targetCli);                                  // send_(chs[*chName], " KICK \n"); ?
-        }
-      }
       // if (chs[*chName]->size() == 0)
       //   chs.erase(*chName);
-    }
   }
   return 0;
 }
