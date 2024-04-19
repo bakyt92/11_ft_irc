@@ -70,6 +70,7 @@
   + `nick '`
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`)
   + `PASS ` (с пробелом)
+  + `PASS 3`,`PASS 2`
   + `PASS`, `pass` и `paSS` должны одинаково рабоатть?
   + `USER al 0 * Alice`, потом опять`USER al 0 * Alice`
   + `MyChannel` и `myChannel` это один и тот же канал? 
