@@ -17,7 +17,6 @@
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-* Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
 * `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
 * Посмотреть другие проекты
@@ -49,14 +48,11 @@
 *  остановилась на сообщении Ouaip j'ai jamais réussi à recevoir un NJOIN de ngircd
 
 ## Протестировать нашу программу и реальный сервер
-* [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt) (цитата: RFC 1459 is famously sparse. It does not tell you everything you need to know to write a server)
-* [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
-* для команды NICK есть разница в RCF1459 и RCF2812
-* rfc 2810, 2811, 2812, 2813 переопределяют la rfc 1459 и надо брать эти новые (но у нас написано, что надо взять для образца любой сервер и делать всё, как он)
-* **RFC 1459 is outdated, use 2812, 2813 is for multiserver**
-* rfc 2812 concerns clients request, rfc 2813 server request, rfc 1459 is an old version of 2812
+* **[rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)** concerns clients request, rfc 2813 server request, rfc 1459 is an old version of 2812
+* rfc 2810, 2811, **2812**, 2813 переопределяют rfc 1459, надо брать новые (2813 is for multiserver)
 * https://modern.ircdocs.horse/
 * [IRCv3 Specifications](https://ircv3.net/irc/)
+* Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
 * le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 * You have to choose one of the **IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
