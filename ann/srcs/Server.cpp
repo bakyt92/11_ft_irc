@@ -71,6 +71,9 @@ void Server::printMe() { // for debugging only
   cout << endl << endl;
 }
 
+string mode(Ch *ch) {
+  return " topic=" + ch->topic + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream & >((std::ostringstream() << std::dec << (ch->limit) )).str()) + " " + (ch->optI ? "invite-only " : "");
+}
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
 Server::Server(string port_, string pass_) : port(port_), pass(pass_) {}
 
@@ -371,7 +374,7 @@ int Server::execMode() {
   if(args.size() < 2)
     return send_(cli, "MODE :Not enough parameters\n");                               // ERR_NEEDMOREPARAMS
   if(args.size() == 2)
-    return send_(cli, args[1] + " topic=" + chs[args[1]]->topic + " pass=" + chs[args[1]]->pass + " lim=" + (static_cast< std::ostringstream & >((std::ostringstream() << std::dec << (chs[args[1]]->limit) )).str()) + " " + (chs[args[1]]->optI ? "invite-only " : "") /*+ admins ?*/); // RPL_CHANNELMODEIS 
+    return send_(cli, args[1] + mode(chs[args[1]])); // RPL_CHANNELMODEIS 
   if(args.size() == 3 && args[1].compare("+i"))
     return (chs[args[1]]->optI = true);
   if(args.size() == 3 && args[1].compare("-i"))
