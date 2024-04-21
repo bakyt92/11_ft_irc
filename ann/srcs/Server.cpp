@@ -76,7 +76,9 @@ Server::Server(string port_, string pass_) : port(port_), pass(pass_) {}
 
 void Server::init() {
   try {
-    signal(SIGINT,  sigHandler); // SIGQUIT ?
+    signal(SIGINT,  sigHandler);
+    signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal
+    // SIGQUIT ?
   }
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -369,7 +371,7 @@ int Server::execMode() {
   if(args.size() < 2)
     return send_(cli, "MODE :Not enough parameters\n");                               // ERR_NEEDMOREPARAMS
   if(args.size() == 2)
-    return send_(cli, args[1] + " topic=" + chs[args[1]]->topic + " pass=" + chs[args[1]]->pass + " " /*+ chs[args[1]]->limit + " " */+ (chs[args[1]]->optI ? "invite-only " : "") /*+ admins*/); // RPL_CHANNELMODEIS 
+    return send_(cli, args[1] + " topic=" + chs[args[1]]->topic + " pass=" + chs[args[1]]->pass + " lim=" + (static_cast< std::ostringstream & >((std::ostringstream() << std::dec << (chs[args[1]]->limit) )).str()) + " " + (chs[args[1]]->optI ? "invite-only " : "") /*+ admins ?*/); // RPL_CHANNELMODEIS 
   if(args.size() == 3 && args[1].compare("+i"))
     return (chs[args[1]]->optI = true);
   if(args.size() == 3 && args[1].compare("-i"))

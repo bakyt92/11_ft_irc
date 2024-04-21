@@ -11,6 +11,8 @@
 # include <netdb.h>
 # include <set>
 # include <stdlib.h>
+//# include <string>
+# include <sstream>
 # include <sys/poll.h>
 # include <vector>
 # include <unistd.h>
@@ -43,7 +45,7 @@ struct Ch {
   string                   topic; // t
   string                   pass;  // k
   bool                     optI;  // i option
-  size_t                   limit; // l
+  unsigned int             limit; // l
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
   unsigned int             size() { return clis.size(); }
