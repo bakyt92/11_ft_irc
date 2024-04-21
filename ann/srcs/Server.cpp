@@ -31,7 +31,7 @@ Cli* Server::getCli(string &name) {
 }
 
 string mode(Ch *ch) {
-  return "mode : top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream >((std::ostringstream() << std::dec << (ch->limit) )).str());
+  return "mode : top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
 int send_(Cli *cli, string msg) {
@@ -390,19 +390,21 @@ int Server::execMode() {
     return chs[args[1]]->limit = std::numeric_limits<unsigned int>::max();
   if(args.size() == 3 && args[2].compare("-k") == 0)
     return (chs[args[1]]->pass = "", 0);
-  if(args.size() == 3 && (args[2].compare("+k") || args[1].compare("+l") || args[1].compare("+o") || args[1].compare("-o")))
+  if(args.size() == 3 && (args[2].compare("+k") == 0 || args[1].compare("+l") == 0 || args[1].compare("+o") == 0 || args[1].compare("-o") == 0))
     return send_(cli, "MODE :Not enough parameters\n");                               // ERR_NEEDMOREPARAMS
-  if(args.size() == 4 && args[2].compare("+k") == 0 && chs[args[1]]->pass == "") 
-    return send_(cli, args[2] + " :Channel key already set\n");                       // ERR_KEYSET
-  if(args.size() == 4 && args[2].compare("+k") == 0)
+  if(args.size() == 3)
+    return send_(cli, args[0] + " " + args[1] + " " + args[2] + " :is unknown mode char to me\n"); // ERR_UNKNOWNMODE
+  if(args[2].compare("+k") == 0 && chs[args[1]]->pass != "")
+    return send_(cli, args[1] + " :Channel key already set\n");                       // ERR_KEYSET
+  if(args[2].compare("+k") == 0)
     return (chs[args[1]]->pass = args[3], 0);
-  if(args.size() == 4 && args[2].compare("+l") == 0 && atoi(args[1].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(args[1].c_str())) <= std::numeric_limits<unsigned int>::max())
-    return (chs[args[1]]->limit = static_cast<int>(strtol(args[3].c_str(), &notUsed, 10)), 0); // проверить число [0; INT_MAX]
-  if(args.size() == 4 && args[2].compare("+o") == 0)
-    return (chs[args[1]]->adms.insert(getCli(args[3])), 0);
-  if(args.size() == 4 && args[2].compare("-o") == 0)
+  if(args[2].compare("+l") == 0 && atoi(args[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(args[3].c_str())) <= std::numeric_limits<unsigned int>::max())
+    return (chs[args[1]]->limit = static_cast<int>(strtol(args[3].c_str(), &notUsed, 10)), 0);
+  if(args[2].compare("+o") == 0)
+    return (chs[args[1]]->adms.insert(getCli(args[3])), 0); // если такого ника нет?
+  if(args[2].compare("-o") == 0)
     return chs[args[1]]->adms.erase(getCli(args[3]));
-  return chs[args[1]]->adms.erase(getCli(args[3]));                                   // ERR_UNKNOWNMODE
+  return send_(cli, args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " :is unknown mode char to me\n"); // ERR_UNKNOWNMODE
 }
 
 int Server::execPing() {
