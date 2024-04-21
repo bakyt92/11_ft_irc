@@ -398,8 +398,8 @@ int Server::execMode() {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {   //if (atoi(argv[1].c_str()) < 1024 || atoi(argv[1].c_str()) > 49151) 
-    std::cout << "Invalid arguments. Run ./ircserv <port> <password> (port number (should be between 1024 and 49151)\n";
+  if (argc != 3 || atoi(argv[1]) < 1024 || atoi(argv[1]) > 49151) {  
+    std::cout << "Invalid arguments.\nRun ./ircserv <port> <password>, port should be between 1024 and 49151\n";
     return 0;
   }
   Server s = Server(argv[1], argv[2]);

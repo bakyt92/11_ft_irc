@@ -22,7 +22,7 @@ re:			fclean all
 			echo $@ compilled
 
 run:		all
-			./ircserv 4444 2
+			./ircserv 6667 2
 
 .PHONY:		all clean fclean re so bonus norm
 

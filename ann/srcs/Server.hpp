@@ -10,6 +10,7 @@
 # include <map>
 # include <netdb.h>
 # include <set>
+# include <stdlib.h>
 # include <sys/poll.h>
 # include <vector>
 # include <unistd.h>
