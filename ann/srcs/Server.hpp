@@ -42,9 +42,10 @@ struct Ch {
     clis.insert(adm);
     adms.insert(adm);
   };
-  string                   topic; // t
-  string                   pass;  // k
-  bool                     optI;  // i option
+  string                   topic;
+  string                   pass;  // k option
+  bool                     optI;  // i 
+  bool                     optT;  // t 
   unsigned int             limit; // l
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
