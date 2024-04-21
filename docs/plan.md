@@ -23,6 +23,16 @@
   + кто-то предлагает использовать openssl, чтобы не зранить пароль в октрытом виде
   + для команды NICK есть разница в RCF1459 и RCF2812
   + rfc 2810, 2811, 2812, 2813 переопределяют la rfc 1459 и надо брать эти новые (но у нас написано, что надо взять для образца любой сервер и делать всё, как он)
+  + в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
+  + pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
+  +  l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
+  +  Pour tester: utiliser nc et de ne pas passer par un client parce qu'ils ont tendance a silence les msg du server
+  +  le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
+  +  votre serveur il fonctionne avec irssi wechat hexchat etc... ?
+  +  un client c juste un interpreteur assez permissif, et tous les checks sont faits au niveau du server
+  +  le serveur a la list de tout les User, et les channels ont des User* qui pointent sur les memes User que dans la liste
+  +  une peerclass irc ptdr (не поняла совсем)
+
 
 * Посмотреть другие проекты
 * сверить наш код с `bircd` (который нам дали как пример с сабжектом) - у меня не получается, этот код слишком отличается от нашего 
