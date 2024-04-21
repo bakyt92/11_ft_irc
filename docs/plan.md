@@ -155,7 +155,8 @@
 * https://www.youtube.com/watch?v=I9o-oTdsMgI&list=PLUJCSGGiox1Q-QvHfMMydtoyEa1IEzeLe&index=1   
 * https://github.com/shuygena/intra42_ru_guides?tab=readme-ov-file#irc (много информации по проектам)  
 * https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
-* https://github.com/marineks/Ft_irc  
+* https://github.com/marineks/Ft_irc
+* https://github.com/miravassor/irc
 * [Сетевое программирование от Биджа. Использование	Интернет Сокетов. (кратко)](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 * https://www.irchelp.org/
 
