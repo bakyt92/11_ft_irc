@@ -59,6 +59,7 @@
 * [IRCv3 Specifications](https://ircv3.net/irc/)
 * le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
+* Как устанавливать топик, командой `TOPIC` или `MODE +t #myChannel myTopic`?
 * You have to choose one of the **IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
   + Your reference client must be able to connect to your server without encountering any error
   + As for the client the one that we choose almost every time is irrsi. A CLI irc client. We also went for revolutionIRC, hexchat and kiwirc for testing purposes.
