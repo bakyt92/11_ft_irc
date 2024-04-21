@@ -55,6 +55,9 @@
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 * You have to choose one of the **IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
   + **отсюда https://github.com/kvirc/KVIrc скачать kvirc и через cmake компилировать**
+    - `# mkdir build && cd build`
+    - `# cmake ..`
+    - `# make install`
   + Your reference client must be able to connect to your server without encountering any error
   + As for the client the one that we choose almost every time is irrsi. A CLI irc client. We also went for revolutionIRC, hexchat and kiwirc for testing purposes.
   + Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
