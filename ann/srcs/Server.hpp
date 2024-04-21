@@ -42,7 +42,7 @@ struct Ch {
   string                   topic; // t
   string                   pass;  // k
   bool                     optI;  // i option
-  int                      limit; // l
+  size_t                   limit; // l
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
   unsigned int             size() { return clis.size(); }
