@@ -19,31 +19,42 @@
 * Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
 * `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
-* Читаю группу дискорд:
-  + кто-то предлагает использовать openssl, чтобы не зранить пароль в октрытом виде
-  + для команды NICK есть разница в RCF1459 и RCF2812
-  + rfc 2810, 2811, 2812, 2813 переопределяют la rfc 1459 и надо брать эти новые (но у нас написано, что надо взять для образца любой сервер и делать всё, как он)
-  + в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
-  + pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
-  +  l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
-  +  Pour tester: utiliser nc et de ne pas passer par un client parce qu'ils ont tendance a silence les msg du server
-  +  le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
-  +  votre serveur il fonctionne avec irssi wechat hexchat etc... ?
-  +  un client c juste un interpreteur assez permissif, et tous les checks sont faits au niveau du server
-  +  le serveur a la list de tout les User, et les channels ont des User* qui pointent sur les memes User que dans la liste
-  +  une peerclass irc ptdr (не поняла совсем)
-
-
 * Посмотреть другие проекты
-* сверить наш код с `bircd` (который нам дали как пример с сабжектом) - у меня не получается, этот код слишком отличается от нашего 
 * `valgrind` (в конце)
                                
+## Читаю группу дискорд:
+* кто-то предлагает использовать openssl, чтобы не зранить пароль в октрытом виде
+* в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
+* l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
+* votre serveur il fonctionne avec irssi wechat hexchat etc... ?
+* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
+* une peerclass irc ptdr (не поняла совсем)
+* If a client send a CAP command, ignore it, don’t throw an error
+* To test ipv6 you can use irssi and add -6 during the /connect
+* IRC default port is **6667**, use it, it’s annoying to specify it while testing in a defense (when using irssi for example, specifying 6667 every time at the end is boring)
+* Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
+* **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
+* ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
+*  Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
+*  you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
+*  that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
+*  
+
+
 ## Протестировать нашу программу и реальный сервер
 * [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt) (цитата: RFC 1459 is famously sparse. It does not tell you everything you need to know to write a server)
 * [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
+* для команды NICK есть разница в RCF1459 и RCF2812
+* rfc 2810, 2811, 2812, 2813 переопределяют la rfc 1459 и надо брать эти новые (но у нас написано, что надо взять для образца любой сервер и делать всё, как он)
+* **RFC 1459 is outdated, use 2812, 2813 is for multiserver**
+* rfc 2812 concerns clients request, rfc 2813 server request, rfc 1459 is an old version of 2812
+* le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
-* You have to **choose one of the IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
-  + Your reference client must be able to connect to your server without encountering any error.
+* You have to choose one of the **IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
+  + Your reference client must be able to connect to your server without encountering any error
+  + As for the client the one that we choose almost every time is irrsi. A CLI irc client. We also went for revolutionIRC, hexchat and kiwirc for testing purposes.
+  + Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
+  +  server is 90% of the time built according to oragono irc server https://oragono.io/
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Как выглядит параметр `mode`, когда сервер его показывает ?
   + https://stackoverflow.com/questions/12886573/implementing-irc-rfc-how-to-respond-to-mode
@@ -70,6 +81,7 @@
 * The server should not block. It should be able to answer all demands. Do some test with the IRC client and nc at the same time. (checklist)
 * Just like in the subject, try to send partial commands (checklist)
   + With a partial command sent, ensure that other connections still run fine
+* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * Unexpectedly kill a client. Then check that the server is still operational for the other connections and for any new incoming client. (checklist)
 * Unexpectedly kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. The server should not hang. When the client is live again, all stored commands should be processed normally. Also, check for memory leaks during this operation. (checklist)
@@ -87,6 +99,7 @@
 * low bandwidth (subject)
 * https://github.com/opsec-infosec/ft_irc-tester
 * https://github.com/markveligod/ft_irc
+* when a user joins a server you have to greed him with a welcome message
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
