@@ -25,7 +25,7 @@
 * `valgrind` (в конце)
                                
 ## Читаю группу дискорд:
-* кто-то предлагает использовать openssl, чтобы не зранить пароль в октрытом виде
+* кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
 * в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
 * l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
 * votre serveur il fonctionne avec irssi wechat hexchat etc... ?
