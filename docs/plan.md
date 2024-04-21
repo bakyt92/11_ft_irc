@@ -53,6 +53,8 @@
 * rfc 2810, 2811, 2812, 2813 переопределяют la rfc 1459 и надо брать эти новые (но у нас написано, что надо взять для образца любой сервер и делать всё, как он)
 * **RFC 1459 is outdated, use 2812, 2813 is for multiserver**
 * rfc 2812 concerns clients request, rfc 2813 server request, rfc 1459 is an old version of 2812
+* https://modern.ircdocs.horse/
+* [IRCv3 Specifications](https://ircv3.net/irc/)
 * le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 * You have to choose one of the **IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
@@ -150,5 +152,5 @@
 * https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
 * https://github.com/marineks/Ft_irc  
 * [Сетевое программирование от Биджа. Использование	Интернет Сокетов. (кратко)](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
-* [Аня разбирает код тут](https://github.com/akostrik/IRC-fork/blob/master/README.md)  
+* https://www.irchelp.org/
 
