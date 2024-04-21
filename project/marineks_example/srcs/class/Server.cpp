@@ -1,5 +1,5 @@
-#include "Server.hpp"
-#include "Commands.hpp"
+#include "../../includes/Server.hpp"
+#include "../../includes/Commands.hpp"
 
 // Server::Server()
 Server::Server(std::string port, std::string password, struct tm *timeinfo)
@@ -7,7 +7,7 @@ Server::Server(std::string port, std::string password, struct tm *timeinfo)
 {
 	std::cout << YELLOW << "Server running..." << RESET << std::endl;
 	std::cout << YELLOW << "Server listening" << RESET << std::endl;
-	memset(&_hints, 0, sizeof(_hints));
+	memset(&_hints, 0, sizeof(_hints)); // заполняем пустотой
 	this->setDatetime(timeinfo);
 }
 

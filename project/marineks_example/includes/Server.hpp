@@ -21,6 +21,8 @@ class Server
 {
 	private:
 		struct addrinfo					_hints;
+		// Наконец, параметр hints указывает на struct addrinfo, 
+		// которую вы уже заполнили нужной информацией.
 		struct addrinfo					*_servinfo;
 		int								_server_socket_fd;
 		std::map<const int, Client>		_clients;
