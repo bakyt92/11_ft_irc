@@ -58,6 +58,7 @@
     - `# mkdir build && cd build`
     - `# cmake ..`
     - `# make install`
+  + **irssi, он есть на школьных компах, но под него пришлось кое-где специально подстраиваться**
   + Your reference client must be able to connect to your server without encountering any error
   + As for the client the one that we choose almost every time is irrsi. A CLI irc client. We also went for revolutionIRC, hexchat and kiwirc for testing purposes.
   + Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
