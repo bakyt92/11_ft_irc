@@ -35,15 +35,14 @@ struct Cli {
 };
 
 struct Ch {
-  Ch(Cli* adm) : topic(""), optI(false), optT(false), pass(""), limit(3) { // limit(numeric_limits<unsigned int>::max()
+  Ch(Cli* adm) : topic(""), pass(""), optI(false), limit(std::numeric_limits<unsigned int>::max()) {
     clis.insert(adm);
     adms.insert(adm);
   };
-  string                   topic;
-  bool                     optI;  // i option
-  bool                     optT;  // t
+  string                   topic; // t
   string                   pass;  // k
-  unsigned int             limit; // l
+  bool                     optI;  // i option
+  int                      limit; // l
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
   unsigned int             size() { return clis.size(); }
@@ -59,6 +58,7 @@ struct Ch {
                                  break;
                                }
                            }  
+  void                     erase(Cli *cli) { erase(cli->nick); } 
 };
 
 class Server {
