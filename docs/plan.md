@@ -1,4 +1,4 @@
-## Разобраться или доделать
+а## Разобраться или доделать
 * одна команда может оказаться разбитой на несколько сообщений или нет ?
   + Кажется у Бориса не может
   + TCP is a streaming protocol, not a message protocol
@@ -7,7 +7,7 @@
     - You could send 100 1 byte chunks and receive 4 25 byte messages.
     - **You must deal with message boundaries yourself**. (у нас messages boundaries это `\n`, правильно?)
   + Из RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя обычно оно бывает с разными командам. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
-  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`) - что это значит?
+  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it. Что это значит?
 * должна ли PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
