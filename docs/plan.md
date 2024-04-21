@@ -9,7 +9,7 @@
   + Из RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя обычно оно бывает с разными командам. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
-* должна ли PRIVMSG понимать маски и особые формы записи?
+* должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
   + в дискорде пишут надо только `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
@@ -20,8 +20,8 @@
 * `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
 * Посмотреть другие проекты
-* **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (какие именно команды необходимы?)
-* `valgrind` (в конце)
+* **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
+* `valgrind`, закрытие сокетов
                                
 ## Читаю группу дискорд:
 * кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
@@ -42,7 +42,6 @@
 *  you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
 *  that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
 *  on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
-*  irc est un projet sans fin
 *  Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 *  tout les messages doivent finir par **\r\n**
 *  остановилась на сообщении Ouaip j'ai jamais réussi à recevoir un NJOIN de ngircd
