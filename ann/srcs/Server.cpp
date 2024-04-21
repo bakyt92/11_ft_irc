@@ -31,7 +31,7 @@ Cli* Server::getCli(string &name) {
 }
 
 string mode(Ch *ch) {
-  return "mode : top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream & >((std::ostringstream() << std::dec << (ch->limit) )).str());
+  return "mode : top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream >((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
 int send_(Cli *cli, string msg) {
