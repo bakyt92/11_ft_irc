@@ -80,6 +80,7 @@
   + [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) - Friendly IRC client built in Vala and GTK, designed for elementary OS. ([source](https://github.com/avojak/iridium)) `Linux`
   + [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) - Simple, fast and easy access to multiple IRC networks. `Android`
   + ngircd
+* если есть лишние аргументы, сервер всегда их просто игнорирует?
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * IRC channels.
   + [netsplit.de Search](https://netsplit.de/channels/ ) - Searches 563 different networks.
