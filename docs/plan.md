@@ -32,7 +32,7 @@
 * [rfc1459](https://github.com/bakyt92/11_ft_irc/blob/master/docs/rfc1459.txt) (цитата: RFC 1459 is famously sparse. It does not tell you everything you need to know to write a server)
 * [rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
-* You have to **choose one of the IRC slients as a reference**. Your reference client will be used during the evaluation process. (subject)
+* You have to **choose one of the IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
   + Your reference client must be able to connect to your server without encountering any error.
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Как выглядит параметр `mode`, когда сервер его показывает ?
