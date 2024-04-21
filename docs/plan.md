@@ -33,12 +33,17 @@
 * To test ipv6 you can use irssi and add -6 during the /connect
 * IRC default port is **6667**, use it, it’s annoying to specify it while testing in a defense (when using irssi for example, specifying 6667 every time at the end is boring)
 * Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
+  + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
+  + pour ca que faut normalement utiliser select pour lire
 * **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
 * ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
 *  Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
 *  you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
 *  that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
-*  
+*  on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
+*  irc est un projet sans fin
+*  Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
+*  tout les messages doivent finir par **\r\n**
 
 
 ## Протестировать нашу программу и реальный сервер
@@ -54,7 +59,28 @@
   + Your reference client must be able to connect to your server without encountering any error
   + As for the client the one that we choose almost every time is irrsi. A CLI irc client. We also went for revolutionIRC, hexchat and kiwirc for testing purposes.
   + Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
-  +  server is 90% of the time built according to oragono irc server https://oragono.io/
+  + server is 90% of the time built according to oragono irc server https://oragono.io/
+  + sur mac tu peux faire un brew install ircd
+  + [Textual](https://www.codeux.com/textual/) - Very customizable, ZNC integration, iCloud sync ($4.99). ([source](https://github.com/Codeux-Software/Textual)) `macOS`
+  + [LimeChat](http://limechat.net/mac/) - One window for multiple servers, keyboard shortcuts, fast & stable. ([source](https://github.com/psychs/limechat)) `macOS` `iOS`
+  + [HexChat](https://hexchat.github.io) - Based on XChat, easy to use, spell check & multiple languages. ([source](https://github.com/hexchat/hexchat)) `Windows` `macOS` `Linux`
+  + [gamja](https://sr.ht/~emersion/gamja/) - A simple IRC web client. ([source](https://git.sr.ht/~emersion/gamja)) `Web`
+  + [Kiwi IRC](https://kiwiirc.com) - Powerful modern IRC messenger for the web. ([source](https://github.com/kiwiirc/kiwiirc), [demo](https://kiwiirc.com/nextclient/)) `Web`
+  + [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. ([source](https://github.com/flackr/circ)) `Chrome`
+  + [Quassel](https://quassel-irc.org) - Distributed (clients can attach to and detach from a central core that stays permanently online. ([source](https://github.com/quassel/quassel)) `Linux` `macOS` `Windows`
+  + [Yaaic](https://www.yaaic.org) - Multi-server/channel support, SASL support, Smooth channel scrolling / swiping. ([source](https://github.com/pocmo/Yaaic)) `Android`
+  + [relay.js](https://github.com/Fauntleroy/relay.js) - Focuses on making IRC less intimidating and easier to use. `Web`
+  + [Circe](https://github.com/emacs-circe/circe) - For use in Emacs, sane defaults. `Emacs`
+  + [Smuxi](https://smuxi.im) - User-friendly, based on GNOME / GTK+. ([source](https://github.com/meebey/smuxi)) `Linux` `Windows` `macOS`
+  + [KvIRC](http://www.kvirc.net) - Free, portable, based on Qt GUI toolkit. ([source](https://github.com/kvirc/KVIrc)) `Linux` `macOS` `Windows`
+  + [Konversation](https://konversation.kde.org) - User-friendly client built on the KDE Platform. ([source](https://github.com/KDE/konversation)) `Linux`
+  + [sic](https://tools.suckless.org/sic/) - **S**imple **I**RC **c**lient - a terminal client in less than 250 lines of C. `Linux`
+  + [irssi](https://irssi.org) - Terminal client, multi-protocol friendly for module authors, GPLv2. `Linux` `macOS` `Cygwin` `BSD`
+  + [Revolution IRC](https://github.com/MCMrARM/revolution-irc) - Feature-full, actively maintained Android IRC client. `Android`
+  + [AdiIRC](https://adiirc.com) - Never has a client offered such granular settings for every aspect of the IRC experience. ([features](https://dev.adiirc.com/projects/adiirc/wiki/Features), [screenshots](https://dev.adiirc.com/projects/adiirc/wiki/Screenshots)) `Windows` `WINE`
+  + [IRC for Android™](https://www.countercultured.net/android/) - Android/Chrome OS client for power users, with ZNC built-ins, notification logic, reliable DCC, keybinds for hardware keyboards, etc. `Android` `ChromeOS`
+  + [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) - Friendly IRC client built in Vala and GTK, designed for elementary OS. ([source](https://github.com/avojak/iridium)) `Linux`
+  + [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) - Simple, fast and easy access to multiple IRC networks. `Android`
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Как выглядит параметр `mode`, когда сервер его показывает ?
   + https://stackoverflow.com/questions/12886573/implementing-irc-rfc-how-to-respond-to-mode
