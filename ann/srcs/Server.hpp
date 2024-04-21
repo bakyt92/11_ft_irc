@@ -95,5 +95,6 @@ public:
   int                      execPrivmsg();
   int                      execTopic();
   int                      execMode();
+  int                      execPing();
 };
 #endif

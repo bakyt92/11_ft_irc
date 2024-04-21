@@ -186,6 +186,8 @@ int Server::exec() {
     return execPrivmsg();
   if (args[0] == "MODE")  
     return execMode();
+  if (args[0] == "PING") 
+    return execPing();
   return send_(cli, args[0] + " " + "<command> :Unknown command\n");        // ERR_UNKNOWNCOMMAND
 }
 
@@ -401,6 +403,10 @@ int Server::execMode() {
   if(args.size() == 4 && args[2].compare("-o") == 0)
     return chs[args[1]]->adms.erase(getCli(args[3]));
   return chs[args[1]]->adms.erase(getCli(args[3]));                                   // ERR_UNKNOWNMODE
+}
+
+int Server::execPing() {
+  return send_(cli, "PONG\n");
 }
 
 int main(int argc, char *argv[]) {
