@@ -1,4 +1,4 @@
-а## Разобраться или доделать
+## Разобраться или доделать
 * одна команда может оказаться разбитой на несколько сообщений или нет ?
   + Кажется у Бориса не может
   + TCP is a streaming protocol, not a message protocol
@@ -83,6 +83,7 @@
   + [IRC for Android™](https://www.countercultured.net/android/) - Android/Chrome OS client for power users, with ZNC built-ins, notification logic, reliable DCC, keybinds for hardware keyboards, etc. `Android` `ChromeOS`
   + [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) - Friendly IRC client built in Vala and GTK, designed for elementary OS. ([source](https://github.com/avojak/iridium)) `Linux`
   + [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) - Simple, fast and easy access to multiple IRC networks. `Android`
+  + ngircd
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * IRC channels.
   + [netsplit.de Search](https://netsplit.de/channels/ ) - Searches 563 different networks.
