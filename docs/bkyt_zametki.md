@@ -291,3 +291,5 @@ select() даёт вам возможность следить за нескол
 ```
        The caller should specify the number of items in the fds array in
        nfds.
+
+### Проверка кода - сверка
