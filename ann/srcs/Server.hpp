@@ -74,7 +74,7 @@ private:
   vector<struct pollfd>    polls;
   map<int, Cli*>           clis;
   map<string, Ch*>         chs;
-  vector<string>           args;  // the command being treated at the moment, args[0] = command
+  vector<string>           ar;  // the command being treated at the moment, args[0] = command
   Cli                      *cli;  // the client  being treated at the moment
 public:
                            Server(string port, string pass);
@@ -96,5 +96,6 @@ public:
   int                      execTopic();
   int                      execMode();
   int                      execPing();
+  int                      execWhois();
 };
 #endif
