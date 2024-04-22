@@ -103,6 +103,7 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
     - это нельзя использовать для игнорирования файлового дескриптора 0
 * return le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
 * return NULL: un dépassement du délai d'attente et qu'aucun descripteur de fichier n'était prêt
+* POSIX: if the value of fd is less than 0, events shall be ignored, and revents shall be set to 0 in that entry on return from poll()
 * return -1: s'ils échouent, errno contient le code d'erreur  
 ```
 struct pollfd {
