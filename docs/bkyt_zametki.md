@@ -289,7 +289,8 @@ select() даёт вам возможность следить за нескол
                short revents;    /* returned events */
            };
 ```
-       The caller should specify the number of items in the fds array in
+The caller should specify the number of items in the fds array in
        nfds.
 
 ### Проверка кода - сверка
+
