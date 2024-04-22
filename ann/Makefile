@@ -1,5 +1,5 @@
 NAME		=	ircserv
-CPP			=	clang++ $(CFLAGS)
+CPP			=	c++ $(CFLAGS)
 CFLAGS		=	-Wall -Wextra -Werror -g3 -std=c++98 # -Iinclude -fsanitize=address
 SRCS		=	srcs/Server.cpp
 OBJS		=	$(SRCS:.cpp=.o)
