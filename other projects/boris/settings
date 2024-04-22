@@ -1,0 +1,7 @@
+[Common]
+checkDelay=60
+serverName=ircServer
+
+[Operators]
+Operator1=Obama:Chmo
+Operator2=MaBoDe:admin

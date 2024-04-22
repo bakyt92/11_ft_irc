@@ -1,0 +1,6 @@
+*.o
+servirc
+ircserv
+.vscode/
+.idea
+
