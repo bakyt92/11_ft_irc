@@ -139,6 +139,7 @@
 * https://github.com/opsec-infosec/ft_irc-tester
 * https://github.com/markveligod/ft_irc
 * when a user joins a server you have to greed him with a welcome message
+* ставить @ перед ником админа?
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
