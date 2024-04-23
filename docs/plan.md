@@ -22,79 +22,62 @@
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
 * утилита wireshark 
 * `valgrind`, закрытие сокетов
-                               
-## Читаю группу дискорд:
-* кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
-* в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
-* l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
-* votre serveur il fonctionne avec irssi wechat hexchat etc... ?
-* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
-* une peerclass irc ptdr (не поняла совсем)
-* If a client send a CAP command, ignore it, don’t throw an error
-* To test ipv6 you can use irssi and add -6 during the /connect
-* IRC default port is **6667**, use it, it’s annoying to specify it while testing in a defense (when using irssi for example, specifying 6667 every time at the end is boring)
-* Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
-  + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
-  + pour ca que faut normalement utiliser select pour lire
-* **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
-* ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
-*  Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
-*  you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
-*  that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
-*  on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
-*  Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
-*  tout les messages doivent finir par **\r\n**
-*  остановилась на сообщении Ouaip j'ai jamais réussi à recevoir un NJOIN de ngircd
 
-## Протестировать нашу программу и реальный сервер
-* **[rfc2812](https://datatracker.ietf.org/doc/html/rfc2812)** concerns clients request, rfc 2813 server request, rfc 1459 is an old version of 2812
-* rfc 2810, 2811, **2812**, 2813 переопределяют rfc 1459, надо брать новые (2813 is for multiserver)
+## Выбрать клиент
+* **kvirc**
+  + скачать https://github.com/kvirc/KVIrc
+  + `# mkdir build && cd build`
+  + `# cmake ..`
+  + `# make install`
+* **irssi**
+  + есть на школьных компах
+  + под него пришлось кое-где специально подстраиваться
+  + аня на личном компе:
+    - скачала irssi https://doc.ubuntu-fr.org/irssi
+    - запустила наш сервер на порту 6667
+    - ввела в терминале `irssi`, он запустился
+    - в самом irssi ввела команду `/connect 0`, он посылает какие-то запросы нашему серверу, но сервер получает запросы, но видимо неправильно отвечает
+* ngircd
+  + кто-то в дискорде тестировал с ним
+* sur mac tu peux faire un brew install ircd
+* [HexChat](https://hexchat.github.io) - Based on XChat, easy to use, spell check & multiple languages. ([source](https://github.com/hexchat/hexchat)) `Windows` `macOS` `Linux`
+* [gamja](https://sr.ht/~emersion/gamja/) - A simple IRC web client. ([source](https://git.sr.ht/~emersion/gamja)) `Web`
+* [Kiwi IRC](https://kiwiirc.com) - Powerful modern IRC messenger for the web. ([source](https://github.com/kiwiirc/kiwiirc), [demo](https://kiwiirc.com/nextclient/)) `Web`
+* [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. ([source](https://github.com/flackr/circ)) `Chrome`
+* [Quassel](https://quassel-irc.org) - Distributed (clients can attach to and detach from a central core that stays permanently online. ([source](https://github.com/quassel/quassel)) `Linux` `macOS` `Windows`
+* [Yaaic](https://www.yaaic.org) - Multi-server/channel support, SASL support, Smooth channel scrolling / swiping. ([source](https://github.com/pocmo/Yaaic)) `Android`
+* [relay.js](https://github.com/Fauntleroy/relay.js) - Focuses on making IRC less intimidating and easier to use. `Web`
+* [Circe](https://github.com/emacs-circe/circe) - For use in Emacs, sane defaults. `Emacs`
+* [Smuxi](https://smuxi.im) - User-friendly, based on GNOME / GTK+. ([source](https://github.com/meebey/smuxi)) `Linux` `Windows` `macOS`
+* [Konversation](https://konversation.kde.org) - User-friendly client built on the KDE Platform. ([source](https://github.com/KDE/konversation)) `Linux`
+* [sic](https://tools.suckless.org/sic/) - **S**imple **I**RC **c**lient - a terminal client in less than 250 lines of C. `Linux`
+* [Revolution IRC](https://github.com/MCMrARM/revolution-irc) - Feature-full, actively maintained Android IRC client. `Android`
+* [AdiIRC](https://adiirc.com) - Never has a client offered such granular settings for every aspect of the IRC experience. ([features](https://dev.adiirc.com/projects/adiirc/wiki/Features), [screenshots](https://dev.adiirc.com/projects/adiirc/wiki/Screenshots)) `Windows` `WINE`
+* [IRC for Android](https://www.countercultured.net/android/) - Android/Chrome OS client for power users, with ZNC built-ins, notification logic, reliable DCC, keybinds for hardware keyboards, etc. `Android` `ChromeOS`
+* [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) - Friendly IRC client built in Vala and GTK, designed for elementary OS. ([source](https://github.com/avojak/iridium)) `Linux`
+* [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) - Simple, fast and easy access to multiple IRC networks. `Android`
+
+## Выбрать сервер для тестов
+* Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
+* server is 90% of the time built according to oragono irc server https://oragono.io/
+
+## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
+* **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
+* rfc 2813 messages server -> server, нам не нужно
+* rfc 1459 устарел
 * https://modern.ircdocs.horse/
 * [IRCv3 Specifications](https://ircv3.net/irc/)
+* Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
-* le join du rfc 2812 et pour les msg client to server et celui du 2813 est pour les msg server to server. pareil pour user, nick et mode
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
-* You have to choose one of the **IRC clients as a reference**. Your reference client will be used during the evaluation process. (subject)
-  + **отсюда https://github.com/kvirc/KVIrc скачать kvirc и через cmake компилировать**
-    - `# mkdir build && cd build`
-    - `# cmake ..`
-    - `# make install`
-  + **irssi, он есть на школьных компах, но под него пришлось кое-где специально подстраиваться**
-  + ngircd (кто-то в дискорде тестировал с нима)
-  + Your reference client must be able to connect to your server without encountering any error
-  + As for the client the one that we choose almost every time is irrsi. A CLI irc client. We also went for revolutionIRC, hexchat and kiwirc for testing purposes.
-  + Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
-  + server is 90% of the time built according to oragono irc server https://oragono.io/
-  + sur mac tu peux faire un brew install ircd
-  + [Textual](https://www.codeux.com/textual/) - Very customizable, ZNC integration, iCloud sync ($4.99). ([source](https://github.com/Codeux-Software/Textual)) `macOS`
-  + [LimeChat](http://limechat.net/mac/) - One window for multiple servers, keyboard shortcuts, fast & stable. ([source](https://github.com/psychs/limechat)) `macOS` `iOS`
-  + [HexChat](https://hexchat.github.io) - Based on XChat, easy to use, spell check & multiple languages. ([source](https://github.com/hexchat/hexchat)) `Windows` `macOS` `Linux`
-  + [gamja](https://sr.ht/~emersion/gamja/) - A simple IRC web client. ([source](https://git.sr.ht/~emersion/gamja)) `Web`
-  + [Kiwi IRC](https://kiwiirc.com) - Powerful modern IRC messenger for the web. ([source](https://github.com/kiwiirc/kiwiirc), [demo](https://kiwiirc.com/nextclient/)) `Web`
-  + [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. ([source](https://github.com/flackr/circ)) `Chrome`
-  + [Quassel](https://quassel-irc.org) - Distributed (clients can attach to and detach from a central core that stays permanently online. ([source](https://github.com/quassel/quassel)) `Linux` `macOS` `Windows`
-  + [Yaaic](https://www.yaaic.org) - Multi-server/channel support, SASL support, Smooth channel scrolling / swiping. ([source](https://github.com/pocmo/Yaaic)) `Android`
-  + [relay.js](https://github.com/Fauntleroy/relay.js) - Focuses on making IRC less intimidating and easier to use. `Web`
-  + [Circe](https://github.com/emacs-circe/circe) - For use in Emacs, sane defaults. `Emacs`
-  + [Smuxi](https://smuxi.im) - User-friendly, based on GNOME / GTK+. ([source](https://github.com/meebey/smuxi)) `Linux` `Windows` `macOS`
-  + [KvIRC](http://www.kvirc.net) - Free, portable, based on Qt GUI toolkit. ([source](https://github.com/kvirc/KVIrc)) `Linux` `macOS` `Windows`
-  + [Konversation](https://konversation.kde.org) - User-friendly client built on the KDE Platform. ([source](https://github.com/KDE/konversation)) `Linux`
-  + [sic](https://tools.suckless.org/sic/) - **S**imple **I**RC **c**lient - a terminal client in less than 250 lines of C. `Linux`
-  + [irssi](https://irssi.org) - Terminal client, multi-protocol friendly for module authors, GPLv2. `Linux` `macOS` `Cygwin` `BSD`
-  + [Revolution IRC](https://github.com/MCMrARM/revolution-irc) - Feature-full, actively maintained Android IRC client. `Android`
-  + [AdiIRC](https://adiirc.com) - Never has a client offered such granular settings for every aspect of the IRC experience. ([features](https://dev.adiirc.com/projects/adiirc/wiki/Features), [screenshots](https://dev.adiirc.com/projects/adiirc/wiki/Screenshots)) `Windows` `WINE`
-  + [IRC for Android™](https://www.countercultured.net/android/) - Android/Chrome OS client for power users, with ZNC built-ins, notification logic, reliable DCC, keybinds for hardware keyboards, etc. `Android` `ChromeOS`
-  + [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) - Friendly IRC client built in Vala and GTK, designed for elementary OS. ([source](https://github.com/avojak/iridium)) `Linux`
-  + [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) - Simple, fast and easy access to multiple IRC networks. `Android`
-  + ngircd
-*  Un channel "exclusif" à deux users cmd PRIVMSG + nickname (для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?)
+*  Un channel "exclusif" à deux users cmd PRIVMSG + nickname
+  + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
 * если есть лишние аргументы, сервер всегда их просто игнорирует?
 * есть ли какие-то ограничения на пароль?
-* Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * IRC channels.
   + [netsplit.de Search](https://netsplit.de/channels/ ) - Searches 563 different networks.
   + [mibbit Search](https://search.mibbit.com) - Searches networks listed [here](https://search.mibbit.com/networks).
-  +  [KiwiIRC Search](https://kiwiirc.com/search) - Searches 318 different networks.
+  + [KiwiIRC Search](https://kiwiirc.com/search) - Searches 318 different networks.
   + [#ubuntu](https://wiki.ubuntu.com/IRC/ChannelList)@Libera.Chat - Official Ubuntu support channel. ([rules](https://wiki.ubuntu.com/IRC/Guidelines))
 * Как выглядит параметр `mode`, когда сервер его показывает ?
   + https://stackoverflow.com/questions/12886573/implementing-irc-rfc-how-to-respond-to-mode
@@ -104,7 +87,7 @@
 * неправильнй пароль (по RCF 1459 и RCF 2812 не понятно!) 
 * что отвечает сервер на `MODE #myChannel +l 999999999999999`
 * очень длинное собщение
-* команды QUIT, PASS, NICK, USER выаолняет, даже если клиент не залогинен, а дргуие команды не выполняет в этой ситуации
+* команды QUIT, PASS, NICK, USER выполняет, даже если клиент не залогинен, а дргуие команды не выполняет в этой ситуации
 * Ограничения на имя канала такие же, как на имя пользователя?
 * пустая строка
 * Надо ли удалять двоеточие из текста сообщения `:Alice PRIVMSG Bob :Hello`
@@ -142,6 +125,29 @@
 * https://github.com/markveligod/ft_irc
 * when a user joins a server you have to greed him with a welcome message
 * ставить @ перед ником админа?
+
+## Читаю группу дискорд:
+* кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
+* в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
+* l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
+* votre serveur il fonctionne avec irssi wechat hexchat etc... ?
+* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
+* une peerclass irc ptdr (не поняла совсем)
+* If a client send a CAP command, ignore it, don’t throw an error
+* To test ipv6 you can use irssi and add -6 during the /connect
+* IRC default port is **6667**, use it, it’s annoying to specify it while testing in a defense (when using irssi for example, specifying 6667 every time at the end is boring)
+* Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
+  + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
+  + pour ca que faut normalement utiliser select pour lire
+* **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
+* ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
+*  Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
+*  you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
+*  that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
+*  on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
+*  Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
+*  tout les messages doivent finir par **\r\n**
+*  остановилась на сообщении Ouaip j'ai jamais réussi à recevoir un NJOIN de ngircd
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
