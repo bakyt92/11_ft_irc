@@ -48,16 +48,17 @@
 * [Kiwi IRC](https://kiwiirc.com) `Web`
   + аккаунт 1AQ2ZS3ED
   + пробую через web, ввожу IP своего компа, через 1-2 минута наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
-* [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. `Chrome`
+* [sic](https://tools.suckless.org/sic/) a terminal client
+  + usage: sic [-h host] [-p port] [-n nick] [-k keyword] [-v]
+* [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy `Chrome`
 * [Quassel](https://quassel-irc.org) 
 * [Yaaic](https://www.yaaic.org) `Android`
 * [relay.js](https://github.com/Fauntleroy/relay.js) `Web`
 * [Circe](https://github.com/emacs-circe/circe) for use in Emacs, sane defaults `Emacs`
 * [Smuxi](https://smuxi.im) 
 * [Konversation](https://konversation.kde.org) 
-* [sic](https://tools.suckless.org/sic/) a terminal client 
 * [Revolution IRC](https://github.com/MCMrARM/revolution-irc)  `Android`
-* [IRC for Android](https://www.countercultured.net/android/)  `Android` `ChromeOS`
+* [IRC for Android](https://www.countercultured.net/android/)  `Android`
 * [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) 
 * [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin)  `Android`
 
