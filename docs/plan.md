@@ -32,6 +32,10 @@
   + скачать https://github.com/kvirc/KVIrc
   + `# mkdir build && cd build`
   + `# cmake ..`
+    - у Ани в этом месте не получается:
+    - -- Configuring incomplete, errors occurred!
+    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeOutput.log".
+    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeError.log".
   + `# make install`
 * **irssi**
   + есть на школьных компах
