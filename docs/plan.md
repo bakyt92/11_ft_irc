@@ -44,21 +44,21 @@
   + кто-то в дискорде тестировал с ним
 * sur mac tu peux faire un brew install ircd
 * [HexChat](https://hexchat.github.io) - Based on XChat, easy to use, spell check & multiple languages. ([source](https://github.com/hexchat/hexchat)) `Windows` `macOS` `Linux`
-* [gamja](https://sr.ht/~emersion/gamja/) - A simple IRC web client. ([source](https://git.sr.ht/~emersion/gamja)) `Web`
-* [Kiwi IRC](https://kiwiirc.com) - Powerful modern IRC messenger for the web. ([source](https://github.com/kiwiirc/kiwiirc), [demo](https://kiwiirc.com/nextclient/)) `Web`
-* [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. ([source](https://github.com/flackr/circ)) `Chrome`
-* [Quassel](https://quassel-irc.org) - Distributed (clients can attach to and detach from a central core that stays permanently online. ([source](https://github.com/quassel/quassel)) `Linux` `macOS` `Windows`
-* [Yaaic](https://www.yaaic.org) - Multi-server/channel support, SASL support, Smooth channel scrolling / swiping. ([source](https://github.com/pocmo/Yaaic)) `Android`
-* [relay.js](https://github.com/Fauntleroy/relay.js) - Focuses on making IRC less intimidating and easier to use. `Web`
-* [Circe](https://github.com/emacs-circe/circe) - For use in Emacs, sane defaults. `Emacs`
-* [Smuxi](https://smuxi.im) - User-friendly, based on GNOME / GTK+. ([source](https://github.com/meebey/smuxi)) `Linux` `Windows` `macOS`
-* [Konversation](https://konversation.kde.org) - User-friendly client built on the KDE Platform. ([source](https://github.com/KDE/konversation)) `Linux`
-* [sic](https://tools.suckless.org/sic/) - **S**imple **I**RC **c**lient - a terminal client in less than 250 lines of C. `Linux`
-* [Revolution IRC](https://github.com/MCMrARM/revolution-irc) - Feature-full, actively maintained Android IRC client. `Android`
-* [AdiIRC](https://adiirc.com) - Never has a client offered such granular settings for every aspect of the IRC experience. ([features](https://dev.adiirc.com/projects/adiirc/wiki/Features), [screenshots](https://dev.adiirc.com/projects/adiirc/wiki/Screenshots)) `Windows` `WINE`
-* [IRC for Android](https://www.countercultured.net/android/) - Android/Chrome OS client for power users, with ZNC built-ins, notification logic, reliable DCC, keybinds for hardware keyboards, etc. `Android` `ChromeOS`
-* [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) - Friendly IRC client built in Vala and GTK, designed for elementary OS. ([source](https://github.com/avojak/iridium)) `Linux`
-* [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) - Simple, fast and easy access to multiple IRC networks. `Android`
+* [gamja](https://sr.ht/~emersion/gamja/) `Web`
+* [Kiwi IRC](https://kiwiirc.com) `Web`
+  + регитсрируюсь 1AQ2ZS3ED
+* [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. `Chrome`
+* [Quassel](https://quassel-irc.org) 
+* [Yaaic](https://www.yaaic.org) `Android`
+* [relay.js](https://github.com/Fauntleroy/relay.js) `Web`
+* [Circe](https://github.com/emacs-circe/circe) for use in Emacs, sane defaults `Emacs`
+* [Smuxi](https://smuxi.im) 
+* [Konversation](https://konversation.kde.org) 
+* [sic](https://tools.suckless.org/sic/) a terminal client 
+* [Revolution IRC](https://github.com/MCMrARM/revolution-irc)  `Android`
+* [IRC for Android](https://www.countercultured.net/android/)  `Android` `ChromeOS`
+* [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) 
+* [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin)  `Android`
 
 ## Выбрать сервер для тестов
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
