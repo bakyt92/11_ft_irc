@@ -43,7 +43,7 @@
 * ngircd
   + кто-то в дискорде тестировал с ним
 * sur mac tu peux faire un brew install ircd
-* [HexChat](https://hexchat.github.io) - Based on XChat, easy to use, spell check & multiple languages. ([source](https://github.com/hexchat/hexchat)) `Windows` `macOS` `Linux`
+* [HexChat](https://hexchat.github.io)
 * [gamja](https://sr.ht/~emersion/gamja/) `Web`
 * [Kiwi IRC](https://kiwiirc.com) `Web`
   + регитсрируюсь 1AQ2ZS3ED
