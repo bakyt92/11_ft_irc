@@ -24,7 +24,7 @@
 * `valgrind`, закрытие сокетов
 
 ## Выбрать клиент
-*  **kvirc**
+* **kvirc**
   + скачать https://github.com/kvirc/KVIrc
   + `# mkdir build && cd build`
   + `# cmake ..`
