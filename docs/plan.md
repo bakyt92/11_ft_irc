@@ -43,10 +43,15 @@
   + Irssi envoie la commande CAP en plus de NICK et USER (discord)
     - `CAP LS [version]` to discover the available capabilities on the server
     - https://scripts.irssi.org/scripts/cap_sasl.pl
+    - CAP LS [version] to discover the available capabilities on the server
+    - CAP REQ to blindly request a particular set of capabilities
+    - CAP END
+    - Upon receiving either a CAP LS or CAP REQ command during connection registration, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
+    - https://ircv3.net/specs/extensions/capability-negotiation.html
   + аня на личном компе:
     - скачала irssi https://doc.ubuntu-fr.org/irssi
     - запустила наш сервер на порту 6667
-    - ввела в терминале `irssi`, он запустился
+    - ввела в терминале `irssi`
     - в самом irssi ввела команду `/connect 0`, он посылает `CAP LS` нашему серверу
   + вроде бы он работает с `RCv3 extensions` 
 * ngircd
