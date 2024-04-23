@@ -37,7 +37,7 @@ string mode(Ch *ch) {
 int send_(Cli *cli, string msg) {
   if (msg != "") {
     msg += "\r\n";
-    cout << "I send to fd=" << cli->fd << " this msg:             " + msg;
+    cout << "I send to fd=" << cli->fd << ":                      " + msg;
     send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   }
   return 0;
@@ -61,14 +61,18 @@ int send_(Ch *ch, string msg) {
   return 0;
 }
 
-void Server::printMe1() { // for debugging only
-  cout << " I have received from fd=" << cli->fd << " this cmd: ";
+void Server::printNewCli(int fd) { // for debugging only
+  cout << "I have got new cli fd=" << fd << endl;
+}
+
+void Server::printCmd() { // for debugging only
+  cout << " I have received from fd=" << cli->fd << "         : ";
   for (vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
     cout << *it << " ";
   cout << endl;
 }
 
-void Server::printMe2() { // for debugging only
+void Server::printServState() { // for debugging only
   cout << "My clients are:                      ";
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
     cout << "[" << it->second->nick << "] ";
@@ -137,6 +141,7 @@ void Server::run() {
             clis[fdForMsgs] = newCli;
             struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
             polls.push_back(pollForMsgs);
+            printNewCli(fdForMsgs);
           }
           break ;
         }
@@ -144,7 +149,7 @@ void Server::run() {
           if (!(cli = clis.at(poll->fd)))
             continue ;
           vector<unsigned char> buf(512);
-          int bytes = recv(cli->fd, buf.data(), buf.size(), 0); 
+          int bytes = recv(cli->fd, buf.data(), buf.size(), 0);         // size ?
           if (bytes < 0) 
             perror("recv");
           else if (bytes == 0)                                         // клиент пропал
@@ -156,9 +161,9 @@ void Server::run() {
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               ar = split(*cmd, ' ');                                  // if (ar[0][0] == ':') ar.erase(ar.begin()); // нужен ли префикс?
               if (cli) {
-                printMe1();
+                printCmd();
                 exec();
-                printMe2();
+                printServState();
               }
             }
           }
@@ -196,6 +201,8 @@ int Server::exec() {
     return execPing();
   if (ar[0] == "WHOIS")
     return execWhois();
+  if (ar[0] == "CAP")
+    return execCap();
   return send_(cli, ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
 }
 
@@ -212,9 +219,9 @@ int Server::execPass() {
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0) 
     return send_(cli, ":No nickname given");                                      // ERR_NONICKNAMEGIVEN
-  for (size_t i = 0; i < ar[1].size() && ar[1].size() <= 9; ++i) 
-    if(string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(ar[1][i]) == string::npos)
-      return send_(cli, ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
+  //for (size_t i = 0; i < ar[1].size() && ar[1].size() <= 9; ++i)
+  //  if(string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(ar[1][i]) == string::npos)
+  //    return send_(cli, ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
   for (std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if(itCli->second->nick.size() == ar[1].size()) {
       bool nickInUse = true;
@@ -428,6 +435,13 @@ int Server::execWhois() {
     else
       send_(cli, getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName + "\n"); // RPL_WHOISUSER
   return send_(cli, nicks[0] + " :End of WHOIS list");                            // RPL_ENDOFWHOIS ?
+}
+
+int Server::execCap() {
+  cout << "ar.size = " << ar.size() << " ar[0] = [" << ar[0] << "] ar[1] = [" << ar[1] << "] bool = " << (ar[1] == "LS") << endl;
+  //if(ar.size() >= 2 && ar[1] == "LS")
+    return send_(cli, "CAP * LS :");
+  return 0;
 }
 
 int main(int argc, char *argv[]) {

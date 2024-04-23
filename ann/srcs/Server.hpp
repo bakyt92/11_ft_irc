@@ -96,7 +96,9 @@ public:
   int                      execMode();
   int                      execPing();
   int                      execWhois();
-  void                     printMe1();
-  void                     printMe2();
+  int                      execCap();
+  void                     printNewCli(int fd);
+  void                     printCmd();
+  void                     printServState();
 };
 #endif
