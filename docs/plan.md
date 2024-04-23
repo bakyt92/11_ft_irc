@@ -36,7 +36,7 @@
 * **irssi**
   + есть на школьных компах
   + под него пришлось кое-где специально подстраиваться
-  + кажется сервер должен отвечать на команду `CAP LS`
+  + Irssi envoie la commande CAP en plus de NICK et USER (discord)
     - `CAP LS [version]` to discover the available capabilities on the server
   + аня на личном компе:
     - скачала irssi https://doc.ubuntu-fr.org/irssi
