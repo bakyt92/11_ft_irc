@@ -42,6 +42,7 @@
   + под него пришлось кое-где специально подстраиваться
   + Irssi envoie la commande CAP en plus de NICK et USER (discord)
     - `CAP LS [version]` to discover the available capabilities on the server
+    - https://scripts.irssi.org/scripts/cap_sasl.pl
   + аня на личном компе:
     - скачала irssi https://doc.ubuntu-fr.org/irssi
     - запустила наш сервер на порту 6667
