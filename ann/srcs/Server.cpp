@@ -31,12 +31,13 @@ Cli* Server::getCli(string &name) {
 }
 
 string mode(Ch *ch) {
-  return "mode : top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
+  return "mode: top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
 int send_(Cli *cli, string msg) {
   if (msg != "") {
     msg += "\r\n";
+    cout << "I send to fd=" << cli->fd << " this msg:             " + msg;
     send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   }
   return 0;
@@ -60,19 +61,22 @@ int send_(Ch *ch, string msg) {
   return 0;
 }
 
-void Server::printMe() { // for debugging only
-  cout << "I execute  : ";
+void Server::printMe1() { // for debugging only
+  cout << " I have received from fd=" << cli->fd << " this cmd: ";
   for (vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
     cout << *it << " ";
-  cout << endl << "My clients : ";
+  cout << endl;
+}
+
+void Server::printMe2() { // for debugging only
+  cout << "My clients are:                      ";
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
     cout << "[" << it->second->nick << "] ";
-  cout << endl << "My channels: ";
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << ch->first << ", users : ";
+    cout << endl << "My channel:                          " << ch->first << ", users: ";
     for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
       cout << (*itCli)->nick << " ";
-    cout << ", " << mode(ch->second) << " ";
+    cout << ", " << mode(ch->second) << "\n";
   }
   cout << endl << endl;
 }
@@ -90,29 +94,27 @@ void Server::init() {
     std::cerr << e.what() << std::endl;
   }
   sigReceived = false;
-  struct addrinfo ai;
-  std::memset(&ai, 0, sizeof(ai));
-  ai.ai_family   = AF_INET;
-  ai.ai_socktype = SOCK_STREAM;
-  ai.ai_flags    = AI_PASSIVE;
-  struct addrinfo *list_ai;
-  if (getaddrinfo(NULL, port.c_str(), &ai, &list_ai))
+  struct addrinfo hints, *listRes; //, *hint
+  std::memset(&hints, 0, sizeof(hints));
+  hints.ai_family   = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags    = AI_PASSIVE;
+  if (getaddrinfo(NULL, port.c_str(), &hints, &listRes))
     throw(std::runtime_error("getaddrinfo"));
-  struct addrinfo *it = NULL;
   int notUsed = 1;
-  for (it = list_ai; it != NULL; it = it->ai_next) {
-    if ((fdForNewClis = socket(it->ai_family, it->ai_socktype, it->ai_protocol)) < 0) 
+  for (struct addrinfo* hint = listRes; hint != NULL; hint = hint->ai_next) {
+    if ((fdForNewClis = socket(hint->ai_family, hint->ai_socktype, hint->ai_protocol)) < 0) 
       throw(std::runtime_error("socket"));
     else if (setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR , &notUsed, sizeof(notUsed)))
       throw(std::runtime_error("setsockopt"));
-    else if (bind(fdForNewClis, it->ai_addr, it->ai_addrlen)) { 
+    else if (bind(fdForNewClis, hint->ai_addr, hint->ai_addrlen)) { 
       close(fdForNewClis);
-      it->ai_next == NULL ? throw(std::runtime_error("bind")) : perror("bind"); 
+      hint->ai_next == NULL ? throw(std::runtime_error("bind")) : perror("bind"); 
     }
     else
       break ;
   }
-  freeaddrinfo(list_ai);
+  freeaddrinfo(listRes);
   if (listen(fdForNewClis, 10))
     throw(std::runtime_error("listen"));
   struct pollfd pollForNewClis = {fdForNewClis, POLLIN, 0};
@@ -125,7 +127,7 @@ void Server::run() {
     if (poll(polls.data(), polls.size(), 1) > 0) {                     // в сокетах есть какие-то данные
       for (std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
         if ((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
-          struct sockaddr sa; 
+          struct sockaddr sa;
           socklen_t       saLen = sizeof(sa);
           fdForMsgs = accept(poll->fd, &sa, &saLen);
           if (fdForMsgs == -1)
@@ -154,8 +156,9 @@ void Server::run() {
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               ar = split(*cmd, ' ');                                  // if (ar[0][0] == ':') ar.erase(ar.begin()); // нужен ли префикс?
               if (cli) {
+                printMe1();
                 exec();
-                printMe();
+                printMe2();
               }
             }
           }
@@ -168,15 +171,15 @@ void Server::run() {
 
 //////////////////////////////////////////////////////////////////////////////////////// IRC COMMANDS
 int Server::exec() {
-  if (ar.size() == 0)        
+  if (ar.size() == 0)
     return 0; // ?
-  if (ar[0] == "PASS")        
+  if (ar[0] == "PASS")
     return execPass();
-  if (ar[0] == "NICK")  
+  if (ar[0] == "NICK")
     return execNick();
   if (ar[0] == "USER")
     return execUser();
-  if (ar[0] == "QUIT") 
+  if (ar[0] == "QUIT")
     return execQuit();
   if (ar[0] == "TOPIC")
     return execTopic();
@@ -184,27 +187,25 @@ int Server::exec() {
     return execJoin();
   if (ar[0] == "INVITE")
     return execInvite();
-  if (ar[0] == "KICK")   
-    return execKick();
+  if (ar[0] == "KICK")    return execKick();
   if (ar[0] == "PRIVMSG" || ar[0] == "NOTICE")
     return execPrivmsg();
-  if (ar[0] == "MODE")  
+  if (ar[0] == "MODE")
     return execMode();
-  if (ar[0] == "PING") 
+  if (ar[0] == "PING")
     return execPing();
-  if (ar[0] == "WHOIS") 
+  if (ar[0] == "WHOIS")
     return execWhois();
-  return send_(cli, ar[0] + " " + "<command> :Unknown command");                  // ERR_UNKNOWNCOMMAND
+  return send_(cli, ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
 }
 
-int Server::execPass() { 
+int Server::execPass() {
   if(ar.size() < 2)
     return send_(cli, "PASS :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
   if(cli->passOk)
     return send_(cli, ":You may not reregister");                                 // ERR_ALREADYREGISTRED 
-  if(ar[1] != pass)
-    return 0;                                                                       // ?
-  cli->passOk = true;
+  if(ar[1] == pass)
+    cli->passOk = true;
   return 0;
 }
 
@@ -329,7 +330,6 @@ int Server::execTopic() {
 }
 
 int Server::execKick() {
-  printMe();
   if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 3)

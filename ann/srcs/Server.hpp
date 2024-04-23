@@ -83,7 +83,6 @@ public:
   void                     init();
   void                     run();
   Cli*                     getCli(string &name);
-  void                     printMe();
   int                      exec(); 
   int                      execPass();
   int                      execNick();
@@ -97,5 +96,7 @@ public:
   int                      execMode();
   int                      execPing();
   int                      execWhois();
+  void                     printMe1();
+  void                     printMe2();
 };
 #endif
