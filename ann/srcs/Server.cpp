@@ -377,13 +377,13 @@ int Server::execMode() {
   if(chs.find(ar[1]) == chs.end())
     return send_(cli, ar[1] + " :No such channel");                               // ERR_NOSUCHCHANNEL
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
-    return send_(cli, ar[1] + " :You're not on that channel");                     // ERR_NOTONCHANNEL
+    return send_(cli, ar[1] + " :You're not on that channel");                    // ERR_NOTONCHANNEL
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end()) 
     return send_(cli, ar[1] + " :You're not channel operator");                   // ERR_CHANOPRIVSNEEDED
   if(ar.size() < 2)
     return send_(cli, "MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(ar.size() == 2)
-    return send_(cli, ar[1] + " " + mode(chs[ar[1]]));                       // RPL_CHANNELMODEIS 
+    return send_(cli, ar[1] + " " + mode(chs[ar[1]]));                            // RPL_CHANNELMODEIS 
   if(ar.size() == 3 && ar[2].compare("+i") == 0)
     return (chs[ar[1]]->optI = true);
   if(ar.size() == 3 && ar[2].compare("-i") == 0)
