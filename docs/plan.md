@@ -42,6 +42,7 @@
   + вроде бы он работает с `RCv3 extensions` 
 * ngircd
   + кто-то в дискорде тестировал с ним
+  + Ngircd t'envoie la commande MODE si ton user à un rôle spécifique
 * sur mac tu peux faire un brew install ircd
 * [HexChat](https://hexchat.github.io)
 * [gamja](https://sr.ht/~emersion/gamja/) `Web`
@@ -50,17 +51,20 @@
   + пробую через web, ввожу IP своего компа, через 1-2 минута наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
 * [sic](https://tools.suckless.org/sic/) a terminal client
   + usage: sic [-h host] [-p port] [-n nick] [-k keyword] [-v]
-* [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy `Chrome`
 * [Quassel](https://quassel-irc.org) 
 * [Yaaic](https://www.yaaic.org) `Android`
 * [relay.js](https://github.com/Fauntleroy/relay.js) `Web`
 * [Circe](https://github.com/emacs-circe/circe) for use in Emacs, sane defaults `Emacs`
 * [Smuxi](https://smuxi.im) 
 * [Konversation](https://konversation.kde.org) 
-* [Revolution IRC](https://github.com/MCMrARM/revolution-irc)  `Android`
-* [IRC for Android](https://www.countercultured.net/android/)  `Android`
+* [Revolution IRC](https://github.com/MCMrARM/revolution-irc) `Android`
+* [IRC for Android](https://www.countercultured.net/android/) `Android`
 * [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) 
-* [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin)  `Android`
+* [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) `Android`
+* anope
+* oragono
+* ne faites pas irc omg, Bv champion
+* ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
 
 ## Выбрать сервер для тестов
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
@@ -145,14 +149,14 @@
   + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
   + pour ca que faut normalement utiliser select pour lire
 * **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
-* ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
-*  Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
-*  you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
-*  that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
-*  on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
-*  Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
-*  tout les messages doivent finir par **\r\n**
-*  остановилась на сообщении Ouaip j'ai jamais réussi à recevoir un NJOIN de ngircd
+* Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
+* you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
+* that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
+* on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
+* Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
+* tout les messages doivent finir par **\r\n**
+* pour stats, vous avez fait comment pour compter le nombre de byte qu'envoie tel ou tel commande au total depuis le debut du lancement du serv ?
+* остановилась на сообщении Bon bah si ya des gens qui passent par ici et qui font IRC, hesitez pas
 
 ## Инфо
 * Используем клиент https://kiwiirc.com/nextclient/
