@@ -9,6 +9,7 @@
   + Из RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя обычно оно бывает с разными командам. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
+  + у Ахмеда так считвыается: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
 * должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
