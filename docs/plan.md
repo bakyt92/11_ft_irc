@@ -47,7 +47,7 @@
 * [gamja](https://sr.ht/~emersion/gamja/) `Web`
 * [Kiwi IRC](https://kiwiirc.com) `Web`
   + аккаунт 1AQ2ZS3ED
-  + пробую через web, ввожу IP своего компа, наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
+  + пробую через web, ввожу IP своего компа, через 1-2 минута наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
 * [CIRC](https://flackr.github.io/circ/) - Uses the chrome.sockets APIs to connect directly to IRC servers without needing a proxy. `Chrome`
 * [Quassel](https://quassel-irc.org) 
 * [Yaaic](https://www.yaaic.org) `Android`
