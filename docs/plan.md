@@ -31,15 +31,6 @@
 * `valgrind`, закрытие сокетов
 
 ## Выбрать клиент
-* **kvirc**
-  + скачать https://github.com/kvirc/KVIrc
-  + `# mkdir build && cd build`
-  + `# cmake ..`
-    - у Ани в этом месте не получается:
-    - -- Configuring incomplete, errors occurred!
-    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeOutput.log".
-    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeError.log".
-  + `# make install`
 * **irssi**
   + есть на школьных компах
   + под него пришлось кое-где специально подстраиваться
@@ -55,14 +46,23 @@
     - запустила наш сервер на порту 6667
     - ввела в терминале `irssi`
     - в самом irssi ввела команду `/connect 0`, он посылает `CAP LS` нашему серверу
+* **kvirc**
+  + скачать https://github.com/kvirc/KVIrc
+  + `# mkdir build && cd build`
+  + `# cmake ..`
+    - у Ани в этом месте не получается:
+    - -- Configuring incomplete, errors occurred!
+    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeOutput.log".
+    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeError.log".
+  + `# make install`
+* [Kiwi IRC](https://kiwiirc.com) `Web`
+  + аккаунт 1AQ2ZS3ED
+  + пробую через web, ввожу IP своего компа, через 1-2 минута наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
 * ngircd
   + кто-то в дискорде тестировал с ним
 * sur mac tu peux faire un brew install ircd
 * [HexChat](https://hexchat.github.io)
 * [gamja](https://sr.ht/~emersion/gamja/) `Web`
-* [Kiwi IRC](https://kiwiirc.com) `Web`
-  + аккаунт 1AQ2ZS3ED
-  + пробую через web, ввожу IP своего компа, через 1-2 минута наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
 * [sic](https://tools.suckless.org/sic/) a terminal client
   + usage: sic [-h host] [-p port] [-n nick] [-k keyword] [-v]
 * [Quassel](https://quassel-irc.org) 
@@ -77,7 +77,8 @@
 * [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) `Android`
 * anope
 * oragono
-* ne faites pas irc omg, Bv champion
+* ne faites pas irc omg
+* Bv champion
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
