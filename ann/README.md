@@ -92,7 +92,7 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
     - полю revents возвращает ноль
     - это простой способ игнорирования файлового дескриптора в одиночном вызове poll()
     - это нельзя использовать для игнорирования файлового дескриптора 0
-* much better than select, because you can keep re-using the same data structure
+* better than select, because you can keep re-using the same data structure
 * POSIX: if the value of fd is less than 0, events shall be ignored, and revents shall be set to 0 in that entry on return from poll()
 * returns:
   + le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
