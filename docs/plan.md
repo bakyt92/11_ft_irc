@@ -7,8 +7,6 @@
     - You could send 100 1 byte chunks and receive 4 25 byte messages.
     - **You must deal with message boundaries yourself**. (у нас messages boundaries это `\n`, правильно?)
   + Из RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя обычно оно бывает с разными командам. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
-  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
-  + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
   + у Ахмеда так считвыается: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
   + то же самое в littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
   + подводные камни tcp-ip сокетамов: данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это совсем не значит, что они могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
@@ -32,6 +30,9 @@
   + **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
   + wireshark, netcat etc
 * non-blocking https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
+* сигналы
+  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
+  + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
