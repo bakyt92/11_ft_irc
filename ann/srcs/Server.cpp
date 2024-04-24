@@ -51,6 +51,7 @@ string mode(Ch *ch) { // +o ?
 }
 
 int Server::send_(Cli *to, string msg) {
+  cout << "I send to " << to->fd << "              : [" << msg << "]\n";
   msg += "\r\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
@@ -274,9 +275,9 @@ int Server::execPrivmsg() {
     if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
       send_(cli, *to + " :No such nick/channel");                                 // ERR_NOSUCHNICK
     else if((*to)[0] == '#' && chs[*to]->clis.find(cli) != chs[*to]->clis.end())    // ERR_NOTONCHANNEL нужно ?
-      send_(chs[*to], cli->rName + " PRIVMSG " + *to + " :" + ar[2]);
+      send_(chs[*to], cli->nick + " PRIVMSG " + *to + " :" + ar[2]);
     else
-      send_(getCli(*to), cli->rName + " PRIVMSG " + *to + " :" + ar[2]);
+      send_(getCli(*to), cli->nick + " PRIVMSG " + *to + " :" + ar[2]);
   return 0;
 }
 
