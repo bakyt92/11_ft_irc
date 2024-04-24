@@ -14,7 +14,6 @@
 * должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
-  + в дискорде пишут можно вщять названия каналов только `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
   + Параметр <receiver> может быть маской хоста (#mask) или маски сервера ($mask)
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
@@ -23,7 +22,7 @@
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
 * The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
-* когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
+* когда мы в irssi, то после команды `join #ch` все сообщение идут в этот канал, нам тоже так надо?
 * **wireshark** / netcat / a custom **proxy** etc… to
   + не понимаю, как использоать
   + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
@@ -55,6 +54,28 @@
 * https://hub.docker.com/_/irssi
 * альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
 
+## 23:26 Irssi commands:
+accept     die         knock    notice    sconnect   unload     
+action     disconnect  knockout notify    script     unnotify   
+admin      echo        lastlog  op        scrollback unquery    
+alias      eval        layout   oper      server     unsilence  
+away       exec        links    part      servlist   upgrade    
+ban        flushbuffer list     ping      set        uptime     
+beep       foreach     load     query     sethost    userhost   
+bind       format      log      quit      silence    ver        
+cat        hash        lusers   quote     squery     version    
+cd         help        map      rawlog    squit      voice      
+channel    hilight     me       recode    stats      wait       
+clear      ignore      mircdcc  reconnect statusbar  wall       
+completion info        mode     redraw    time       wallops    
+connect    invite      motd     rehash    toggle     who        
+ctcp       ircnet      msg      reload    topic      whois      
+cycle      ison        names    resize    trace      whowas     
+dcc        join        nctcp    restart   ts         window     
+dehilight  kick        netsplit rmreconns unalias     
+deop       kickban     network  rmrejoins unban       
+devoice    kill        nick     save      unignore  
+
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
 * server is 90% of the time built according to oragono irc server https://oragono.io/
@@ -72,7 +93,8 @@
 * [IRCv3 Specifications](https://ircv3.net/irc/)
 * `RCv3 extensions` надеюсь нам не нужно 
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
-* Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
+* Имя канала обязательно начинается с `#`? Я пока сделала так, но вроде бы `#` это маска хоста
+  + дискорд: можно взять названия каналов только с `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 *  Un channel "exclusif" à deux users cmd PRIVMSG + nickname
   + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
