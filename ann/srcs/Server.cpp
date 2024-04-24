@@ -472,12 +472,13 @@ int Server::execWhois() {
   if(ar.size() < 2)
     return send_(cli, "431 :No nickname given");                                      // ERR_NONICKNAMEGIVEN
   std::vector<string> nicks = split(ar[1], ",");
+  string toSend = "";
   for (vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
-      send_(cli, ar[1] + " :No such nick");                                       // ERR_NOSUCHNICK
+      toSend += ar[1] + " :No such nick\r\n";                                       // ERR_NOSUCHNICK
     else
-      send_(cli, getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName + "\n"); // RPL_WHOISUSER
-  return send_(cli, nicks[0] + " :End of WHOIS list");                            // RPL_ENDOFWHOIS ?
+      toSend += getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName + "\r\n"; // RPL_WHOISUSER
+  return send_(cli, toSend + " " + nicks[0] + " :End of WHOIS list\r\n");              // RPL_ENDOFWHOIS ?
 }
 
 int Server::execCap() {
