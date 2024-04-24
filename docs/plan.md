@@ -82,7 +82,7 @@
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
 * server is 90% of the time built according to oragono irc server https://oragono.io/
-* irssi: `/connect irc.freenode.net`, `/join #ubuntu`
+* irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
 
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
