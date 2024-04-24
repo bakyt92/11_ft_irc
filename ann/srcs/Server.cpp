@@ -81,23 +81,24 @@ void Server::printNewCli(int fd) { // for debugging only
 }
 
 void Server::printCmd() { // for debugging only
-  cout << "I execute (cmd from fd=" << cli->fd << ") : ";
+  // cout << "I execute (cmd from fd=" << cli->fd << ") : ";
+  cout << "I execute (cmd from fd=" << static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd) )).str() << ") : ";
   for (vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
     cout << "[" << *it << "]" << " ";
   cout << endl;
 }
 
 void Server::printServState() { // for debugging only
-  cout << "My clients are            : ";
+  cout << "My clients                : ";
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
     cout << "[" << it->second->nick << "] ";
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << endl << "My channel                 : " << ch->first << ", users: ";
+    cout << "My channel                 : " << ch->first << ", users: ";
     for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
       cout << (*itCli)->nick << " ";
-    cout << ", " << mode(ch->second) << "\n";
+    cout << ", " << mode(ch->second) << endl;
   }
-  cout << endl << endl;
+  cout << endl;
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
@@ -107,13 +108,13 @@ void Server::init() {
   try {
     signal(SIGINT,  sigHandler);
     signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal
-    // SIGQUIT ?
+    // SIitCliGQUIT ?
   }
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
   sigReceived = false;
-  struct addrinfo hints, *listRes; //, *hint
+  struct addrinfo hints, *listRes;
   std::memset(&hints, 0, sizeof(hints));
   hints.ai_family   = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
@@ -148,7 +149,7 @@ void Server::run() {
         if ((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
           struct sockaddr sa;
           socklen_t       saLen = sizeof(sa);
-          fdForMsgs = accept(poll->fd, &sa, &saLen);
+          int fdForMsgs = accept(poll->fd, &sa, &saLen); // у каждого киента свой fd
           if (fdForMsgs == -1)
             perror("accept");
           else {
@@ -163,23 +164,26 @@ void Server::run() {
         else if ((poll->revents & POLLIN) && poll->fd != fdForNewClis) { // клиент прислал сообщение в свой fdForMsgs
           if (!(cli = clis.at(poll->fd)))
             continue ;
-          vector<unsigned char> buf(512);
-          int bytes = recv(cli->fd, buf.data(), buf.size(), 0);         // size ?
+          vector<unsigned char> buf(513); // 512 ?
+          for (int i = 0; i < 513; i++)
+            buf[i] = '\0';
+          int bytes = recv(cli->fd, buf.data(), buf.size() - 1, 0);         // size - 1 ?
           if (bytes < 0) 
             perror("recv");
           else if (bytes == 0)                                         // клиент пропал
-            execQuit();
+            execQuit(); 
           else {
             string bufS = string(buf.begin(), buf.end());
             bufS.resize(bytes);
-            std::vector<string> cmds = split(bufS, "\n");            // if empty ? 
+            std::vector<string> cmds = split(bufS, "\n");
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
-              ar = split(*cmd, " ");                                  // if (ar[0][0] == ':') ar.erase(ar.begin()); // нужен ли префикс?
-              if (cli) {
-                printCmd();
-                exec();
-                printServState();
-              }
+              // for (int i = 0; i < ar.size(); i++)
+              //   ar[i] = "";
+              vector<string>().swap(ar);
+              ar = split(*cmd, " "); // обнулить?
+              printCmd();
+              exec();
+              printServState();
             }
           }
         }
@@ -207,25 +211,28 @@ int Server::exec() {
     return execJoin();
   if (ar[0] == "INVITE")
     return execInvite();
-  if (ar[0] == "KICK")    return execKick();
-  if (ar[0] == "PRIVMSG" || ar[0] == "NOTICE")
+  if (ar[0] == "KICK")
+    return execKick();
+  if (ar[0] == "PRIVMSG" || ar[0] == "NOTICE") //
     return execPrivmsg();
   if (ar[0] == "MODE")
     return execMode();
   if (ar[0] == "PING")
     return execPing();
+  if (ar[0] == "PONG") //
+    return execPong();
   if (ar[0] == "WHOIS")
     return execWhois();
   if (ar[0] == "CAP")
     return execCap();
-  return send_(cli, ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
+  return send_(cli, "421 :" + ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
 }
 
 int Server::execPass() {
   if(ar.size() < 2)
-    return send_(cli, "PASS :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
+    return send_(cli, "461 :PASS :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(cli->passOk)
-    return send_(cli, ":You may not reregister");                                 // ERR_ALREADYREGISTRED 
+    return send_(cli, "462 :You may not reregister");                                 // ERR_ALREADYREGISTRED
   if(ar[1] == pass)
     cli->passOk = true;
   if (cli->nick != "" && cli->uName != "" && cli->capOk)
@@ -235,10 +242,10 @@ int Server::execPass() {
 
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0) 
-    return send_(cli, ":No nickname given");                                      // ERR_NONICKNAMEGIVEN
+    return send_(cli, "431 :No nickname given");                                      // ERR_NONICKNAMEGIVEN
   for (size_t i = 0; i < ar[1].size() && ar[1].size() <= 9; ++i)
     if(string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(ar[1][i]) == string::npos)
-      return send_(cli, ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
+      return send_(cli, "432 :" + ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
   for (std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if(itCli->second->nick.size() == ar[1].size()) {
       bool nickInUse = true;
@@ -246,7 +253,7 @@ int Server::execNick() {
         if(std::tolower(ar[1][i]) != std::tolower(itCli->second->nick[i]))
           nickInUse = false;
       if(nickInUse)
-        return send_(cli, ar[1] + " :Nickname collision");                        // ERR_NICKNAMEINUSE
+        return send_(cli, "433 :" + ar[1] + " :Nickname collision");                        // ERR_NICKNAMEINUSE
     }
   }
   cli->nick = ar[1];
@@ -257,9 +264,9 @@ int Server::execNick() {
 
 int Server::execUser() {
   if(ar.size() < 5)
-    return send_(cli, "USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 :USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(cli->uName != "")
-    return send_(cli, ":You may not reregister");                                 // ERR_ALREADYREGISTRED
+    return send_(cli, "462 :You may not reregister");                                 // ERR_ALREADYREGISTRED
   cli->uName = ar[1];
   cli->rName = ar[4];
   if (cli->nick != "" && cli->passOk && cli->capOk)
@@ -271,7 +278,7 @@ int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() == 1) 
-    return send_(cli, ":No recipient given (" + ar[0] + ")");                     // ERR_NORECIPIENT
+    return send_(cli, ":No recipient given (" + ar[1] + ")");                     // ERR_NORECIPIENT
   if(ar.size() == 2)
     return send_(cli, ":No text to send");                                        // ERR_NOTEXTTOSEND
   vector<string> tos = split(ar[1], ",");
@@ -289,7 +296,7 @@ int Server::execJoin() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 2)
-    return send_(cli, "JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
+    return send_(cli, "461 :JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ",");
   //vector<string> passes  = ar.size() > 2 ? split(ar[2], ",") : vector<string>();  // доделать
   //passes.insert(passes.end(), chNames.size() - passes.size(), 0);
@@ -320,7 +327,7 @@ int Server::execInvite() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 3)
-    return send_(cli, "INVITE :Not enough parameters");                           // ERR_NEEDMOREPARAMS 
+    return send_(cli, "461 :INVITE :Not enough parameters");                           // ERR_NEEDMOREPARAMS 
   if(chs.find(ar[2]) == chs.end())
     return send_(cli, ar[2] + " :No such channel");                               // ERR_NOSUCHCHANNEL ? 
   if(chs[ar[2]]->adms.find(cli) == chs[ar[2]]->adms.end()) 
@@ -338,7 +345,7 @@ int Server::execTopic() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 1)
-    return send_(cli, "TOPIC :Not enough parameters");                            // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 :TOPIC :Not enough parameters");                            // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
     return send_(cli, ar[1] + " :No such channel");                               // ERR_NOSUCHCHANNEL
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
@@ -357,7 +364,7 @@ int Server::execKick() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 3)
-    return send_(cli, "KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 :KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   std::vector<string> chNames    = split(ar[1], ",");
   std::vector<string> targetClis = split(ar[2], ",");
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
@@ -382,13 +389,12 @@ int Server::execQuit() {
   vector<string> chsToRm;
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
     ch->second->erase(cli);
-    if (ch->second->size() == 0) 
+    if (ch->second->size() == 0)
       chsToRm.push_back(ch->first);
   }
-  for (vector<string>::iterator chName = chsToRm.begin(); chName != chsToRm.end(); chName++)
-    chs.erase(*chName);
-  if(clis.find(cli->fd) != clis.end())
-    close(clis.find(cli->fd)->first);
+  for (vector<string>::iterator ch = chsToRm.begin(); ch != chsToRm.end(); ch++)
+    chs.erase(*ch);
+  close(clis.find(cli->fd)->first);
   //polls.erase(std::remove(polls.begin(), polls.end(), cli->fd), polls.end());
   clis.erase(clis.find(cli->fd));
   return 0;
@@ -397,42 +403,42 @@ int Server::execQuit() {
 int Server::execMode() {
   char *notUsed; // ?
   if(!cli->passOk || cli->nick == "" || cli->uName == "")
-    return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
+    return send_(cli, cli->nick + " :User not logged in *" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
+  if(ar.size() < 2)
+    return send_(cli, "461 :MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
     return send_(cli, ar[1] + " :No such channel");                               // ERR_NOSUCHCHANNEL
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
     return send_(cli, ar[1] + " :You're not on that channel");                    // ERR_NOTONCHANNEL
-  if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end()) 
+  if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end())
     return send_(cli, ar[1] + " :You're not channel operator");                   // ERR_CHANOPRIVSNEEDED
-  if(ar.size() < 2)
-    return send_(cli, "MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(ar.size() == 2)
-    return send_(cli, ar[1] + " " + mode(chs[ar[1]]));                            // RPL_CHANNELMODEIS 
-  if(ar.size() == 3 && ar[2].compare("+i") == 0)
+    return send_(cli, ar[1] + " " + mode(chs[ar[1]]));                            // RPL_CHANNELMODEIS
+  if(ar.size() == 3 && ar[2] == "+i")
     return (chs[ar[1]]->optI = true);
-  if(ar.size() == 3 && ar[2].compare("-i") == 0)
+  if(ar.size() == 3 && ar[2] == "-i")
     return (chs[ar[1]]->optI = false);
-  if(ar.size() == 3 && ar[2].compare("+t") == 0)
+  if(ar.size() == 3 && ar[2] == "+t")
     return (chs[ar[1]]->optT = true);
-  if(ar.size() == 3 && ar[2].compare("-t") == 0)
+  if(ar.size() == 3 && ar[2] == "-t")
     return (chs[ar[1]]->optT = false);
-  if(ar.size() == 3 && ar[2].compare("-l") == 0)
+  if(ar.size() == 3 && ar[2] == "-l")
     return chs[ar[1]]->limit = std::numeric_limits<unsigned int>::max();
-  if(ar.size() == 3 && ar[2].compare("-k") == 0)
+  if(ar.size() == 3 && ar[2] == "-k")
     return (chs[ar[1]]->pass = "", 0);
-  if(ar.size() == 3 && (ar[2].compare("+k") == 0 || ar[1].compare("+l") == 0 || ar[1].compare("+o") == 0 || ar[1].compare("-o") == 0))
-    return send_(cli, "MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+  if(ar.size() == 3 && (ar[2] == "+k" || ar[1] == "+l" || ar[1] == "+o" || ar[1] == "-o"))
+    return send_(cli, "461 :MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(ar.size() == 3)
-    return send_(cli, "MODE :Not enough parameters");                             //  ERR_NEEDMOREPARAMS
-  if(ar[2].compare("+k") == 0 && chs[ar[1]]->pass != "")
+    return send_(cli, "461 :MODE :Not enough parameters");                             //  ERR_NEEDMOREPARAMS
+  if(ar[2] == "+k" && chs[ar[1]]->pass != "")
     return send_(cli, ar[1] + " :Channel key already set");                       // ERR_KEYSET
-  if(ar[2].compare("+k") == 0)
+  if(ar[2] == "+k")
     return (chs[ar[1]]->pass = ar[3], 0);
-  if(ar[2].compare("+l") == 0 && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
+  if(ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
     return (chs[ar[1]]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10)), 0);
-  if(ar[2].compare("+o") == 0)
+  if(ar[2] == "+o")
     return (chs[ar[1]]->adms.insert(getCli(ar[3])), 0); // если такого ника нет?
-  if(ar[2].compare("-o") == 0)
+  if(ar[2] == "-o")
     return chs[ar[1]]->adms.erase(getCli(ar[3]));
   return send_(cli, ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
 }
@@ -441,10 +447,13 @@ int Server::execPing() {
   return send_(cli, "PONG");
 }
 
+int Server::execPong() {
+  return send_(cli, "PING");
+}
 // not implemented here: RPL_WHOISCHANNELS RPL_WHOISOPERATOR RPL_AWAY RPL_WHOISIDLE                 
 int Server::execWhois() {
   if(ar.size() < 2)
-    return send_(cli, ":No nickname given");                                      // ERR_NONICKNAMEGIVEN
+    return send_(cli, "431 :No nickname given");                                      // ERR_NONICKNAMEGIVEN
   std::vector<string> nicks = split(ar[1], ",");
   for (vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
@@ -459,9 +468,12 @@ int Server::execCap() {
     cli->capOk = false;
     return send_(cli, "CAP * LS :");
   }
-  if(ar.size() >= 2 && ar[1] == "END") {
+  else if(ar.size() >= 2 && ar[1] == "END") {
     cli->capOk = true;
-    return send_(cli, "001 :Welcome to the Internet Relay Network " + cli->uName); // RPL_WELCOME
+    send_(cli, "001"); // :Welcome to the Internet Relay Network " + cli->uName); // RPL_WELCOME
+    send_(cli, "002"); // :Your host is " + cli->host  + ", running version 1.0");            // RPL_YOURHOST
+    send_(cli, "003"); // :This server was created 24.04.2024");                  // RPL_CREATED // ?
+    send_(cli, "004"); // :ircserv 1.0  ptkio");                                // RPL_MYINFO
   }
   return 0;
 }

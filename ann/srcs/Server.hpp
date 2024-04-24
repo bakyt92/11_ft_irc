@@ -71,7 +71,6 @@ private:
   string                   port;
   string                   pass;
   int                      fdForNewClis;    // один общий для всех клиентов
-  int                      fdForMsgs;       // у каждого киента свой
   vector<struct pollfd>    polls;
   map<int, Cli*>           clis;
   map<string, Ch*>         chs;
@@ -96,6 +95,7 @@ public:
   int                      execTopic();
   int                      execMode();
   int                      execPing();
+  int                      execPong();
   int                      execWhois();
   int                      execCap();
   void                     printNewCli(int fd);
