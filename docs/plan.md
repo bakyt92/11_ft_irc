@@ -26,6 +26,7 @@
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
 * The command MUST either be a valid IRC command or a three (3) digit number represented in ASCII text - то есть возможно надо понимать просто сообщения-числа?
 * This specification adds a new batch type and tag sent by clients and servers to send messages that can exceed the usual byte length limit and that can contain line breaks - надеюсь, нам это не надо
+* `RCv3 extensions` что это, нужно ли
 * `valgrind`, закрытие сокетов
 
 ## Выбрать клиент
@@ -53,10 +54,8 @@
     - запустила наш сервер на порту 6667
     - ввела в терминале `irssi`
     - в самом irssi ввела команду `/connect 0`, он посылает `CAP LS` нашему серверу
-  + вроде бы он работает с `RCv3 extensions` 
 * ngircd
   + кто-то в дискорде тестировал с ним
-  + Ngircd t'envoie la commande MODE si ton user à un rôle spécifique
 * sur mac tu peux faire un brew install ircd
 * [HexChat](https://hexchat.github.io)
 * [gamja](https://sr.ht/~emersion/gamja/) `Web`
@@ -80,9 +79,10 @@
 * ne faites pas irc omg, Bv champion
 * ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
 
-## Выбрать сервер для тестов
+## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
 * server is 90% of the time built according to oragono irc server https://oragono.io/
+* irssi: `/connect irc.freenode.net`, `/join #ubuntu`
 
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
