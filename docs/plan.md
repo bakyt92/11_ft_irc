@@ -24,12 +24,14 @@
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
 * The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
-* wireshark не понимаю, как использоать, вроде это полезная утилита
-  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. Dans le meilleur des cas tu utilises un serv irc dans docker et un client irc. Puis tu sniff avec wireshark pour regarder ce qui est send. Puis tu t'adapte.
-  + Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
-  + **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
-  + wireshark, netcat etc
-* non-blocking https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
+* **wireshark** / netcat / a custom **proxy** etc… to
+  + не понимаю, как использоать
+  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
+  + to inspect communication between your reference server (or your server) and you your client
+  + we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
+  + to easily debug your server and also gives you the ability to check how already existing one behaves
+* non-blocking
+  + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
 * сигналы
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
