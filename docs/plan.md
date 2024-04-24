@@ -33,18 +33,16 @@
 ## Наладить связть с irssi
 * Irssi envoie la commande CAP en plus de NICK et USER (discord)
   + https://scripts.irssi.org/scripts/cap_sasl.pl
-  + CAP LS [version] to discover the available capabilities on the server, типа `CAP * LS :multi-prefix sasl` ?
+  + CAP LS [version] to discover the available capabilities on the server
   + CAP REQ to blindly request a particular set of capabilities
-  + CAP END
-  + Upon receiving either a CAP LS or CAP REQ command during connection registration, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
+  + CAP END. Upon receiving either a CAP LS or CAP REQ command, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
   + https://ircv3.net/specs/extensions/capability-negotiation.html
-  + pour que la connexion marche avec irssi, il faut envoyer au nouveau client connecté la RPL 001 pour que irssi comprenne que c'est good il est bien co 
-+ le bail de CAP, tu peux soit ignorer la command, soit mettre command not found, soit renvoyer une response de CAP disant que tu gere aucune capabilities (meilleur idée je pense) 
+  + irssi: il faut envoyer au nouveau client connecté la RPL 001 pour que irssi comprenne qu'il est bien co
 * аня на личном компе:
   + скачала irssi https://doc.ubuntu-fr.org/irssi
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
-  + в самом irssi ввела команду `/connect 0`, он посылает `CAP LS` нашему серверу
+  + в самом irssi команда `/connect 0` ? или `+ /connect 0 -tls_pass 2` ?`
 * альтернативы irssi: kvirc, ngircd, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
