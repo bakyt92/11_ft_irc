@@ -51,7 +51,7 @@ string mode(Ch *ch) { // +o ?
 }
 
 int Server::send_(Cli *to, string msg) {
-  cout << "I send to " << to->fd << "                : [" << msg << "]\n";
+  cout << "I send to fd=" << to->fd << "            : [" << msg << "]\n";
   msg += "\r\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
@@ -89,6 +89,12 @@ void Server::printServState() { // for debugging only
   }
   cout << endl;
 }
+
+// I execute (cmd from fd=5) : [PRIVMSG] [#ch] [:hello]
+// I send to 4                : [an PRIVMSG #ch ::hello]
+
+// I execute (cmd from fd=4) : [PRIVMSG] [an] [hello2] 
+// I send to 5                : [a PRIVMSG an :hello2]
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
 Server::Server(string port_, string pass_) : port(port_), pass(pass_) {}
@@ -214,6 +220,8 @@ int Server::exec() {
     return execWhois();
   if (ar[0] == "CAP")
     return execCap();
+  if (ar[0] == "PART")
+    return execPart();
   return send_(cli, "421 :" + ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
 }
 
@@ -310,7 +318,25 @@ int Server::execJoin() {
       }                                                                             // нужно ли исключение "пользователь уже на канале" ?   
     }
   }
-  return 1;
+  return 0;
+}
+
+int Server::execPart() {
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
+    return send_(cli, cli->nick + " :User not logged in" );                         // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
+  if(ar.size() < 2)
+    return send_(cli, "461 :JOIN :Not enough parameters");                          // ERR_NEEDMOREPARAMS
+  vector<string> chNames = split(ar[1], ",");
+  for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
+    if (chs.find(*chName) == chs.end())
+      send_(cli, *chName + " " + chs[*chName]->topic + " " + mode(chs[*chName]));   // ERR_NOSUCHCHANNEL
+    else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
+      send_(cli, *chName + " :You're not on that channel");                         // ERR_NOTONCHANNEL
+    else {
+      send_(chs[*chName], cli->nick + " PART :" + *chName);                         // нужно ли сообщение
+      chs.erase(*chName);
+    }
+  return 0;
 }
 
 int Server::execInvite() {
@@ -471,8 +497,9 @@ int Server::execCap() {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 3 || atoi(argv[1]) < 1024 || atoi(argv[1]) > 49151) {  
-    std::cout << "Invalid arguments.\nRun ./ircserv <port> <password>, port should be between 1024 and 49151\n";
+  // проверить с помощью strtol, не выходим ли за рамки int
+  if(argc != 3 || atoi(argv[1]) < 1024) {
+    std::cout << "Invalid arguments.\nRun ./ircserv <port> <password>, port should be between 1024 and 65535\n";
     return 0;
   }
   Server s = Server(argv[1], argv[2]);

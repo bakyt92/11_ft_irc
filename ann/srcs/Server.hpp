@@ -99,6 +99,7 @@ public:
   int                      execPing();
   int                      execPong();
   int                      execWhois();
+  int                      execPart();
   int                      execCap();
   void                     printNewCli(int fd);
   void                     printCmd();
