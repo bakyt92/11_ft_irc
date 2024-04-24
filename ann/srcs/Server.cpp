@@ -51,7 +51,7 @@ string mode(Ch *ch) { // +o ?
 }
 
 int Server::send_(Cli *to, string msg) {
-  cout << "I send to " << to->fd << "              : [" << msg << "]\n";
+  cout << "I send to " << to->fd << "                : [" << msg << "]\n";
   msg += "\r\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
@@ -82,7 +82,7 @@ void Server::printServState() { // for debugging only
     cout << "[" << it->second->nick << "] ";
   cout << endl;
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << "My channel                 : name = " << ch->first << ", users = ";
+    cout << "My channel                : name = " << ch->first << ", topic = " << ch->second->topic << ", pass = " << ch->second->pass << ", users = ";
     for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
       cout << (*itCli)->nick << " ";
     cout << ", mode = " << mode(ch->second) << endl;
@@ -269,7 +269,7 @@ int Server::execPrivmsg() {
   if(ar.size() == 1) 
     return send_(cli, ":No recipient given (" + ar[1] + ")");                     // ERR_NORECIPIENT
   if(ar.size() == 2)
-    return send_(cli, ":No text to send");                                        // ERR_NOTEXTTOSEND
+    return send_(cli, ":No text to send");                                       // ERR_NOTEXTTOSEND
   vector<string> tos = split(ar[1], ",");
   for (vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
