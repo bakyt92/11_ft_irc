@@ -36,8 +36,8 @@ Cli* Server::getCli(string &name) {
   return NULL;
 }
 
-string mode(Ch *ch) {
-  string mode = "mode ";
+string mode(Ch *ch) { // +o ?
+  string mode = "";
   if (ch->optT == true)
     mode += "t";
   if (ch->optI == true)
@@ -50,29 +50,16 @@ string mode(Ch *ch) {
   //static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
-int send_(Cli *cli, string msg) {
-  if (msg != "") {
-    msg += "\r\n";
-    send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-  }
+int Server::send_(Cli *to, string msg) {
+  msg += "\r\n";
+  send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
 }
 
-int send_(set<Cli*> clis, string msg) {
-  for (set<Cli*>::iterator cli = clis.begin(); cli != clis.end(); cli++) 
-    send_(*cli, msg);
-  return 0;
-}
-
-int send_(map<int, Cli*> clis, string msg) {
-  for (map<int, Cli*>::iterator cli = clis.begin(); cli != clis.end(); cli++) 
-    send_(cli->second, msg);
-  return 0;
-}
-
-int send_(Ch *ch, string msg) {
-  for (set<Cli*>::iterator cli = ch->clis.begin(); cli != ch->clis.end(); cli++) 
-    send_(*cli, msg);
+int Server::send_(Ch *ch, string msg) {
+  for (set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
+    if ((*to)->fd != cli->fd)
+      send_(*to, msg);
   return 0;
 }
 
@@ -94,10 +81,10 @@ void Server::printServState() { // for debugging only
     cout << "[" << it->second->nick << "] ";
   cout << endl;
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << "My channel                 : " << ch->first << ", users: ";
+    cout << "My channel                 : name = " << ch->first << ", users = ";
     for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
       cout << (*itCli)->nick << " ";
-    cout << ", " << mode(ch->second) << endl;
+    cout << ", mode = " << mode(ch->second) << endl;
   }
   cout << endl;
 }
@@ -287,27 +274,28 @@ int Server::execPrivmsg() {
     if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
       send_(cli, *to + " :No such nick/channel");                                 // ERR_NOSUCHNICK
     else if((*to)[0] == '#' && chs[*to]->clis.find(cli) != chs[*to]->clis.end())    // ERR_NOTONCHANNEL нужно ?
-      send_(chs[*to], cli->rName + " PRIVMSG " + *to + " " + ar[2]);
+      send_(chs[*to], cli->rName + " PRIVMSG " + *to + " :" + ar[2]);
     else
-      send_(getCli(*to), cli->rName + " PRIVMSG " + *to + " " + ar[2]);
+      send_(getCli(*to), cli->rName + " PRIVMSG " + *to + " :" + ar[2]);
   return 0;
 }
 
+// the user receives a JOIN message as confirmation 
+//  the channel's topic (using RPL_TOPIC)
+// the list of users who are on the channel (using RPL_NAMREPLY), which MUST include the user joining
 int Server::execJoin() {
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 2)
     return send_(cli, "461 :JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ",");
-  //vector<string> passes  = ar.size() > 2 ? split(ar[2], ",") : vector<string>();  // доделать
-  //passes.insert(passes.end(), chNames.size() - passes.size(), 0);
-  size_t i = 0;
-  for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++, i++) {
+  //vector<string> passes  = ar.size() > 2 ? split(ar[2], ",") : vector<string>();
+  for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     if(chName->size() > 200 || (*chName)[0] != '#') // проверить
       send_(cli, *chName + " :Cannot join channel (bad channel name)");           // ?
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName]; // ERR_NOSUCHCHANNEL ? 
-      //string pass = passes.size() > i ? passes[i] : "";
+      // string pass = passes.size() > i ? passes[i] : "";
       // if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
       //   send_(cli, *chName + " :Cannot join channel (+k)\n");                    // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit) 
@@ -316,8 +304,8 @@ int Server::execJoin() {
         send_(cli, *chName + " :Cannot join channel (+i)");                       // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        send_(chs[*chName], cli->nick + " JOIN :" + *chName);
-        send_(cli, *chName + " " + chs[*chName]->topic + mode(chs[*chName])); 
+        send_(chs[*chName], cli->nick + " JOIN :" + *chName);  // объедиить два send
+        send_(cli, *chName + " " + chs[*chName]->topic + " " + mode(chs[*chName])); 
       }                                                                             // нужно ли исключение "пользователь уже на канале" ?   
     }
   }
@@ -414,7 +402,7 @@ int Server::execMode() {
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end())
     return send_(cli, ar[1] + " :You're not channel operator");                   // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
-    return send_(cli, ar[1] + " " + mode(chs[ar[1]]));                            // RPL_CHANNELMODEIS
+    return send_(cli, ar[1] + " mode = " + mode(chs[ar[1]]));                            // RPL_CHANNELMODEIS
   if(ar.size() == 3 && ar[2] == "+i")
     return (chs[ar[1]]->optI = true);
   if(ar.size() == 3 && ar[2] == "-i")

@@ -83,6 +83,8 @@ public:
   void                     init();
   void                     run();
   Cli*                     getCli(string &name);
+  int                      send_(Cli *to, string msg);
+  int                      send_(Ch *ch, string msg);
   int                      exec(); 
   int                      execPass();
   int                      execNick();
