@@ -30,55 +30,22 @@
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
 * `valgrind`, закрытие сокетов
 
-## Выбрать клиент
-* **irssi**
-  + есть на школьных компах
-  + под него пришлось кое-где специально подстраиваться
-  + Irssi envoie la commande CAP en plus de NICK et USER (discord)
-    - https://scripts.irssi.org/scripts/cap_sasl.pl
-    - CAP LS [version] to discover the available capabilities on the server, типа `CAP * LS :multi-prefix sasl` ?
-    - CAP REQ to blindly request a particular set of capabilities
-    - CAP END
-    - Upon receiving either a CAP LS or CAP REQ command during connection registration, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
-    - https://ircv3.net/specs/extensions/capability-negotiation.html
-  + аня на личном компе:
-    - скачала irssi https://doc.ubuntu-fr.org/irssi
-    - запустила наш сервер на порту 6667
-    - ввела в терминале `irssi`
-    - в самом irssi ввела команду `/connect 0`, он посылает `CAP LS` нашему серверу
-* **kvirc**
-  + скачать https://github.com/kvirc/KVIrc
-  + `# mkdir build && cd build`
-  + `# cmake ..`
-    - у Ани в этом месте не получается:
-    - -- Configuring incomplete, errors occurred!
-    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeOutput.log".
-    - See also "/mnt/md0/42/irc-group/kvirc_client/build/CMakeFiles/CMakeError.log".
-  + `# make install`
-* [Kiwi IRC](https://kiwiirc.com) `Web`
-  + аккаунт 1AQ2ZS3ED
-  + пробую через web, ввожу IP своего компа, через 1-2 минута наш сервер получает команды `CAP LS`, `NICK an`, `USER an an 0 :an`, но не отечает 
-* ngircd
-  + кто-то в дискорде тестировал с ним
-* sur mac tu peux faire un brew install ircd
-* [HexChat](https://hexchat.github.io)
-* [gamja](https://sr.ht/~emersion/gamja/) `Web`
-* [sic](https://tools.suckless.org/sic/) a terminal client
-  + usage: sic [-h host] [-p port] [-n nick] [-k keyword] [-v]
-* [Quassel](https://quassel-irc.org) 
-* [Yaaic](https://www.yaaic.org) `Android`
-* [relay.js](https://github.com/Fauntleroy/relay.js) `Web`
-* [Circe](https://github.com/emacs-circe/circe) for use in Emacs, sane defaults `Emacs`
-* [Smuxi](https://smuxi.im) 
-* [Konversation](https://konversation.kde.org) 
-* [Revolution IRC](https://github.com/MCMrARM/revolution-irc) `Android`
-* [IRC for Android](https://www.countercultured.net/android/) `Android`
-* [Iridium](https://appcenter.elementary.io/com.github.avojak.iridium/) 
-* [IRC Vitamin](https://play.google.com/store/apps/details?id=com.todoartedigital.chuecamobile.irc.vitamin) `Android`
-* anope
-* oragono
-* ne faites pas irc omg
-* Bv champion
+## Наладить связть с irssi
+* Irssi envoie la commande CAP en plus de NICK et USER (discord)
+  + https://scripts.irssi.org/scripts/cap_sasl.pl
+  + CAP LS [version] to discover the available capabilities on the server, типа `CAP * LS :multi-prefix sasl` ?
+  + CAP REQ to blindly request a particular set of capabilities
+  + CAP END
+  + Upon receiving either a CAP LS or CAP REQ command during connection registration, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
+  + https://ircv3.net/specs/extensions/capability-negotiation.html
+  + pour que la connexion marche avec irssi, il faut envoyer au nouveau client connecté la RPL 001 pour que irssi comprenne que c'est good il est bien co 
++ le bail de CAP, tu peux soit ignorer la command, soit mettre command not found, soit renvoyer une response de CAP disant que tu gere aucune capabilities (meilleur idée je pense) 
+* аня на личном компе:
+  + скачала irssi https://doc.ubuntu-fr.org/irssi
+  + запустила наш сервер на порту 6667
+  + ввела в терминале `irssi`
+  + в самом irssi ввела команду `/connect 0`, он посылает `CAP LS` нашему серверу
+* альтернативы irssi: kvirc, ngircd, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
@@ -194,3 +161,4 @@
 * [Сетевое программирование от Биджа. Использование	Интернет Сокетов. (кратко)](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 * https://www.irchelp.org/
 * https://ircgod.com/ (!)
+* https://stackoverflow.com/questions/27705753/should-i-use-pass-before-nick-user/27708209#27708209
