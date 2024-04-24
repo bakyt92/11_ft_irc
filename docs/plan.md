@@ -27,7 +27,10 @@
 * The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
 * wireshark не понимаю, как использоать, вроде это полезная утилита
-  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. Dans le meilleur des cas tu utilises un serv irc dans docker et un client irc. Puis tu sniff avec wireshark pour regarder ce qui est send. Puis tu t'adapte. 
+  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. Dans le meilleur des cas tu utilises un serv irc dans docker et un client irc. Puis tu sniff avec wireshark pour regarder ce qui est send. Puis tu t'adapte.
+  + Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
+  + **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
+  + wireshark, netcat etc
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
@@ -43,7 +46,7 @@
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi `/connect 0 -tls_pass 2`
-* альтернативы irssi: kvirc, bitchx(хвалят), ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
+* альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
@@ -51,6 +54,8 @@
 * irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
 * freenode
 * liberachat
+* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
+
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
@@ -121,26 +126,21 @@
 ## Читаю группу дискорд:
 * кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
 * в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
-* l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
-* votre serveur il fonctionne avec irssi wechat hexchat etc... ?
-* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
-* une peerclass irc ptdr (не поняла совсем)
 * If a client send a CAP command, ignore it, don’t throw an error
 * To test ipv6 you can use irssi and add -6 during the /connect
-* IRC default port is **6667**, use it, it’s annoying to specify it while testing in a defense (when using irssi for example, specifying 6667 every time at the end is boring)
+* IRC default port is 6667
 * Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
   + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
-  + pour ca que faut normalement utiliser select pour lire
 * **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
-* Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
-* you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
 * that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
 * on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
-* Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
+* Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr)
+  + ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ?
+  + l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 * tout les messages doivent finir par **\r\n**
-* pour stats, vous avez fait comment pour compter le nombre de byte qu'envoie tel ou tel commande au total depuis le debut du lancement du serv ?
 * Le serveurs n'a le droit qu'a un seul send() par client pour chaque poll() ou select() (?)
 * you only are allowed to do 1 (one) send() per select()
+*  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
 * остановилась на сообщении Ah. On a pris libera chat comme référence depuis le début lol.
 
 ## Инфо
