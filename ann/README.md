@@ -27,19 +27,18 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + 2) команда
     + правильная IRC-команда или трехзначное число, представленное в ASCII-тексте
   + 3) параметры команды
-     + до 15 параметров
 * Перенос строки невозможен
 * `<reply> ::= <nick>['*'] '=' <hostname>` '*' обозначает, что клиент зарегистрирован как IRC-оператор
-* Специальнае случаи, которые навернео нам не нужны
+* Специальнае случаи, которые наверное нам не нужны
   + `:Angel!localhost PRIVMSG Wiz`       a message from Angel to Wiz
   + `PRIVMSG jto@localhost :Hello`       a message to a user "jto" on server localhost
   + `PRIVMSG kalt%localhost`             a message to a user on the local server with username of "kalt", and connected from the localhost
   + `PRIVMSG Wiz!jto@localhost :Hello` a message to the user with nickname Wiz who is connected from the localhostand has the username "jto"
 * Сообщение NOTICE используеьтся подобно PRIVMSG.
-  + Отличия между ними в том, что на NOTICE-сообщение ждать автоматического ответа бесполезно.
-  + Это правило распространяется и на серверы, - они не должны отсылать обратно сообщения-NOTICE клиентам, содержащие ошибки
-  + Обьект этого правила заключается в петле между клиентом, автоматически посылающим что-либо в ответ на что-либо полученное
-  + Обычно это используется автоматами (клиентами с AI или другой интерактивной программой, управляющей их действиями)
+  + Отличия между ними в том, что на NOTICE-сообщение ждать автоматического ответа бесполезно
+  + Это правило распространяется и на серверы
+*  most public IRC servers don't usually set a connection password
+  + PASS only required if a password is required to connect to a serve
 
 ## TCP
 * гарантирует надёжность с точки зрения потока (UDP не гарантирует) 
