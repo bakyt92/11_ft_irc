@@ -71,16 +71,14 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
 * You could send 100 1 byte chunks and receive 4 25 byte messages
 * **You must deal with message boundaries yourself**
 
-## Introduction to non-blocking I/O
+## Non-blocking I/O
 * http://www.kegel.com/dkftpbench/nonblocking.html
-* Programs that use non-blocking I/O tend to follow the rule that every function has to return immediately, i.e. all the functions in such programs are nonblocking
-* Thus control passes very quickly from one routine to the next.
-* Many objects need to wait for time to pass or for an external event to occur, but because their methods must return immediately, they can't do the obvious or natural thing.
+* Programs that use non-blocking I/O: every function has to return immediately, i.e. all the functions in such programs are nonblocking
 * Instead, they use the "state machine" technique.
 * ...
 *  A way to query the available data on a socket
-  + You could use Non-bloking sockets, or select()/poll() for that matter
-  + I prefer non-blocking sockets because I can do other things while waiting for new data
+  + Non-bloking sockets
+  + select()/poll()
 
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
@@ -100,7 +98,6 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
   + NULL: un dépassement du délai d'attente et qu'aucun descripteur de fichier n'était prêt
   + -1: s'ils échouent, errno contient le code d'erreur  
-* poll() has inspired yet another mechanism in modern Linux kernels: epoll() which improves even more upon the mechanism to allow yet another leap in scalability http://scotdoyle.com/python-epoll-howto.html
 
 ```
 struct pollfd {
@@ -109,6 +106,12 @@ struct pollfd {
     short revents;    /* Événements détectés    */
 };
 ```
+## epoll()
+* improves upon the mechanism
+* http://scotdoyle.com/python-epoll-howto.html
+
+## kqueue()
+...
 
 ## select() 
 * three bitmasks to mark which fd-s you want to watch for reading, writing, errors
