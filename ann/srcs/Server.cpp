@@ -461,7 +461,7 @@ int Server::execCap() {
   }
   if(ar.size() >= 2 && ar[1] == "END") {
     cli->capOk = true;
-    return send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
+    return send_(cli, "001 :Welcome to the Internet Relay Network " + cli->uName); // RPL_WELCOME
   }
   return 0;
 }
