@@ -25,9 +25,10 @@
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
 * The command MUST either be a valid IRC command or a three (3) digit number represented in ASCII text - то есть возможно надо понимать просто сообщения-числа?
-* This specification adds a new batch type and tag sent by clients and servers to send messages that can exceed the usual byte length limit and that can contain line breaks - надеюсь, нам это не надо
-* `RCv3 extensions` что это, нужно ли
+* This specification adds a new batch type and tag sent by clients and servers to send messages that can exceed the usual byte length limit and that can contain line breaks - нужно ли?
+* `RCv3 extensions` нужно ли?
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
+* wireshark не понимаю, как использоать, вроде это полезная утилита
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
