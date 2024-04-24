@@ -27,6 +27,7 @@
 * The command MUST either be a valid IRC command or a three (3) digit number represented in ASCII text - то есть возможно надо понимать просто сообщения-числа?
 * This specification adds a new batch type and tag sent by clients and servers to send messages that can exceed the usual byte length limit and that can contain line breaks - надеюсь, нам это не надо
 * `RCv3 extensions` что это, нужно ли
+* когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
 * `valgrind`, закрытие сокетов
 
 ## Выбрать клиент
