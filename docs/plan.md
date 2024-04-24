@@ -27,6 +27,7 @@
 * The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
 * wireshark не понимаю, как использоать, вроде это полезная утилита
+  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. Dans le meilleur des cas tu utilises un serv irc dans docker et un client irc. Puis tu sniff avec wireshark pour regarder ce qui est send. Puis tu t'adapte. 
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
@@ -42,13 +43,15 @@
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi `/connect 0 -tls_pass 2`
-* альтернативы irssi: kvirc, ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
+* альтернативы irssi: kvirc, bitchx(хвалят), ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
 * server is 90% of the time built according to oragono irc server https://oragono.io/
 * irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
-
+* freenode
+* liberachat
+  
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
 * rfc 2813 messages server -> server, нам не нужно
@@ -137,6 +140,7 @@
 * tout les messages doivent finir par **\r\n**
 * pour stats, vous avez fait comment pour compter le nombre de byte qu'envoie tel ou tel commande au total depuis le debut du lancement du serv ?
 * Le serveurs n'a le droit qu'a un seul send() par client pour chaque poll() ou select() (?)
+* you only are allowed to do 1 (one) send() per select()
 * остановилась на сообщении Ah. On a pris libera chat comme référence depuis le début lol.
 
 ## Инфо
