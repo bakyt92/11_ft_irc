@@ -92,6 +92,7 @@ void Server::printServState() { // for debugging only
   cout << "My clients                : ";
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
     cout << "[" << it->second->nick << "] ";
+  cout << endl;
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
     cout << "My channel                 : " << ch->first << ", users: ";
     for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
@@ -472,9 +473,10 @@ int Server::execCap() {
   else if(ar.size() >= 2 && ar[1] == "END") {
     cli->capOk = true;
     send_(cli, "001"); // :Welcome to the Internet Relay Network " + cli->uName); // RPL_WELCOME
-    send_(cli, "002"); // :Your host is " + cli->host  + ", running version 1.0");            // RPL_YOURHOST
-    send_(cli, "003"); // :This server was created 24.04.2024");                  // RPL_CREATED // ?
-    send_(cli, "004"); // :ircserv 1.0  ptkio");                                // RPL_MYINFO
+    //send_(cli, "002"); // :Your host is " + cli->host  + ", running version 1.0");            // RPL_YOURHOST
+    //send_(cli, "003"); // :This server was created 24.04.2024");                  // RPL_CREATED // ?
+    //send_(cli, "004"); // :ircserv 1.0  ptkio");                                // RPL_MYINFO
+    // 1 send() per select() !!!
   }
   return 0;
 }
