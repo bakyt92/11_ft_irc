@@ -56,7 +56,8 @@ int Server::send_(Cli *to, string msg) {
     toPrint.replace(pos, 2, "\n                            ");
   toPrint = toPrint.substr(0, toPrint.size()-29);
   cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
-  msg += "\r\n";
+  if (msg.substr(msg.size() - 3, 2) != "\r\n")
+    msg += "\r\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
 }
