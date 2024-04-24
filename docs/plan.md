@@ -77,7 +77,6 @@
 * anope
 * oragono
 * ne faites pas irc omg, Bv champion
-* ircd.tar.gz is just a basic tcp server, not an irc server, it’s not useful
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
