@@ -11,15 +11,21 @@ void Server::sigHandler(int sig) {
   (void)sig;
 }
 
-std::vector<string> split(string s, char delim) {
+std::vector<string> split(string s, string delim) {
   std::vector<string> parts;
   for (size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
-    if (pos > 0) 
-      parts.push_back(s.substr(0, pos));
-    s.erase(0, pos + 1);
+    if (pos > 0) {
+      string part = s.substr(0, pos);
+      part.erase(std::remove(part.begin(), part.end(), '\r'), part.end());
+      parts.push_back(part);
+    }
+    s.erase(0, pos + delim.size());
   }
-  if (s.size()>0) 
-    parts.push_back(s);
+  if (s.size()>0) {
+    string part = s;
+    part.erase(std::remove(part.begin(), part.end(), '\r'), part.end());
+    parts.push_back(part);
+  }
   return parts;
 }
 
@@ -37,7 +43,7 @@ string mode(Ch *ch) {
 int send_(Cli *cli, string msg) {
   if (msg != "") {
     msg += "\r\n";
-    cout << "I send to fd=" << cli->fd << ":                      " + msg;
+    cout << "I send to fd=" << cli->fd << "            : " + msg;
     send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   }
   return 0;
@@ -62,22 +68,22 @@ int send_(Ch *ch, string msg) {
 }
 
 void Server::printNewCli(int fd) { // for debugging only
-  cout << "I have got new cli fd=" << fd << endl;
+  cout << "New cli (fd=" << fd << ")" << endl;
 }
 
 void Server::printCmd() { // for debugging only
-  cout << " I have received from fd=" << cli->fd << "         : ";
+  cout << "I execute (cmd from fd=" << cli->fd << ") : ";
   for (vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
-    cout << *it << " ";
+    cout << "[" << *it << "]" << " ";
   cout << endl;
 }
 
 void Server::printServState() { // for debugging only
-  cout << "My clients are:                      ";
+  cout << "My clients are            : ";
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
     cout << "[" << it->second->nick << "] ";
   for (map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << endl << "My channel:                          " << ch->first << ", users: ";
+    cout << endl << "My channel                 : " << ch->first << ", users: ";
     for (set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
       cout << (*itCli)->nick << " ";
     cout << ", " << mode(ch->second) << "\n";
@@ -157,9 +163,9 @@ void Server::run() {
           else {
             string bufS = string(buf.begin(), buf.end());
             bufS.resize(bytes);
-            std::vector<string> cmds = split(bufS, '\n');             // if empty ? 
+            std::vector<string> cmds = split(bufS, "\n");            // if empty ? 
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
-              ar = split(*cmd, ' ');                                  // if (ar[0][0] == ':') ar.erase(ar.begin()); // нужен ли префикс?
+              ar = split(*cmd, " ");                                  // if (ar[0][0] == ':') ar.erase(ar.begin()); // нужен ли префикс?
               if (cli) {
                 printCmd();
                 exec();
@@ -219,9 +225,9 @@ int Server::execPass() {
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0) 
     return send_(cli, ":No nickname given");                                      // ERR_NONICKNAMEGIVEN
-  //for (size_t i = 0; i < ar[1].size() && ar[1].size() <= 9; ++i)
-  //  if(string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(ar[1][i]) == string::npos)
-  //    return send_(cli, ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
+  for (size_t i = 0; i < ar[1].size() && ar[1].size() <= 9; ++i)
+    if(string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(ar[1][i]) == string::npos)
+      return send_(cli, ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
   for (std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if(itCli->second->nick.size() == ar[1].size()) {
       bool nickInUse = true;
@@ -257,7 +263,7 @@ int Server::execPrivmsg() {
     return send_(cli, ":No recipient given (" + ar[0] + ")");                     // ERR_NORECIPIENT
   if(ar.size() == 2)
     return send_(cli, ":No text to send");                                        // ERR_NOTEXTTOSEND
-  vector<string> tos = split(ar[1], ',');
+  vector<string> tos = split(ar[1], ",");
   for (vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
       send_(cli, *to + " :No such nick/channel");                                 // ERR_NOSUCHNICK
@@ -273,8 +279,8 @@ int Server::execJoin() {
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 2)
     return send_(cli, "JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
-  vector<string> chNames = split(ar[1], ',');
-  //vector<string> passes  = ar.size() > 2 ? split(ar[2], ',') : vector<string>();  // доделать
+  vector<string> chNames = split(ar[1], ",");
+  //vector<string> passes  = ar.size() > 2 ? split(ar[2], ",") : vector<string>();  // доделать
   //passes.insert(passes.end(), chNames.size() - passes.size(), 0);
   size_t i = 0;
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++, i++) {
@@ -341,8 +347,8 @@ int Server::execKick() {
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 3)
     return send_(cli, "KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
-  std::vector<string> chNames    = split(ar[1], ',');
-  std::vector<string> targetClis = split(ar[2], ',');
+  std::vector<string> chNames    = split(ar[1], ",");
+  std::vector<string> targetClis = split(ar[2], ",");
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     if(chs.find(*chName) == chs.end())
       send_(cli, *chName + " :No such channel");                                  // ERR_NOSUCHCHANNEL
@@ -428,7 +434,7 @@ int Server::execPing() {
 int Server::execWhois() {
   if(ar.size() < 2)
     return send_(cli, ":No nickname given");                                      // ERR_NONICKNAMEGIVEN
-  std::vector<string> nicks = split(ar[1], ',');
+  std::vector<string> nicks = split(ar[1], ",");
   for (vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
       send_(cli, ar[1] + " :No such nick");                                       // ERR_NOSUCHNICK
@@ -438,8 +444,7 @@ int Server::execWhois() {
 }
 
 int Server::execCap() {
-  cout << "ar.size = " << ar.size() << " ar[0] = [" << ar[0] << "] ar[1] = [" << ar[1] << "] bool = " << (ar[1] == "LS") << endl;
-  //if(ar.size() >= 2 && ar[1] == "LS")
+  if(ar.size() >= 2 && ar[1] == "LS")
     return send_(cli, "CAP * LS :");
   return 0;
 }
