@@ -14,7 +14,7 @@
 * должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
-  + в дискорде пишут надо только `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
+  + в дискорде пишут можно вщять названия каналов только `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
   + Параметр <receiver> может быть маской хоста (#mask) или маски сервера ($mask)
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
@@ -30,6 +30,7 @@
   + to inspect communication between your reference server (or your server) and you your client
   + we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
   + to easily debug your server and also gives you the ability to check how already existing one behaves
+* Once a user has joined a channel, he receives information about all commands his server receives affecting the channel: JOIN, MODE, KICK, QUIT and of course PRIVMSG/NOTICE
 * non-blocking
   + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
 * сигналы
