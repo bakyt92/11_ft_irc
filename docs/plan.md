@@ -44,7 +44,7 @@
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi команда `/connect 0` ? или `+ /connect 0 -tls_pass 2` ?`
-* альтернативы irssi: kvirc, ngircd, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
+* альтернативы irssi: kvirc, ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
