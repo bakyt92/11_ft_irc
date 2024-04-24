@@ -2,7 +2,7 @@
 ////////////////////////////////////////////////////////////////////////////// UTILS
 Server::~Server() {
   // close all fd 
-  // free clis, chs
+  // free clis, chs ?
 }
 
 void Server::sigHandler(int sig) {
@@ -450,6 +450,7 @@ int Server::execPing() {
 int Server::execPong() {
   return send_(cli, "PING");
 }
+
 // not implemented here: RPL_WHOISCHANNELS RPL_WHOISOPERATOR RPL_AWAY RPL_WHOISIDLE                 
 int Server::execWhois() {
   if(ar.size() < 2)
