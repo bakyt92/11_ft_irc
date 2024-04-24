@@ -51,7 +51,11 @@ string mode(Ch *ch) { // +o ?
 }
 
 int Server::send_(Cli *to, string msg) {
-  cout << "I send to fd=" << to->fd << "            : [" << msg << "]\n";
+  string toPrint(msg);
+  for(size_t pos = toPrint.find("\r\n"); pos != string::npos; pos = toPrint.find("\r\n", pos))
+    toPrint.replace(pos, 2, "\n                            ");
+  toPrint = toPrint.substr(0, toPrint.size()-29);
+  cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
   msg += "\r\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   return 0;
