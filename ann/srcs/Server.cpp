@@ -37,13 +37,22 @@ Cli* Server::getCli(string &name) {
 }
 
 string mode(Ch *ch) {
-  return "mode: top=" + ch->topic + " optT=" + (ch->optT ? "1" : "0") + " optI=" + (ch->optI ? "1" : "0") + " pass=" + ch->pass + " lim=" + (static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
+  string mode = "mode ";
+  if (ch->optT == true)
+    mode += "t";
+  if (ch->optI == true)
+    mode += "i";
+  if (ch->pass != "")
+    mode += "k";
+  if (ch->limit < std::numeric_limits<unsigned int>::max())
+    mode += "l";
+  return mode;
+  //static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
 int send_(Cli *cli, string msg) {
   if (msg != "") {
     msg += "\r\n";
-    cout << "I send to fd=" << cli->fd << "            : " + msg;
     send(cli->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
   }
   return 0;
@@ -219,6 +228,8 @@ int Server::execPass() {
     return send_(cli, ":You may not reregister");                                 // ERR_ALREADYREGISTRED 
   if(ar[1] == pass)
     cli->passOk = true;
+  if (cli->nick != "" && cli->uName != "" && cli->capOk)
+    send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
   return 0;
 }
 
@@ -239,25 +250,25 @@ int Server::execNick() {
     }
   }
   cli->nick = ar[1];
-  if(cli->uName != "")
-    send_(cli, cli->nick + " " + cli->uName);
+  if(cli->uName != "" && cli->passOk && cli->capOk)
+    send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
   return 0;
 }
 
 int Server::execUser() {
   if(ar.size() < 5)
-    return send_(cli, "USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
+    return send_(cli, "USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(cli->uName != "")
-    return send_(cli, ":You may not reregister");                                 // ERR_ALREADYREGISTRED 
+    return send_(cli, ":You may not reregister");                                 // ERR_ALREADYREGISTRED
   cli->uName = ar[1];
   cli->rName = ar[4];
-  if (cli->nick != "")
-    send_(cli, cli->nick + " " + cli->uName);
+  if (cli->nick != "" && cli->passOk && cli->capOk)
+    send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
   return 0;
 }
 
 int Server::execPrivmsg() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "") // ?
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() == 1) 
     return send_(cli, ":No recipient given (" + ar[0] + ")");                     // ERR_NORECIPIENT
@@ -275,7 +286,7 @@ int Server::execPrivmsg() {
 }
 
 int Server::execJoin() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 2)
     return send_(cli, "JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
@@ -306,7 +317,7 @@ int Server::execJoin() {
 }
 
 int Server::execInvite() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 3)
     return send_(cli, "INVITE :Not enough parameters");                           // ERR_NEEDMOREPARAMS 
@@ -324,7 +335,7 @@ int Server::execInvite() {
 }
 
 int Server::execTopic() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 1)
     return send_(cli, "TOPIC :Not enough parameters");                            // ERR_NEEDMOREPARAMS
@@ -343,7 +354,7 @@ int Server::execTopic() {
 }
 
 int Server::execKick() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "")                   
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
     return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 3)
     return send_(cli, "KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
@@ -444,8 +455,14 @@ int Server::execWhois() {
 }
 
 int Server::execCap() {
-  if(ar.size() >= 2 && ar[1] == "LS")
+  if(ar.size() >= 2 && ar[1] == "LS") {
+    cli->capOk = false;
     return send_(cli, "CAP * LS :");
+  }
+  if(ar.size() >= 2 && ar[1] == "END") {
+    cli->capOk = true;
+    return send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
+  }
   return 0;
 }
 
@@ -457,5 +474,5 @@ int main(int argc, char *argv[]) {
   Server s = Server(argv[1], argv[2]);
   s.init();
   s.run();
-  return 0; 
+  return 0;
 }
