@@ -31,6 +31,7 @@
   + Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
   + **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
   + wireshark, netcat etc
+* non-blocking https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
@@ -46,7 +47,8 @@
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi `/connect 0 -tls_pass 2`
-* альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
+* https://hub.docker.com/_/irssi
+* альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
@@ -55,7 +57,7 @@
 * freenode
 * liberachat
 * pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
-
+* don't use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
@@ -141,7 +143,8 @@
 * Le serveurs n'a le droit qu'a un seul send() par client pour chaque poll() ou select() (?)
 * you only are allowed to do 1 (one) send() per select()
 *  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
-* остановилась на сообщении Ah. On a pris libera chat comme référence depuis le début lol.
+*  Operator password is not the same thing as server password
+* остановилась на сообщении ok donc l'erreur viens surement de moi, je pense que je confirme mal mais sincerement je recopie comme la RFC 2813
 
 ## Инфо
 * **most public IRC servers don't usually set a connection password**
