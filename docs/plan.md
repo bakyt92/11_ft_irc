@@ -171,3 +171,4 @@
 * https://www.irchelp.org/
 * https://ircgod.com/ (!)
 * https://stackoverflow.com/questions/27705753/should-i-use-pass-before-nick-user/27708209#27708209
+* [заметки Ани](https://github.com/bakyt92/11_ft_irc/edit/master/ann/README.md) 
