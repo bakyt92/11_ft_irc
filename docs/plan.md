@@ -141,8 +141,7 @@
 * остановилась на сообщении rssi envoie la commande CAP en plus de NICK et USER a la connection, possiblement si vous renvoyez une erreur ça pose problème
 
 ## Инфо
-* Используем клиент https://kiwiirc.com/nextclient/
-  + есть ещё такие варианты: limechat
+* **most public IRC servers don't usually set a connection password**
 * https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
 * https://modern.ircdocs.horse/   
 * https://irc.dalexhd.dev/index.html  
