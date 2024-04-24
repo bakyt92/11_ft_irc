@@ -42,9 +42,8 @@
   + есть на школьных компах
   + под него пришлось кое-где специально подстраиваться
   + Irssi envoie la commande CAP en plus de NICK et USER (discord)
-    - `CAP LS [version]` to discover the available capabilities on the server
     - https://scripts.irssi.org/scripts/cap_sasl.pl
-    - CAP LS [version] to discover the available capabilities on the server
+    - CAP LS [version] to discover the available capabilities on the server, типа `CAP * LS :multi-prefix sasl` ?
     - CAP REQ to blindly request a particular set of capabilities
     - CAP END
     - Upon receiving either a CAP LS or CAP REQ command during connection registration, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
