@@ -30,6 +30,7 @@
   + to inspect communication between your reference server (or your server) and you your client
   + we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
   + to easily debug your server and also gives you the ability to check how already existing one behaves
+* Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 * Once a user has joined a channel, he receives information about all commands his server receives affecting the channel: JOIN, MODE, KICK, QUIT and of course PRIVMSG/NOTICE
 * non-blocking
   + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
@@ -144,8 +145,6 @@
   + ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ?
   + l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 * tout les messages doivent finir par **\r\n**
-* Le serveurs n'a le droit qu'a un seul send() par client pour chaque poll() ou select() (?)
-* you only are allowed to do 1 (one) send() per select()
 *  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
 *  Operator password is not the same thing as server password
 * остановилась на сообщении ok donc l'erreur viens surement de moi, je pense que je confirme mal mais sincerement je recopie comme la RFC 2813
@@ -171,3 +170,4 @@
 * https://www.irchelp.org/
 * https://ircgod.com/ (!)
 * https://stackoverflow.com/questions/27705753/should-i-use-pass-before-nick-user/27708209#27708209
+* [заметки Ани](https://github.com/bakyt92/11_ft_irc/edit/master/ann/README.md) 

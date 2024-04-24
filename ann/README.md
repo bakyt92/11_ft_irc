@@ -1,15 +1,10 @@
 group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md   
 
-## IRC 
-* Internet Relay Chat
+## IRC = Internet Relay Chat
 * a text-based communication protocol on the Internet
-* real-time messaging that can be either public or private
-* Users can exchange direct messages and join group channels
-* IRC clients connect to IRC servers in order to join channels
-* IRC servers are connected together to form a network
 * use case https://dev.twitch.tv/docs/irc/ 
 
-## Сообщения (Internet Relay Chat Protocol - RFC 1459)
+## Сообщения (Internet Relay Chat Protocol)
 * https://www.lissyara.su/doc/rfc/rfc1459/ 
 * Серверы и клиенты создают сообщения на которые можно ответить, а можно и нет
 * Если сообщение содержит правильные команды, то клиенту следует ответить как полагается, но это не означает, что всегда можно дождаться ответа
@@ -29,7 +24,7 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + 3) параметры команды
 * Перенос строки невозможен
 * `<reply> ::= <nick>['*'] '=' <hostname>` '*' обозначает, что клиент зарегистрирован как IRC-оператор
-* Специальнае случаи, которые наверное нам не нужны
+* Специальнае случаи:
   + `:Angel!localhost PRIVMSG Wiz`       a message from Angel to Wiz
   + `PRIVMSG jto@localhost :Hello`       a message to a user "jto" on server localhost
   + `PRIVMSG kalt%localhost`             a message to a user on the local server with username of "kalt", and connected from the localhost
@@ -42,13 +37,13 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
 
 ## TCP
 * гарантирует надёжность с точки зрения потока (UDP не гарантирует) 
-* но есть ненадёжностью машин в сети
+* есть ненадёжностью машин в сети
 * не гарантирует, что каждый send() будет принят (recv()) соединением
 * TCP какое-то время хранит данные в своём буфере отправки, но в конечном итоге сбросит данные по таймауту
 * send() возвращает успешное выполнение, не зная, было ли сообщение успешного получено на стороне recv()
 * в случае разъединения потеряем данные
 * разработчик решает, как приложение реагирует на неожиданные разъединения
-  + насколько сильно вы будете пытаться узнать, действительно ли получающее приложение получило каждый бит передаваемых данных
+  + насколько сильно вы будете пытаться узнать, действительно ли получающее приложение получило каждый бит
   + можно реализовать подтверждающие сообщения
   + можно реализовать разметку сообщений идентификаторами
   + можно реализовать создание буфера
@@ -60,12 +55,11 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + можно прикладывать большие усилия к тому, чтобы подтвердить завершение длительной операции, но смириться с утерей данных, сообщающих о степени выполнения операции
   + многие приложения просто завершают работу, если происходит отключение в неожиданный момент
   + можно сделать отдельный цикл переподключения, который будет какое-то время спать, а затем пытаться переподключиться и если это удастся, продолжить обычную работу
-* понять, что соединение больше неактивно: пробовать recv() из сокета
 * обрабатывать потенциальные разъединения при любом вызове recv()
-* отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, а не регистрировать для этого обработчик сигналов
+* отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
   + добавить к send() и recv() MSG_NOSIGNAL
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
-* writing to that (не отвечающий) socket will cause a SIGPIPE and make my server crash
+* writing to non-responding socket will cause a SIGPIPE and make my server crash
   + `send(...MSG_NOSIGNAL)` = write() without SIGPIPE
 * TCP is stream oriented
   + You can't rely on "getting the whole message" at once, or in any predictable size of pieces
@@ -77,33 +71,34 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
 * You could send 100 1 byte chunks and receive 4 25 byte messages
 * **You must deal with message boundaries yourself**
 
-## Introduction to non-blocking I/O
+## Non-blocking I/O
 * http://www.kegel.com/dkftpbench/nonblocking.html
-* Programs that use non-blocking I/O tend to follow the rule that every function has to return immediately, i.e. all the functions in such programs are nonblocking
-* Thus control passes very quickly from one routine to the next.
-* Many objects need to wait for time to pass or for an external event to occur, but because their methods must return immediately, they can't do the obvious or natural thing.
+* Programs that use non-blocking I/O: every function has to return immediately, i.e. all the functions in such programs are nonblocking
 * Instead, they use the "state machine" technique.
 * ...
-
-##  A way to query the available data on a socket
-* You could use Non-bloking sockets, or select()/poll() for that matter
-* I prefer non-blocking sockets because I can do other things while waiting for new data
+*  A way to query the available data on a socket
+  + Non-bloking sockets
+  + select()/poll()
 
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
 * ждёт, пока один дескриптор из набора файловых дескрипторов не станет готов выполнить операцию ввода-вывода
+* the OS marks each of fd-s with the kind of event that occurred
 * если ни одно из запрошенных событий с файловыми дескрипторами не произошло или не возникло ошибок, то блокируется до их появления
-* fds = un tableau de structures nfds du type struct pollfd, l'ensemble des descripteurs de fichier à surveiller
+* fds = l'ensemble des descripteurs de fichier à surveiller
 * nfds = количество элементов в fds
   + если nfds 0, то
     - поле events игнорируется
     - полю revents возвращает ноль
     - это простой способ игнорирования файлового дескриптора в одиночном вызове poll()
     - это нельзя использовать для игнорирования файлового дескриптора 0
-* return le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
-* return NULL: un dépassement du délai d'attente et qu'aucun descripteur de fichier n'était prêt
+* better than select, because you can keep re-using the same data structure
 * POSIX: if the value of fd is less than 0, events shall be ignored, and revents shall be set to 0 in that entry on return from poll()
-* return -1: s'ils échouent, errno contient le code d'erreur  
+* returns:
+  + le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
+  + NULL: un dépassement du délai d'attente et qu'aucun descripteur de fichier n'était prêt
+  + -1: s'ils échouent, errno contient le code d'erreur  
+
 ```
 struct pollfd {
     int   fd;         
@@ -111,6 +106,17 @@ struct pollfd {
     short revents;    /* Événements détectés    */
 };
 ```
+## epoll()
+* improves upon the mechanism
+* http://scotdoyle.com/python-epoll-howto.html
+
+## kqueue()
+...
+
+## select() 
+* three bitmasks to mark which fd-s you want to watch for reading, writing, errors
+* the OS marks which ones have had some kind of activity
+* clunky and inefficient
 
 ## `listen(int s, int backlog)`
 1. listen слушает подключающихся
