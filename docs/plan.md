@@ -24,9 +24,7 @@
 * `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
-* The command MUST either be a valid IRC command or a three (3) digit number represented in ASCII text - то есть возможно надо понимать просто сообщения-числа?
-* This specification adds a new batch type and tag sent by clients and servers to send messages that can exceed the usual byte length limit and that can contain line breaks - нужно ли?
-* `RCv3 extensions` нужно ли?
+* The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
 * wireshark не понимаю, как использоать, вроде это полезная утилита
 * `valgrind`, закрытие сокетов
@@ -43,7 +41,7 @@
   + скачала irssi https://doc.ubuntu-fr.org/irssi
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
-  + в самом irssi команда `/connect 0` ? или `+ /connect 0 -tls_pass 2` ?`
+  + в самом irssi `/connect 0 -tls_pass 2`
 * альтернативы irssi: kvirc, ngircd, libera chatь HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
@@ -57,6 +55,7 @@
 * rfc 1459 устарел
 * https://modern.ircdocs.horse/
 * [IRCv3 Specifications](https://ircv3.net/irc/)
+* `RCv3 extensions` надеюсь нам не нужно 
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
