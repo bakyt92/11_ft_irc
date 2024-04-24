@@ -7,8 +7,6 @@
     - You could send 100 1 byte chunks and receive 4 25 byte messages.
     - **You must deal with message boundaries yourself**. (у нас messages boundaries это `\n`, правильно?)
   + Из RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя обычно оно бывает с разными командам. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
-  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
-  + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
   + у Ахмеда так считвыается: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
   + то же самое в littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
   + подводные камни tcp-ip сокетамов: данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это совсем не значит, что они могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
@@ -24,11 +22,19 @@
 * `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
 * **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
-* The command MUST either be a valid IRC command or a three (3) digit number represented in ASCII text - то есть возможно надо понимать просто сообщения-числа?
-* This specification adds a new batch type and tag sent by clients and servers to send messages that can exceed the usual byte length limit and that can contain line breaks - нужно ли?
-* `RCv3 extensions` нужно ли?
+* The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
 * когда мы в irssi, то как бы попадаем на канал и там остаёмся, нам тоже так надо?
-* wireshark не понимаю, как использоать, вроде это полезная утилита
+* **wireshark** / netcat / a custom **proxy** etc… to
+  + не понимаю, как использоать
+  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
+  + to inspect communication between your reference server (or your server) and you your client
+  + we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
+  + to easily debug your server and also gives you the ability to check how already existing one behaves
+* non-blocking
+  + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
+* сигналы
+  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
+  + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
@@ -43,20 +49,26 @@
   + скачала irssi https://doc.ubuntu-fr.org/irssi
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
-  + в самом irssi команда `/connect 0` ? или `+ /connect 0 -tls_pass 2` ?`
-* альтернативы irssi: kvirc, ngircd, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv
+  + в самом irssi `/connect 0 -tls_pass 2`
+* https://hub.docker.com/_/irssi
+* альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
 * server is 90% of the time built according to oragono irc server https://oragono.io/
 * irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
-
+* freenode
+* liberachat
+* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
+* don't use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
+  
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
 * rfc 2813 messages server -> server, нам не нужно
 * rfc 1459 устарел
 * https://modern.ircdocs.horse/
 * [IRCv3 Specifications](https://ircv3.net/irc/)
+* `RCv3 extensions` надеюсь нам не нужно 
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Имя канала обязательно начинается с `#`? Я пока сделала так, но кажется это неправильно, вроде бы `#` это маска хоста
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
@@ -119,25 +131,23 @@
 ## Читаю группу дискорд:
 * кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
 * в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
-* l'implementation qui respecte completement (ou presque) les rfc est celle d'ircnet
-* votre serveur il fonctionne avec irssi wechat hexchat etc... ?
-* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
-* une peerclass irc ptdr (не поняла совсем)
 * If a client send a CAP command, ignore it, don’t throw an error
 * To test ipv6 you can use irssi and add -6 during the /connect
-* IRC default port is **6667**, use it, it’s annoying to specify it while testing in a defense (when using irssi for example, specifying 6667 every time at the end is boring)
+* IRC default port is 6667
 * Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
   + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
-  + pour ca que faut normalement utiliser select pour lire
 * **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
-* Use wireshark / a custom **proxy** etc… to inspect communication between your reference server (or your server) and you your client
-* you MUST have to simplify the project by a LOT: **a proxy**, in our case we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py. But if you feel like, you can use wireshark netcat etc, but quite annoying to set up / use in my opinion. Having a proxy allows you to easily debug your server and also gives you the ability to check how already existing one behaves.
 * that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
 * on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
-* Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
+* Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr)
+  + ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ?
+  + l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 * tout les messages doivent finir par **\r\n**
-* pour stats, vous avez fait comment pour compter le nombre de byte qu'envoie tel ou tel commande au total depuis le debut du lancement du serv ?
-* остановилась на сообщении rssi envoie la commande CAP en plus de NICK et USER a la connection, possiblement si vous renvoyez une erreur ça pose problème
+* Le serveurs n'a le droit qu'a un seul send() par client pour chaque poll() ou select() (?)
+* you only are allowed to do 1 (one) send() per select()
+*  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
+*  Operator password is not the same thing as server password
+* остановилась на сообщении ok donc l'erreur viens surement de moi, je pense que je confirme mal mais sincerement je recopie comme la RFC 2813
 
 ## Инфо
 * **most public IRC servers don't usually set a connection password**
