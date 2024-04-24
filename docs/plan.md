@@ -136,7 +136,7 @@
 * Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr), ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ? ce qui nous casse les pieds c'est l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 * tout les messages doivent finir par **\r\n**
 * pour stats, vous avez fait comment pour compter le nombre de byte qu'envoie tel ou tel commande au total depuis le debut du lancement du serv ?
-* остановилась на сообщении rssi envoie la commande CAP en plus de NICK et USER a la connection, possiblement si vous renvoyez une erreur ça pose problème
+* остановилась на сообщении Ah. On a pris libera chat comme référence depuis le début lol.
 
 ## Инфо
 * **most public IRC servers don't usually set a connection password**
