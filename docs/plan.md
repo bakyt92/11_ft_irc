@@ -162,14 +162,18 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   + ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ?
   + l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 * tout les messages doivent finir par **\r\n**
-*  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
-*  Operator password is not the same thing as server password
-* остановилась на сообщении hello. on utilise irssi et on a jamais remarque ca c'est bizarre. Comment tu t'y prends?
+* Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
+* Operator password is not the same thing as server password
+* je me tape des residus "fantomes" de memoire..
+* Si j'ai bien compris, on doit renvoyer plusieurs réponses numériques (genre RPL_WHOISUSER RPL_WHOISCHANNELS, et RPL_WHOISSERVER par exemple) pour ensuite afficher les différentes infos sur un utilisateur de notre serveur IRC.
+Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un int, celui correspondant à un "numeric reply". Doit-on renvoyer plusieurs numeric reply ou bien un seul ? Si c'est le dernier, comment faire dans le cas de WHOIS pour afficher toutes les infos sur un utilisateur avec un seul "numeric reply" ?
+* остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
 
 ## мелкие вопросы
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 * в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
+* что делать, если админ покинул чат?
 
 ## Инфо
 * **most public IRC servers don't usually set a connection password**
