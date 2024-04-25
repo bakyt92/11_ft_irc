@@ -161,7 +161,7 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * tout les messages doivent finir par **\r\n**
 *  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
 *  Operator password is not the same thing as server password
-* остановилась на сообщении ok donc l'erreur viens surement de moi, je pense que je confirme mal mais sincerement je recopie comme la RFC 2813
+* остановилась на сообщении hello. on utilise irssi et on a jamais remarque ca c'est bizarre. Comment tu t'y prends?
 
 ## мелкие вопросы
 * точно ли нам не нужен ip-6
