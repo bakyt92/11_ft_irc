@@ -17,14 +17,6 @@
 * в проекте mariia есть "tokenize the buffer line by line"
 * Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 
-## должна ли наша PRIVMSG понимать маски и особые формы записи?
-  + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
-  + Борис проверяет `"${receiver}"`зачем-то
-  + Параметр <receiver> может быть маской хоста (#mask) или маски сервера ($mask)
-    - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
-    - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
-    - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-
 ## Programs that use non-blocking I/O: 
 * https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
 * http://www.kegel.com/dkftpbench/nonblocking.html
@@ -174,6 +166,7 @@ Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un i
 * `valgrind`, закрытие сокетов
 * в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
 * что делать, если админ покинул чат?
+* должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
