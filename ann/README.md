@@ -1,5 +1,8 @@
 group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md   
 IRC = Internet Relay Chat  
+* 1988 г
+* для группового общения, общаться через личные сообщения и обмениваться файлами
+* на основе IRC разработано множество мессенджеров, такие как: ICQ, Skype, Discord, Telegram, Slack, etc...
  
 ## Сообщения (Internet Relay Chat Protocol)
 * https://www.lissyara.su/doc/rfc/rfc1459/ 
