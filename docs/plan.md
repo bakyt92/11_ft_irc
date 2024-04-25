@@ -63,13 +63,13 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify script unnotify admin echo  lastlog op scrollback unquery alias eval layout oper server unsilence away exec links part servlist upgrade ban flushbuffer list ping set uptime beep foreach load query sethost userhost bind format log quit silence ver cat hash lusers quote squery version cd help map rawlog squit voice channel hilight me recode stats wait clear ignore mircdcc  reconnect statusbar wall completion info mode redraw time wallops connect invite motd rehash toggle who ctcp      ircnet  msg reload topic whois cycle ison names resize trace whowas dcc join nctcp restart ts window dehilight kick netsplit rmreconns unalias deop kickban network rmrejoins unban devoice kill nick save unignore  
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
-* Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
-* server is 90% of the time built according to oragono irc server https://oragono.io/
+* https://oragono.io/
 * irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
 * freenode
 * liberachat
-* pour tester j’ai pris des serveurs qui étaient déjà installés sur l’application Hexchat
-* don't use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
+* des serveurs qui étaient déjà installés sur l’application Hexchat
+* irc.ircgod.com:6667/6697
+* Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)** (rfc 2813 server -> server, нам не нужно, rfc 1459 устарел)
