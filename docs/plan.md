@@ -36,6 +36,8 @@
 * сигналы
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
+* сигналы
+* точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
