@@ -1,5 +1,5 @@
 ## может оказаться одна команда оказаться разбитой на несколько сообщений ?
-* у Бориса не может
+* у Бориса если команда длинне 512 символов, от просто отрасывает лишнее
 * TCP is a streaming protocol, not a message protocol
     - The only guarantee is that you send n bytes, you will receive n bytes in the same order
     - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
