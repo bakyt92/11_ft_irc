@@ -8,6 +8,7 @@
     - You can't rely on "getting the whole message" at once, or in any predictable size of pieces
     - You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
     - You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
+    - In order to process a command, you have to first **aggregate the received packets in order to rebuild it* (subject)
 * RFC 2812: IRC messages are always lines of characters terminated with a CR-LF pair, and these messages SHALL NOT exceed 512 characters in length, counting all characters including the trailing CR-LF. Thus, there are 510 characters maximum allowed for the command and its parameters. **There is no provision for continuation of message lines**. 
 * Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
 * littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
@@ -144,6 +145,7 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * https://github.com/markveligod/ft_irc
 * when a user joins a server you have to greed him with a welcome message
 * ставить @ перед ником админа?
+* Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...) (checklist)
 
 ## Читаю группу дискорд:
 * кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
