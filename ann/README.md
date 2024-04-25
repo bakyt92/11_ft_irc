@@ -173,11 +173,12 @@ struct pollfd {
     - сделать не весь сокет неблокирующим, а только данную операцию, подставив флаг MSG_NONBLOCK
     - перед чтением проверять, что в сокет что-то пришло. Это всякие poll, select и их вариации
 
-## Discord
-* apres avoir regarde les sources, c'est un exemple tres minimal de comment notre server est cense gerer les connections avec des clients. En C bien sur, parce que pourquoi pas. Et sans gerer les ipv6s et ...... Par contre leur utilisation de select est la bonne : il faut gerer les sockets comme des streams et uniquement mettre dans le write_set les streams qui contiennent qchose a afficher.
-* On doit gerer le cas ou on nous donne en parametre un host, et on doit rejoindre un reseau (comment faire reste un peu flou + si c'est le cas comment on fait sans gerer les communication entre serveurs) ou c'est une petite erreur dans le sujet ? Et quoiqu'il arrive on lance "localement" notre serveur + service IRC ?
-
-  
+## Сигналы
+Ctrl+D (End of File):
+Ctrl+D is a keyboard input that typically represents the end-of-file (EOF) character in Unix-like systems.
+When entered at the beginning of a line in a terminal, it signals the end of input to the terminal.
+It's commonly used to indicate the end of input when reading from stdin (standard input).
+It doesn't directly raise a signal like SIGPIPE. Instead, it's processed by the terminal or the program reading from stdin.
 
 ## Requirements
 * multiple clients at the same time

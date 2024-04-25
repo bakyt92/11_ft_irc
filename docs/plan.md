@@ -18,24 +18,24 @@
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-* `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
-* я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
-* **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
-* The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
-* когда мы в irssi, то после команды `join #ch` все сообщение идут в этот канал, нам тоже так надо?
-* **wireshark** / netcat / a custom **proxy** etc… to
-  + не понимаю, как использоать
-  + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
-  + to inspect communication between your reference server (or your server) and you your client
-  + we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
-  + to easily debug your server and also gives you the ability to check how already existing one behaves
-* Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
-* Once a user has joined a channel, he receives information about all commands his server receives affecting the channel: JOIN, MODE, KICK, QUIT and of course PRIVMSG/NOTICE
+* в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
+* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
+  + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
+  Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 * non-blocking
   + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
 * сигналы
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
+  + EOF processing (Control-D) is handled in canonical mode; it actually means 'make the accumulated input available to read()'; if there is no accumulated input (if you type Control-D at the beginning of a line), then the read() will return zero bytes, which is then interpreted as EOF by programs. Of course, you can merrily type more characters on the keyboard after that, and programs that ignore EOF (or run in non-canonical mode) will be quite happy 
+https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-input
+  + CTRL+D посылает 0 байт только если при пустой строке мы это вводим
+  + если вводим сначала символы и потом CTRL+D, то это своего рода сигнал отправить текущие символы из командной строки
+  + если брать наш пример `PRIV ^D MSG ^D Nickname Hello! \r \n`, то команда CTRL+D сначала отправит <PRIV EOF> - это видимо 6 байт, а потом <MSG EOF> - 5 байт, а не ноль
+  + Наверное в сабджекте имелось также в виду, что мы игнорируем входящие символы ^D. Получается это ^D равен четырем, то есть char c == 4
+    - https://stackoverflow.com/questions/75676419/eof-and-ctrl-d
+    - https://www.physics.udel.edu/~watson/scen103/ascii.html
+* точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
@@ -43,32 +43,90 @@
   + https://scripts.irssi.org/scripts/cap_sasl.pl
   + CAP LS [version] to discover the available capabilities on the server
   + CAP REQ to blindly request a particular set of capabilities
-  + CAP END. Upon receiving either a CAP LS or CAP REQ command, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
+  + CAP END. Upon receiving either a CAP LS or CAP REQ command, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. 
   + https://ircv3.net/specs/extensions/capability-negotiation.html
   + irssi: il faut envoyer au nouveau client connecté la RPL 001 pour que irssi comprenne qu'il est bien co
 * аня на личном компе:
-  + скачала irssi https://doc.ubuntu-fr.org/irssi
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi `/connect 0 -tls_pass 2`
 * https://hub.docker.com/_/irssi
 * альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
-
-## 23:26 Irssi commands:
-accept     die         knock    notice    sconnect   unload     
-action     disconnect  knockout notify    script     unnotify   
-admin      echo        lastlog  op        scrollback unquery    
-alias      eval        layout   oper      server     unsilence  
-away       exec        links    part      servlist   upgrade    
-ban        flushbuffer list     ping      set        uptime     
-beep       foreach     load     query     sethost    userhost   
-bind       format      log      quit      silence    ver        
-cat        hash        lusers   quote     squery     version    
-cd         help        map      rawlog    squit      voice      
-channel    hilight     me       recode    stats      wait       
-clear      ignore      mircdcc  reconnect statusbar  wall       
-completion info        mode     redraw    time       wallops    
-connect    invite      motd     rehash    toggle     who        
+* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify
+  + script
+  + unnotify
+  + admin
+  + echo
+  + lastlog
+  + op
+  + scrollback
+  + unquery
+  + alias
+  + eval
+  + layout
+  + oper
+  + server
+  + unsilence
+  + away
+  + exec
+  + links
+  + part
+  + servlist
+  + upgrade
+  + ban
+  + flushbuffer
+  + list
+  + ping
+  + set
+  + uptime
+  + beep
+  + foreach
+  + load
+  + query
+  + sethost
+  + userhost
+  + bind
+  + format
+  + log
+  + quit
+  + silence
+  + ver
+  + cat
+  + hash
+  + lusers
+  + quote
+  + squery
+  + version
+  + cd
+  + help
+  + map
+  + rawlog
+  + squit
+  + voice
+  + channel
+  + hilight
+  + me
+  + recode
+  + stats
+  + wait
+  + clear
+  + ignore
+  + mircdcc
+  + reconnect
+  + statusbar
+  + wall
+  + completion
+  + info
+  + mode
+  + redraw
+  + time
+  + wallops
+  + connect
+  + invite
+  + motd
+  + rehash
+  + toggle
+  + who        
 ctcp       ircnet      msg      reload    topic      whois      
 cycle      ison        names    resize    trace      whowas     
 dcc        join        nctcp    restart   ts         window     
@@ -95,6 +153,9 @@ devoice    kill        nick     save      unignore
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Имя канала обязательно начинается с `#`? Я пока сделала так, но вроде бы `#` это маска хоста
   + дискорд: можно взять названия каналов только с `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
+  + RFC: "@" is used for secret channels
+  + RFC: "*" for private channels
+  + RFC: "=" for others (public channels)
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 *  Un channel "exclusif" à deux users cmd PRIVMSG + nickname
   + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
