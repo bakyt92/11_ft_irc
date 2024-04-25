@@ -11,25 +11,84 @@ void Server::sigHandler(int sig) {
   (void)sig;
 }
 
-std::vector<string> split(string s, string delim) {
+std::vector<string> split_n(string s) {
   std::vector<string> parts;
-  for (size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
+  for (size_t pos = s.find("\n"); pos != string::npos; pos = s.find("\n")) {
     if (pos > 0) {
       string part = s.substr(0, pos);
-      if (delim == " " && part[0] == ':') {
-        parts.push_back(s.substr(1, s.size() - 1));
-        return parts;
-      }
-      part.erase(std::remove(part.begin(), part.end(), '\r'), part.end()); // ?
       parts.push_back(part);
     }
-    s.erase(0, pos + delim.size());
+    s.erase(0, pos + 1);
   }
-  if (s.size()>0) {
-    string part = s;
-    part.erase(std::remove(part.begin(), part.end(), '\r'), part.end());
-    parts.push_back(part);
+  if (s.size() > 0) //////// начало следующей команды в буфере !
+    parts.push_back(s);
+  return parts;
+}
+
+// s = [CAP LS\r\nPASS 2\r\nNICK an\r\nUSER an an 0 :an\r\n]
+std::vector<string> split_r_n(string s) {
+  // cout << "split s = [";
+  // for (size_t i = 0; i < s.size(); i++)
+  //   if (s[i] == '\r')
+  //     cout << "\\r";
+  //   else if (s[i] == '\n')
+  //     cout << "\\n";
+  //   else
+  //     cout << s[i];
+  // cout << "]" << endl;
+  if (s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r')
+    return split_n(s);
+  std::vector<string> parts;
+  for (size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
+    //cout << "  pos = " << pos << "\n";
+    if (pos > 0) {
+      string part = s.substr(0, pos);
+      //part.erase(std::remove(part.begin(), part.end(), '\r'), part.end()); // ?
+      //cout << "  push [" << part << "]\n";
+      parts.push_back(part);
+    }
+    s.erase(0, pos + 2);
   }
+  if (s.size() > 0) { //////// начало следующей команды в буфере !
+    //s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
+    //cout << "  push [" << s << "]\n";
+    parts.push_back(s);
+  }
+  return parts;
+}
+
+std::vector<string> split_spaces(string s) {
+  std::vector<string> parts;
+  size_t pos;
+  string afterColon = "";
+  if ((pos = s.find(':')) < s.size())
+    afterColon = s.substr(pos, s.size() - pos);
+  s = s.substr(0, pos); // memory leaks ?
+  for (size_t pos = s.find(' '); pos != string::npos; pos = s.find(' ')) {
+    if (pos > 0) {
+      string part = s.substr(0, pos);
+      parts.push_back(part);
+    }
+    s.erase(0, pos + 1);
+  }
+  if (s.size() > 0)
+    parts.push_back(s);
+  if (afterColon.size() > 0)
+    parts.push_back(afterColon);
+  return parts;
+}
+
+std::vector<string> split_comma(string s) {
+  std::vector<string> parts;
+  for (size_t pos = s.find(','); pos != string::npos; pos = s.find(',')) {
+    if (pos > 0) {
+      string part = s.substr(0, pos);
+      parts.push_back(part);
+    }
+    s.erase(0, pos + 1);
+  }
+  if (s.size() > 0)
+    parts.push_back(s);
   return parts;
 }
 
@@ -55,13 +114,14 @@ string mode(Ch *ch) {
 }
 
 int Server::send_(Cli *to, string msg) {
+  string end = msg.substr(msg.size() - 3, 2);
+  if (end == "\r\n")
+    msg = msg.substr(0, msg.size() - 2);
   string toPrint(msg);
   for(size_t pos = toPrint.find("\r\n"); pos != string::npos; pos = toPrint.find("\r\n", pos))
     toPrint.replace(pos, 2, "\n                            ");
-  toPrint = toPrint.substr(0, toPrint.size()-29);
   cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
-  if (msg.substr(msg.size() - 3, 2) != "\r\n")
-    msg += "\r\n";
+  msg += "\r\n";
   return send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
@@ -163,20 +223,20 @@ void Server::run() {
           vector<unsigned char> buf(513); // 512 ?
           for (int i = 0; i < 513; i++)
             buf[i] = '\0';
-          int bytes = recv(cli->fd, buf.data(), buf.size() - 1, 0);         // size - 1 ?
+          int bytes = recv(cli->fd, buf.data(), buf.size() - 1, 0); // size - 1 ? // + добавить к send() и recv() MSG_NOSIGNAL ?
           if (bytes < 0) 
             perror("recv");
-          else if (bytes == 0)                                         // клиент пропал
+          else if (bytes == 0)                                 // клиент пропал
             execQuit(); 
           else {
             string bufS = string(buf.begin(), buf.end());
             bufS.resize(bytes);
-            std::vector<string> cmds = split(bufS, "\n");
+            std::vector<string> cmds = split_r_n(bufS);
             for (std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               // for (int i = 0; i < ar.size(); i++)
-              //   ar[i] = "";
+              //   ar[i] = ""; ?
               vector<string>().swap(ar);
-              ar = split(*cmd, " "); // обнулить?
+              ar = split_spaces(*cmd);
               printCmd();
               exec();
               printServState();
@@ -205,6 +265,8 @@ int Server::exec() {
     return execPing();
   if (ar[0] == "CAP")
     return execCap();
+  if (ar[0] != "PRIVMSG" && ar[0] != "NOTICE" && ar[0] != "WHOIS" && ar[0] != "JOIN" && ar[0] != "PART" && ar[0] != "MODE" && ar[0] != "TOPIC" && ar[0] != "INVITE" && ar[0] != "KICK")
+    return send_(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
   if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk) // выше этой строки те команды, которые можно выполнять без аккаунт
     return send_(cli, "451 " + cli->nick + " :User not logged in" ); // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if (ar[0] == "PRIVMSG" || ar[0] == "NOTICE") //
@@ -263,9 +325,9 @@ int Server::execNick() {
 
 int Server::execUser() {
   if(ar.size() < 5)
-    return send_(cli, "461 USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 USER :Not enough parameters");                        // ERR_NEEDMOREPARAMS
   if(cli->uName != "")
-    return send_(cli, "462 :You may not reregister");                                 // ERR_ALREADYREGISTRED
+    return send_(cli, "462 :You may not reregister");                            // ERR_ALREADYREGISTRED
   cli->uName = ar[1];
   cli->rName = ar[4];
   if (cli->nick != "" && cli->passOk && cli->capOk)
@@ -273,26 +335,35 @@ int Server::execUser() {
   return 0;
 }
 
+// I execute (cmd from fd=5) : [PRIVMSG] [#ch] [aaaa] NON nc -> irssi 
+// I send to fd=4            : [a #ch :aaaa]
+
+// I execute (cmd from fd=4) : [PRIVMSG] [#ch] [:ananan] OK irssi ->nc
+// I send to fd=5            : [an #ch ::ananan]
+
+//  execute (cmd from fd=4) : [PRIVMSG] [#ch] [aaa] NON nc -> irssi 
+// I send to fd=5            : [a #ch :aaa]
+
+// I execute (cmd from fd=5) : [PRIVMSG] [#ch] [:ananan] OK irssi ->nc
+// I send to fd=4            : [an #ch ::ananan]
+
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL ERR_TOOMANYTARGETS RPL_AWAY
-// I execute (cmd from fd=5) : [PRIVMSG] [#ch] [:hello]
-// I send to 4                : [an PRIVMSG #ch ::hello]
-
-// I execute (cmd from fd=4) : [PRIVMSG] [an] [hello2] 
-// I send to 5                : [a PRIVMSG an :hello2]
-
 int Server::execPrivmsg() {
   if(ar.size() == 1) 
     return send_(cli, "411 :No recipient given (" + ar[1] + ")");                 // ERR_NORECIPIENT
   if(ar.size() == 2)
     return send_(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND
-  vector<string> tos = split(ar[1], ",");
-  string toSendToCli = "";
+  vector<string> tos = split_comma(ar[1]);
+  //string toSendToCli = ""; ?
   for (vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
-      toSendToCli += "401 " + *to + " :No such nick/channel\r\n";                 // ERR_NOSUCHNICK
-    else
-      send_(getCli(*to), cli->nick + " " + *to + " :" + ar[2]);
-  send_(cli, toSendToCli);
+    if((*to)[0] == '#' && chs.find(*to) == chs.end())
+      send_(cli, "401 " + *to + " :No such channel");                 // ERR_NOSUCHNICK
+    else if((*to)[0] == '#')
+      send_(chs[*to], "PRIVMSG " + *to + " :" + ar[2]);
+    else if((*to)[0] != '#' && !getCli(*to))
+      send_(cli, "401 " + *to + " :No such nick");                 // ERR_NOSUCHNICK
+    else if((*to)[0] != '#')
+      send_(getCli(*to), "PRIVMSG " + *to + " ::" + ar[2]);
   return 0;
 }
 
@@ -302,8 +373,8 @@ int Server::execPrivmsg() {
 int Server::execJoin() {
   if(ar.size() < 2)
     return send_(cli, "461 JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
-  vector<string> chNames = split(ar[1], ",");
-  //vector<string> passes  = ar.size() > 2 ? split(ar[2], ",") : vector<string>();
+  vector<string> chNames = split_comma(ar[1]);
+  //vector<string> passes  = ar.size() > 2 ? split_comma(ar[2]) : vector<string>();
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     if(chName->size() > 200 || (*chName)[0] != '#') // проверить
       send_(cli, *chName + " :Cannot join channel (bad channel name)");           // ?
@@ -318,7 +389,7 @@ int Server::execJoin() {
         send_(cli, "473 " + *chName + " :Cannot join channel (+i)");                       // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        send_(chs[*chName], cli->nick + " JOIN :" + *chName);  // два send ?
+        send_(chs[*chName], cli->nick + " JOIN " + *chName);  // два send ?
         send_(cli, *chName + " " + chs[*chName]->topic + " " + mode(chs[*chName])); // RPL_TOPIC + RPL_NAMREPLY !
       }                                        // нужно ли исключение "пользователь уже на канале" ?
     }
@@ -329,7 +400,7 @@ int Server::execJoin() {
 int Server::execPart() {
   if(ar.size() < 2)
     return send_(cli, "461 JOIN :Not enough parameters");                          // ERR_NEEDMOREPARAMS
-  vector<string> chNames = split(ar[1], ",");
+  vector<string> chNames = split_comma(ar[1]);
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (chs.find(*chName) == chs.end())
       send_(cli, "403 :" + *chName + " :No such channel"); // ERR_NOSUCHCHANNEL
@@ -383,8 +454,8 @@ int Server::execTopic() {
 int Server::execKick() {
   if(ar.size() < 3)
     return send_(cli, "461 KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
-  std::vector<string> chNames    = split(ar[1], ",");
-  std::vector<string> targetClis = split(ar[2], ",");
+  std::vector<string> chNames    = split_comma(ar[1]);
+  std::vector<string> targetClis = split_comma(ar[2]);
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chs.find(*chName) == chs.end())
       send_(cli, "403 " + *chName + " :No such channel");                                  // ERR_NOSUCHCHANNEL
@@ -474,7 +545,7 @@ int Server::execPong() {
 int Server::execWhois() {
   if(ar.size() < 2)
     return send_(cli, "431 :No nickname given");                                      // ERR_NONICKNAMEGIVEN
-  std::vector<string> nicks = split(ar[1], ",");
+  std::vector<string> nicks = split_comma(ar[1]);
   string toSend = "";
   for (vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
@@ -491,7 +562,7 @@ int Server::execCap() {
   }
   else if(ar.size() >= 2 && ar[1] == "END") {
     cli->capOk = true;
-    send_(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+    send_(cli, "001"); // !!! :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
     //send_(cli, "002"); // :Your host is " + cli->host  + ", running version 1.0");            // RPL_YOURHOST
     //send_(cli, "003"); // :This server was created 24.04.2024");                  // RPL_CREATED // ?
     //send_(cli, "004"); // :ircserv 1.0  ptkio");                                // RPL_MYINFO
