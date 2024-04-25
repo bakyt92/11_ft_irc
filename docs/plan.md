@@ -1,5 +1,4 @@
-## Разобраться или доделать
-* одна команда может оказаться разбитой на несколько сообщений или нет ?
+## одна команда может оказаться разбитой на несколько сообщений или нет ?
   + у Бориса не может
   + TCP is a streaming protocol, not a message protocol
     - The only guarantee is that you send n bytes, you will receive n bytes in the same order
@@ -15,17 +14,18 @@
   + данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
   + в проекте mariia есть "tokenize the buffer line by line"
 
-* должна ли наша PRIVMSG понимать маски и особые формы записи?
+## должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
   + Параметр <receiver> может быть маской хоста (#mask) или маски сервера ($mask)
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-* в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
-* non-blocking
+
+## non-blocking
   + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
-* сигналы
+
+## сигналы
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
   + EOF processing (Control-D) is handled in canonical mode; it actually means 'make the accumulated input available to read()'; if there is no accumulated input (if you type Control-D at the beginning of a line), then the read() will return zero bytes, which is then interpreted as EOF by programs. Of course, you can merrily type more characters on the keyboard after that, and programs that ignore EOF (or run in non-canonical mode) will be quite happy 
@@ -43,9 +43,6 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
     - It's commonly used to indicate the end of input when reading from stdin
     - It doesn't directly raise a signal like SIGPIPE
     - it's processed by the terminal or the program reading from stdin
-
-* точно ли нам не нужен ip-6
-* `valgrind`, закрытие сокетов
 
 ## irssi
 * https://scripts.irssi.org/scripts/cap_sasl.pl
@@ -156,6 +153,11 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 *  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
 *  Operator password is not the same thing as server password
 * остановилась на сообщении ok donc l'erreur viens surement de moi, je pense que je confirme mal mais sincerement je recopie comme la RFC 2813
+
+## мелкие вопросы
+* точно ли нам не нужен ip-6
+* `valgrind`, закрытие сокетов
+* в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
 
 ## Инфо
 * **most public IRC servers don't usually set a connection password**
