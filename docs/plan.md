@@ -19,9 +19,6 @@
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
 * в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
-* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
-  + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
-  Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 * non-blocking
   + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
 * сигналы
@@ -144,9 +141,10 @@ devoice    kill        nick     save      unignore
 * don't use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
-* **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)**
-* rfc 2813 messages server -> server, нам не нужно
-* rfc 1459 устарел
+* **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)** (rfc 2813 server -> server, нам не нужно, rfc 1459 устарел)
+* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
+  + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
+  Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 * https://modern.ircdocs.horse/
 * [IRCv3 Specifications](https://ircv3.net/irc/)
 * `RCv3 extensions` надеюсь нам не нужно 
