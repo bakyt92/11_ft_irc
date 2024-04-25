@@ -32,6 +32,8 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   + Наверное в сабджекте имелось также в виду, что мы игнорируем входящие символы ^D. Получается это ^D равен четырем, то есть char c == 4
     - https://stackoverflow.com/questions/75676419/eof-and-ctrl-d
     - https://www.physics.udel.edu/~watson/scen103/ascii.html
+  + writing to non-responding socket will cause a SIGPIPE and make my server crash
+     - `send(...MSG_NOSIGNAL)` = write() without SIGPIPE
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
