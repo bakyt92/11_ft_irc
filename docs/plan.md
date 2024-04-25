@@ -160,8 +160,6 @@ Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un i
 * https://github.com/levensta/IRC-Server
 * https://github.com/marineks/Ft_irc
 * https://github.com/miravassor/irc
-* https://github.com/Assxios
-* https://github.com/hallainea/ft_irc
 * https://masandilov.ru/network/guide_to_network_programming – гайд по сетевому программированию
 * https://ncona.com/2019/04/building-a-simple-server-with-cpp/ – про сокеты и TCP-сервер на C++
 * https://youtu.be/cNdlrbZSkyQ – еще немного про сокеты
