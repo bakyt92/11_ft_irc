@@ -122,7 +122,7 @@ struct pollfd {
 * blocks (or, if you use a non-blocking listening socket, accept() succeeds) only when a new client connection is available for subsequent communication
 * you have to call accept() for each client that you want to communicate with
 
-## send(2)
+## send()
 * POSIX stqndqnt for system calls
 * is generally associated with low level system calls
 * transmit a message to another socket
@@ -149,7 +149,13 @@ struct pollfd {
   + similar behavior to setting the O_NONBLOCK flag via the fcntl
   + MSG_DONTWAIT is a per-call option
   + O_NONBLOCK is a setting on the open file description
-  
+* every function returns immediately, i.e. all the functions in such programs are nonblocking
+* Instead, they use the "state machine" technique
+* ...
+* How to query the available data on a socket:
+  + Non-bloking sockets
+  + select()/poll()
+
 ### `ssize_t recv(int sockfd, void buf[.len], size_t len, int flags)`
 * ждёт, пока данные не появятся
 * вернёт -1, если сокет находится в неблокирующем режиме и данные ещё не пришли
