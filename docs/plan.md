@@ -22,8 +22,15 @@
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
 
-## non-blocking
-  + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
+## Programs that use non-blocking I/O: 
+* https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
+* http://www.kegel.com/dkftpbench/nonblocking.html
+* every function returns immediately, i.e. all the functions in such programs are nonblocking
+* Instead, they use the "state machine" technique
+* ...
+* How to query the available data on a socket:
+  + Non-bloking sockets
+  + select()/poll()
 
 ## сигналы
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
