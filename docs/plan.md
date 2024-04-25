@@ -6,11 +6,15 @@
     - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
     - You could send 100 1 byte chunks and receive 4 25 byte messages
     - **You must deal with message boundaries yourself**
+    - You can't rely on "getting the whole message" at once, or in any predictable size of pieces
+    - You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
+    - You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
   + RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя **обычно оно бывает с разными командам**. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
   + Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
   + littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
   + данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
   + в проекте mariia есть "tokenize the buffer line by line"
+
 * должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
@@ -37,7 +41,7 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
-## Наладить связть с irssi
+## irssi
 * https://scripts.irssi.org/scripts/cap_sasl.pl
 * https://ircv3.net/specs/extensions/capability-negotiation.html
 * https://hub.docker.com/_/irssi
