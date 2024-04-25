@@ -8,7 +8,7 @@
     - You can't rely on "getting the whole message" at once, or in any predictable size of pieces
     - You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
     - You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
-* RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя **обычно оно бывает с разными командам**. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
+* RFC 2812: IRC messages are always lines of characters terminated with a CR-LF pair, and these messages SHALL NOT exceed 512 characters in length, counting all characters including the trailing CR-LF. Thus, there are 510 characters maximum allowed for the command and its parameters. **There is no provision for continuation of message lines**. 
 * Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
 * littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
 * данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
