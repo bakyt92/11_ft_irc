@@ -158,13 +158,6 @@ struct pollfd {
     - сделать не весь сокет неблокирующим, а только данную операцию, подставив флаг MSG_NONBLOCK
     - перед чтением проверять, что в сокет что-то пришло. Это всякие poll, select и их вариации
 
-## Сигналы
-Ctrl+D (End of File):
-Ctrl+D is a keyboard input that typically represents the end-of-file (EOF) character in Unix-like systems.
-When entered at the beginning of a line in a terminal, it signals the end of input to the terminal.
-It's commonly used to indicate the end of input when reading from stdin (standard input).
-It doesn't directly raise a signal like SIGPIPE. Instead, it's processed by the terminal or the program reading from stdin.
-
 ## Requirements
 * multiple clients at the same time
 * never hang
