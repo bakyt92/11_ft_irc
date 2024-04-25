@@ -38,6 +38,12 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
     - https://www.physics.udel.edu/~watson/scen103/ascii.html
   + writing to non-responding socket will cause a SIGPIPE and make my server crash
      - `send(...MSG_NOSIGNAL)` = write() without SIGPIPE
+  + Ctrl+D is a keyboard input that typically represents the EOF character
+    - When entered at the beginning of a line in a terminal, it signals the end of input to the terminal
+    - It's commonly used to indicate the end of input when reading from stdin
+    - It doesn't directly raise a signal like SIGPIPE
+    - it's processed by the terminal or the program reading from stdin
+
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
