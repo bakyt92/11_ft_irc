@@ -32,6 +32,9 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   + CTRL+D посылает 0 байт только если при пустой строке мы это вводим
   + если вводим сначала символы и потом CTRL+D, то это своего рода сигнал отправить текущие символы из командной строки
   + если брать наш пример `PRIV ^D MSG ^D Nickname Hello! \r \n`, то команда CTRL+D сначала отправит <PRIV EOF> - это видимо 6 байт, а потом <MSG EOF> - 5 байт, а не ноль
+  + Наверное в сабджекте имелось также в виду, что мы игнорируем входящие символы ^D. Получается это ^D равен четырем, то есть char c == 4
+    - https://stackoverflow.com/questions/75676419/eof-and-ctrl-d
+    - https://www.physics.udel.edu/~watson/scen103/ascii.html
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
@@ -49,17 +52,7 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   + в самом irssi `/connect 0 -tls_pass 2`
 * https://hub.docker.com/_/irssi
 * альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
-* Irssi commands:
-  + accept
-  + die
-  + knock
-  + notice
-  + sconnect
-  + unload
-  + action
-  + disconnect
-  + knockout
-  + notify
+* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify
   + script
   + unnotify
   + admin
