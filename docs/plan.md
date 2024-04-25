@@ -18,7 +18,6 @@
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-* `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа?
 * когда мы в irssi, то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
@@ -34,6 +33,8 @@
 * сигналы
   + EOF processing (Control-D) is handled in canonical mode; it actually means 'make the accumulated input available to read()'; if there is no accumulated input (if you type Control-D at the beginning of a line), then the read() will return zero bytes, which is then interpreted as EOF by programs. Of course, you can merrily type more characters on the keyboard after that, and programs that ignore EOF (or run in non-canonical mode) will be quite happy 
 https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-input
++ CTRL+D посылает 0 байт только если при пустой строке мы это вводим
++ если вводим сначала символы и потом CTRL+D, то это своего рода сигнал отправить текущие символы из командной строки
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
