@@ -165,6 +165,8 @@ Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un i
 * https://masandilov.ru/network/guide_to_network_programming – гайд по сетевому программированию
 * https://ncona.com/2019/04/building-a-simple-server-with-cpp/ – про сокеты и TCP-сервер на C++
 * https://youtu.be/cNdlrbZSkyQ – еще немного про сокеты
+* https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select non-blocking I/O
+* http://www.kegel.com/dkftpbench/nonblocking.html non-blocking I/O
 * https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
 * https://modern.ircdocs.horse/   
 * https://irc.dalexhd.dev/index.html  
