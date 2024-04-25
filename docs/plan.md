@@ -1,16 +1,16 @@
 ## Разобраться или доделать
 * одна команда может оказаться разбитой на несколько сообщений или нет ?
-  + Кажется у Бориса не может
+  + у Бориса не может
   + TCP is a streaming protocol, not a message protocol
-    - The only guarantee is that you send n bytes, you will receive n bytes in the same order.
-    - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs.
-    - You could send 100 1 byte chunks and receive 4 25 byte messages.
-    - **You must deal with message boundaries yourself**. (у нас messages boundaries это `\n`, правильно?)
-  + Из RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя обычно оно бывает с разными командам. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
-  + у Ахмеда так считвыается: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
-  + то же самое в littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
-  + подводные камни tcp-ip сокетамов: данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это совсем не значит, что они могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
-  + в проекте mariia они делают как-то "tokenize the buffer line by line"
+    - The only guarantee is that you send n bytes, you will receive n bytes in the same order
+    - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
+    - You could send 100 1 byte chunks and receive 4 25 byte messages
+    - **You must deal with message boundaries yourself**
+  + RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя **обычно оно бывает с разными командам**. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
+  + Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
+  + littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
+  + данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
+  + в проекте mariia есть "tokenize the buffer line by line"
 * должна ли наша PRIVMSG понимать маски и особые формы записи?
   + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
   + Борис проверяет `"${receiver}"`зачем-то
@@ -36,100 +36,15 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * `valgrind`, закрытие сокетов
 
 ## Наладить связть с irssi
-* Irssi envoie la commande CAP en plus de NICK et USER (discord)
-  + https://scripts.irssi.org/scripts/cap_sasl.pl
-  + CAP LS [version] to discover the available capabilities on the server
-  + CAP REQ to blindly request a particular set of capabilities
-  + CAP END. Upon receiving either a CAP LS or CAP REQ command, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. 
-  + https://ircv3.net/specs/extensions/capability-negotiation.html
-  + irssi: il faut envoyer au nouveau client connecté la RPL 001 pour que irssi comprenne qu'il est bien co
+* https://scripts.irssi.org/scripts/cap_sasl.pl
+* https://ircv3.net/specs/extensions/capability-negotiation.html
+* https://hub.docker.com/_/irssi
 * аня на личном компе:
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi `/connect 0 -tls_pass 2`
-* https://hub.docker.com/_/irssi
 * альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
-* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify
-  + script
-  + unnotify
-  + admin
-  + echo
-  + lastlog
-  + op
-  + scrollback
-  + unquery
-  + alias
-  + eval
-  + layout
-  + oper
-  + server
-  + unsilence
-  + away
-  + exec
-  + links
-  + part
-  + servlist
-  + upgrade
-  + ban
-  + flushbuffer
-  + list
-  + ping
-  + set
-  + uptime
-  + beep
-  + foreach
-  + load
-  + query
-  + sethost
-  + userhost
-  + bind
-  + format
-  + log
-  + quit
-  + silence
-  + ver
-  + cat
-  + hash
-  + lusers
-  + quote
-  + squery
-  + version
-  + cd
-  + help
-  + map
-  + rawlog
-  + squit
-  + voice
-  + channel
-  + hilight
-  + me
-  + recode
-  + stats
-  + wait
-  + clear
-  + ignore
-  + mircdcc
-  + reconnect
-  + statusbar
-  + wall
-  + completion
-  + info
-  + mode
-  + redraw
-  + time
-  + wallops
-  + connect
-  + invite
-  + motd
-  + rehash
-  + toggle
-  + who        
-ctcp       ircnet      msg      reload    topic      whois      
-cycle      ison        names    resize    trace      whowas     
-dcc        join        nctcp    restart   ts         window     
-dehilight  kick        netsplit rmreconns unalias     
-deop       kickban     network  rmrejoins unban       
-devoice    kill        nick     save      unignore  
+* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify script unnotify admin echo  lastlog op scrollback unquery alias eval layout oper server unsilence away exec links part servlist upgrade ban flushbuffer list ping set uptime beep foreach load query sethost userhost bind format log quit silence ver cat hash lusers quote squery version cd help map rawlog squit voice channel hilight me recode stats wait clear ignore mircdcc  reconnect statusbar wall completion info mode redraw time wallops connect invite motd rehash toggle who ctcp      ircnet  msg reload topic whois cycle ison names resize trace whowas dcc join nctcp restart ts window dehilight kick netsplit rmreconns unalias deop kickban network rmrejoins unban devoice kill nick save unignore  
 
 ## Выбрать сервер для тестов (чтобы сравнивать с нашим)
 * Don’t use libera.chat as a testing server, it’s a great irc server but it use a lot of ircv3.0 features, instead use self hostable one (ngirc, oragono etc…) you can even use our one, irc.ircgod.com:6667/6697
