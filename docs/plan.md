@@ -93,6 +93,9 @@ devoice    kill        nick     save      unignore
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
 * Имя канала обязательно начинается с `#`? Я пока сделала так, но вроде бы `#` это маска хоста
   + дискорд: можно взять названия каналов только с `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
+  + RFC: "@" is used for secret channels
+  + RFC: "*" for private channels
+  + RFC: "=" for others (public channels)
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 *  Un channel "exclusif" à deux users cmd PRIVMSG + nickname
   + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
