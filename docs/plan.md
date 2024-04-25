@@ -1,5 +1,6 @@
-## одна команда может оказаться разбитой на несколько сообщений или нет ?
-* у Бориса не может
+## может оказаться одна команда оказаться разбитой на несколько сообщений ?
+* у Бориса если команда длинне 512 символов, от просто отрасывает лишнее
+* IRC использует транспортный протокол TCP и криптографический TLS (опционально)
 * TCP is a streaming protocol, not a message protocol
     - The only guarantee is that you send n bytes, you will receive n bytes in the same order
     - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
@@ -8,33 +9,16 @@
     - You can't rely on "getting the whole message" at once, or in any predictable size of pieces
     - You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
     - You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
-* RFC 1459: В предоставление полезной 'non-buffered' сети IO для клиентов и серверов, каждое соединение из которых является частным 'input buffer', в котором результируются большинство полученного, читается и проверяется. Размер буфера 512 байт, используется как одно полное сообщение, хотя **обычно оно бывает с разными командам**. Приватный буфер проверяется после каждой операции чтения на правильность сообщений. Когда распределение с многослойными сообщениями от одного клиента в буфере, следует быть в качестве одного случившегося, клиент может быть 'удален'.
+* RFC 2812: IRC messages are always lines of characters terminated with a CR-LF pair, and these messages SHALL NOT exceed 512 characters in length, counting all characters including the trailing CR-LF. Thus, there are 510 characters maximum allowed for the command and its parameters. **There is no provision for continuation of message lines**. 
 * Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
 * littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
+* у марии тоже size - 1
 * данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
 * в проекте mariia есть "tokenize the buffer line by line"
 * Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 
-## должна ли наша PRIVMSG понимать маски и особые формы записи?
-  + `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions` Сообщение для всех пользователей, сидящих на хосте, попадающим под маску *.edu
-  + Борис проверяет `"${receiver}"`зачем-то
-  + Параметр <receiver> может быть маской хоста (#mask) или маски сервера ($mask)
-    - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
-    - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
-    - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-
-## Programs that use non-blocking I/O: 
-* https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
-* http://www.kegel.com/dkftpbench/nonblocking.html
-* every function returns immediately, i.e. all the functions in such programs are nonblocking
-* Instead, they use the "state machine" technique
-* ...
-* How to query the available data on a socket:
-  + Non-bloking sockets
-  + select()/poll()
-
 ## сигналы
-  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first aggregate the received packets in order to rebuild it
+  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first **aggregate the received packets in order to rebuild it**
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
   + EOF processing (Control-D) is handled in canonical mode; it actually means 'make the accumulated input available to read()'; if there is no accumulated input (if you type Control-D at the beginning of a line), then the read() will return zero bytes, which is then interpreted as EOF by programs. Of course, you can merrily type more characters on the keyboard after that, and programs that ignore EOF (or run in non-canonical mode) will be quite happy 
 https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-input
@@ -71,8 +55,6 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * des serveurs qui étaient déjà installés sur l’application Hexchat
 * irc.ircgod.com:6667/6697
 * Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
-* hésite pas à test avec notre IRC https://github.com/Assxios/ft_irc.git
-* https://github.com/hallainea/ft_irc
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)** (rfc 2813 server -> server, нам не нужно, rfc 1459 устарел)
@@ -143,6 +125,7 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * https://github.com/markveligod/ft_irc
 * when a user joins a server you have to greed him with a welcome message
 * ставить @ перед ником админа?
+* Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...) (checklist)
 
 ## Читаю группу дискорд:
 * кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
@@ -159,17 +142,29 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   + ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ?
   + l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
 * tout les messages doivent finir par **\r\n**
-*  Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
-*  Operator password is not the same thing as server password
-* остановилась на сообщении hello. on utilise irssi et on a jamais remarque ca c'est bizarre. Comment tu t'y prends?
+* Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
+* Operator password is not the same thing as server password
+* je me tape des residus "fantomes" de memoire..
+* Si j'ai bien compris, on doit renvoyer plusieurs réponses numériques (genre RPL_WHOISUSER RPL_WHOISCHANNELS, et RPL_WHOISSERVER par exemple) pour ensuite afficher les différentes infos sur un utilisateur de notre serveur IRC.
+Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un int, celui correspondant à un "numeric reply". Doit-on renvoyer plusieurs numeric reply ou bien un seul ? Si c'est le dernier, comment faire dans le cas de WHOIS pour afficher toutes les infos sur un utilisateur avec un seul "numeric reply" ?
+* остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
 
 ## мелкие вопросы
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 * в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
+* что делать, если админ покинул чат?
+* должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
 
 ## Инфо
-* **most public IRC servers don't usually set a connection password**
+* https://github.com/levensta/IRC-Server
+* https://github.com/marineks/Ft_irc
+* https://github.com/miravassor/irc
+* https://masandilov.ru/network/guide_to_network_programming – гайд по сетевому программированию
+* https://ncona.com/2019/04/building-a-simple-server-with-cpp/ – про сокеты и TCP-сервер на C++
+* https://youtu.be/cNdlrbZSkyQ – еще немного про сокеты
+* https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select non-blocking I/O
+* http://www.kegel.com/dkftpbench/nonblocking.html non-blocking I/O
 * https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
 * https://modern.ircdocs.horse/   
 * https://irc.dalexhd.dev/index.html  
@@ -181,10 +176,6 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * https://www.youtube.com/watch?v=I9o-oTdsMgI  
 * https://www.youtube.com/@edueventsmow/videos  
 * https://www.youtube.com/watch?v=I9o-oTdsMgI&list=PLUJCSGGiox1Q-QvHfMMydtoyEa1IEzeLe&index=1   
-* https://github.com/shuygena/intra42_ru_guides?tab=readme-ov-file#irc (много информации по проектам)  
-* https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
-* https://github.com/marineks/Ft_irc
-* https://github.com/miravassor/irc
 * [Сетевое программирование от Биджа. Использование	Интернет Сокетов. (кратко)](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 * https://www.irchelp.org/
 * https://ircgod.com/ (!)

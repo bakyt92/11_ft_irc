@@ -1,5 +1,9 @@
 group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md   
 IRC = Internet Relay Chat  
+* 1988 г
+* для группового общения, общаться через личные сообщения и обмениваться файлами
+* на основе IRC разработано множество мессенджеров, такие как: ICQ, Skype, Discord, Telegram, Slack, etc...
+* * **most public IRC servers don't usually set a connection password**
  
 ## Сообщения (Internet Relay Chat Protocol)
 * https://www.lissyara.su/doc/rfc/rfc1459/ 
@@ -118,7 +122,7 @@ struct pollfd {
 * blocks (or, if you use a non-blocking listening socket, accept() succeeds) only when a new client connection is available for subsequent communication
 * you have to call accept() for each client that you want to communicate with
 
-## send(2)
+## send()
 * POSIX stqndqnt for system calls
 * is generally associated with low level system calls
 * transmit a message to another socket
@@ -135,16 +139,39 @@ struct pollfd {
 * `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
 * associated with high-level functions
 
-## `recv()`
-* ждат, пока данные не появятся
+## recv recvfrom recvmsg
+* if a message is too long to fit in the supplied buffer, excess bytes may be discarded depending on the type of socket the message is received from
+* if no messages are available at the socket, the receive calls wait for a message to arrive, unless the socket is nonblocking
+* the receive calls normally return any data available, up to the requested amount, rather than waiting for receipt of the full amount requested
+* an application can use select, poll, epoll to determine when more data arrives on a socket
+* flag MSG_DONTWAIT Enables nonblocking operation
+  + if the operation would block, the call fails with the error EAGAIN or EWOULDBLOCK
+  + similar behavior to setting the O_NONBLOCK flag via the fcntl
+  + MSG_DONTWAIT is a per-call option
+  + O_NONBLOCK is a setting on the open file description
+* every function returns immediately, i.e. all the functions in such programs are nonblocking
+* Instead, they use the "state machine" technique
+* ...
+* How to query the available data on a socket:
+  + Non-bloking sockets
+  + select()/poll()
+
+### `ssize_t recv(int sockfd, void buf[.len], size_t len, int flags)`
+* ждёт, пока данные не появятся
 * вернёт -1, если сокет находится в неблокирующем режиме и данные ещё не пришли
 * вернёт -1, если вызов будет прерван сигналом с установкой errno
 * вернёт 0, если соединение закрыто второй стороной
-* если вы считали 100 байт, а потом попытаетесь читать еще раз, то программа заблокируется на `recv` и будет стоять, пока не получит хотя бы байт, или сервер со своей стороны не закроет соединение (recv ге вернёт 0)
+* если вы считали 100 байт, а потом попытаетесь читать еще раз, то программа заблокируется на `recv` и будет стоять, пока не получит хотя бы байт, или сервер со своей стороны не закроет соединение (recv вернёт 0)
   + 3 варианта управлять этой ситуацией:
     - сделать сокет асинхронным, и тогда вы получите отрицательное значение, а в errono будет что-то типа EAGAIN (EWOULDBLOCK) - так система вам намекнет, что данных для вас у нее нет
     - сделать не весь сокет неблокирующим, а только данную операцию, подставив флаг MSG_NONBLOCK
     - перед чтением проверять, что в сокет что-то пришло. Это всякие poll, select и их вариации
+*  The only difference between recv() and read(2) is the presence of flags
+
+### `ssize_t recvfrom(int sockfd, void buf[restrict .len], size_t len, int flags, struct sockaddr *_Nullable restrict src_addr, socklen_t *_Nullable restrict addrlen)`
+* `recvfrom(sockfd, buf, len, flags, NULL, NULL)` = `recv(sockfd, buf, len, flags)`
+           
+### `ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)`
 
 ## Requirements
 * multiple clients at the same time
@@ -159,7 +186,7 @@ struct pollfd {
 * communication between client and server has to be done via TCP/IP (v4 or v6)
 * Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...)
 * **In order to process a command, you have to first aggregate the received packets in order to rebuild it**
-
+      
 ## You only have to implement the following features
   + INVITE: Invite a client to a channel (only by channel operators)
   + TOPIC: to change or view the channel topic (only by channel operators)
