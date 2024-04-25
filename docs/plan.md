@@ -70,7 +70,8 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
 * des serveurs qui étaient déjà installés sur l’application Hexchat
 * irc.ircgod.com:6667/6697
 * Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
-* hésite pas à test avec notre IRC https://github.com/Assxios/ft_irc.git 
+* hésite pas à test avec notre IRC https://github.com/Assxios/ft_irc.git
+* https://github.com/hallainea/ft_irc
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)** (rfc 2813 server -> server, нам не нужно, rfc 1459 устарел)
