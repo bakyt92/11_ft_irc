@@ -38,6 +38,9 @@ https://github.com/bakyt92/11_ft_irc/blob/master/docs/bgnet_A4_rus.pdf
 * используют User Datagram Protocol, UDP (не TCP)
 * нужны, когда недоступен TCP стек или когда допускаeтся потеря нескольких пакетов (игры, звук, видео)
 
+### raw socket (нам не нужно)
+...
+
 ## IP	адрес, порт
 * система маршрутизации сетей Internet Protocol Version 4, IPv4
   + адреса из четырёх байт (192.0.02.111)
