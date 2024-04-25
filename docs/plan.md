@@ -18,8 +18,7 @@
     - Cервер будет отсылать PRIVMSG только тем, кто попадает под серверную или хост-маску
     - Маска должна содержать в себе как минимум одну "." - это требование вынуждаеит пользователей отсылать сообщения к "#*" или "$*", которые уже потом рассылаются всем пользователям; по опыту, этим злоупотребляет большое количество пользователей
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
-* The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа?
-* когда мы в irssi, то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
+* в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
   + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
   Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
@@ -41,11 +40,10 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   + https://scripts.irssi.org/scripts/cap_sasl.pl
   + CAP LS [version] to discover the available capabilities on the server
   + CAP REQ to blindly request a particular set of capabilities
-  + CAP END. Upon receiving either a CAP LS or CAP REQ command, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. This allows clients to request their desired capabilities before completing registration.
+  + CAP END. Upon receiving either a CAP LS or CAP REQ command, the server MUST not complete registration until the client sends a CAP END command to indicate that capability negotiation has ended. 
   + https://ircv3.net/specs/extensions/capability-negotiation.html
   + irssi: il faut envoyer au nouveau client connecté la RPL 001 pour que irssi comprenne qu'il est bien co
 * аня на личном компе:
-  + скачала irssi https://doc.ubuntu-fr.org/irssi
   + запустила наш сервер на порту 6667
   + ввела в терминале `irssi`
   + в самом irssi `/connect 0 -tls_pass 2`
