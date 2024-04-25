@@ -135,16 +135,33 @@ struct pollfd {
 * `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
 * associated with high-level functions
 
-## `recv()`
-* ждат, пока данные не появятся
+## recv recvfrom recvmsg
+* if a message is too long to fit in the supplied buffer, excess bytes may be discarded depending on the type of socket the message is received from
+* if no messages are available at the socket, the receive calls wait for a message to arrive, unless the socket is nonblocking
+* the receive calls normally return any data available, up to the requested amount, rather than waiting for receipt of the full amount requested
+* an application can use select, poll, epoll to determine when more data arrives on a socket
+* flag MSG_DONTWAIT Enables nonblocking operation
+  + if the operation would block, the call fails with the error EAGAIN or EWOULDBLOCK
+  + similar behavior to setting the O_NONBLOCK flag via the fcntl
+  + MSG_DONTWAIT is a per-call option
+  + O_NONBLOCK is a setting on the open file description
+  
+### `ssize_t recv(int sockfd, void buf[.len], size_t len, int flags)`
+* ждёт, пока данные не появятся
 * вернёт -1, если сокет находится в неблокирующем режиме и данные ещё не пришли
 * вернёт -1, если вызов будет прерван сигналом с установкой errno
 * вернёт 0, если соединение закрыто второй стороной
-* если вы считали 100 байт, а потом попытаетесь читать еще раз, то программа заблокируется на `recv` и будет стоять, пока не получит хотя бы байт, или сервер со своей стороны не закроет соединение (recv ге вернёт 0)
+* если вы считали 100 байт, а потом попытаетесь читать еще раз, то программа заблокируется на `recv` и будет стоять, пока не получит хотя бы байт, или сервер со своей стороны не закроет соединение (recv вернёт 0)
   + 3 варианта управлять этой ситуацией:
     - сделать сокет асинхронным, и тогда вы получите отрицательное значение, а в errono будет что-то типа EAGAIN (EWOULDBLOCK) - так система вам намекнет, что данных для вас у нее нет
     - сделать не весь сокет неблокирующим, а только данную операцию, подставив флаг MSG_NONBLOCK
     - перед чтением проверять, что в сокет что-то пришло. Это всякие poll, select и их вариации
+*  The only difference between recv() and read(2) is the presence of flags
+
+### `ssize_t recvfrom(int sockfd, void buf[restrict .len], size_t len, int flags, struct sockaddr *_Nullable restrict src_addr, socklen_t *_Nullable restrict addrlen)`
+* `recvfrom(sockfd, buf, len, flags, NULL, NULL)` = `recv(sockfd, buf, len, flags)`
+           
+### `ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)`
 
 ## Requirements
 * multiple clients at the same time
@@ -159,7 +176,7 @@ struct pollfd {
 * communication between client and server has to be done via TCP/IP (v4 or v6)
 * Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...)
 * **In order to process a command, you have to first aggregate the received packets in order to rebuild it**
-
+      
 ## You only have to implement the following features
   + INVITE: Invite a client to a channel (only by channel operators)
   + TOPIC: to change or view the channel topic (only by channel operators)
