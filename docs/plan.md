@@ -1,4 +1,4 @@
-## одна команда может оказаться разбитой на несколько сообщений или нет ?
+## может оказаться одна команда оказаться разбитой на несколько сообщений ?
 * у Бориса не может
 * TCP is a streaming protocol, not a message protocol
     - The only guarantee is that you send n bytes, you will receive n bytes in the same order
