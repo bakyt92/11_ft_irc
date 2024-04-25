@@ -1,9 +1,6 @@
 group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md   
-
-## IRC = Internet Relay Chat
-* a text-based communication protocol on the Internet
-* use case https://dev.twitch.tv/docs/irc/ 
-
+IRC = Internet Relay Chat  
+ 
 ## Сообщения (Internet Relay Chat Protocol)
 * https://www.lissyara.su/doc/rfc/rfc1459/ 
 * Серверы и клиенты создают сообщения на которые можно ответить, а можно и нет
@@ -29,56 +26,32 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + `PRIVMSG jto@localhost :Hello`       a message to a user "jto" on server localhost
   + `PRIVMSG kalt%localhost`             a message to a user on the local server with username of "kalt", and connected from the localhost
   + `PRIVMSG Wiz!jto@localhost :Hello` a message to the user with nickname Wiz who is connected from the localhostand has the username "jto"
-* Сообщение NOTICE используеьтся подобно PRIVMSG.
-  + Отличия между ними в том, что на NOTICE-сообщение ждать автоматического ответа бесполезно
-  + Это правило распространяется и на серверы
 *  most public IRC servers don't usually set a connection password
   + PASS only required if a password is required to connect to a serve
 
 ## TCP
 * гарантирует надёжность с точки зрения потока (UDP не гарантирует) 
-* есть ненадёжностью машин в сети
+* есть ненадёжность машин в сети
 * не гарантирует, что каждый send() будет принят (recv()) соединением
 * TCP какое-то время хранит данные в своём буфере отправки, но в конечном итоге сбросит данные по таймауту
 * send() возвращает успешное выполнение, не зная, было ли сообщение успешного получено на стороне recv()
 * в случае разъединения потеряем данные
 * разработчик решает, как приложение реагирует на неожиданные разъединения
   + насколько сильно вы будете пытаться узнать, действительно ли получающее приложение получило каждый бит
-  + можно реализовать подтверждающие сообщения
-  + можно реализовать разметку сообщений идентификаторами
-  + можно реализовать создание буфера
-  + можно реализовать системы для повторной отправки сообщений
-  + и/или таймауты, связанные с каждым сообщением
-  + можно хранить пакеты данных на жёстком диске, тогда если возникнет сбой приложения или машины, то позже попытаться отправить эти данные
-  + можно допустить разъединения во время длительных операций; когда две машины наконец восстановят связь, можно будет передать результаты операции
-  + можно определять насколько важно подтверждать доставку в каждом конкретном случае
-  + можно прикладывать большие усилия к тому, чтобы подтвердить завершение длительной операции, но смириться с утерей данных, сообщающих о степени выполнения операции
-  + многие приложения просто завершают работу, если происходит отключение в неожиданный момент
-  + можно сделать отдельный цикл переподключения, который будет какое-то время спать, а затем пытаться переподключиться и если это удастся, продолжить обычную работу
-* обрабатывать потенциальные разъединения при любом вызове recv()
-* отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
-  + добавить к send() и recv() MSG_NOSIGNAL
+  + подтверждающие сообщения
+  + разметка сообщений идентификаторами
+  + создание буфера
+  + повторная отправка сообщений
+  + таймауты, связанные с каждым сообщением
+  + хранить пакеты данных на жёстком диске, тогда если возникнет сбой, то позже попытаться отправить эти данные
+  + разъединение во время длительных операций; когда две машины восстановят связь, можно будет передать результаты операции
+  + определять, насколько важно подтверждать доставку в каждом конкретном случае
+  + прикладывать большие усилия к тому, чтобы подтвердить завершение длительной операции, но смириться с утерей данных, сообщающих о степени выполнения операции
+  + многие приложения завершают работу, если происходит отключение в неожиданный момент
+  + отдельный цикл переподключения, который будет какое-то время спать, а затем пытаться переподключиться и если это удастся, продолжить обычную работу
+  + обрабатывать потенциальные разъединения при любом вызове recv()
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
-* writing to non-responding socket will cause a SIGPIPE and make my server crash
-  + `send(...MSG_NOSIGNAL)` = write() without SIGPIPE
-* TCP is stream oriented
-  + You can't rely on "getting the whole message" at once, or in any predictable size of pieces
-  + You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
-  + You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
-* TCP is a streaming protocol, not a message protocol
-* The only guarantee is that you send n bytes, you will receive n bytes in the same order
-* You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
-* You could send 100 1 byte chunks and receive 4 25 byte messages
-* **You must deal with message boundaries yourself**
-
-## Non-blocking I/O
-* http://www.kegel.com/dkftpbench/nonblocking.html
-* Programs that use non-blocking I/O: every function has to return immediately, i.e. all the functions in such programs are nonblocking
-* Instead, they use the "state machine" technique.
-* ...
-*  A way to query the available data on a socket
-  + Non-bloking sockets
-  + select()/poll()
+  + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
 
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
@@ -172,13 +145,6 @@ struct pollfd {
     - сделать сокет асинхронным, и тогда вы получите отрицательное значение, а в errono будет что-то типа EAGAIN (EWOULDBLOCK) - так система вам намекнет, что данных для вас у нее нет
     - сделать не весь сокет неблокирующим, а только данную операцию, подставив флаг MSG_NONBLOCK
     - перед чтением проверять, что в сокет что-то пришло. Это всякие poll, select и их вариации
-
-## Сигналы
-Ctrl+D (End of File):
-Ctrl+D is a keyboard input that typically represents the end-of-file (EOF) character in Unix-like systems.
-When entered at the beginning of a line in a terminal, it signals the end of input to the terminal.
-It's commonly used to indicate the end of input when reading from stdin (standard input).
-It doesn't directly raise a signal like SIGPIPE. Instead, it's processed by the terminal or the program reading from stdin.
 
 ## Requirements
 * multiple clients at the same time
