@@ -20,9 +20,8 @@
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
 * `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
 * я сделала `MODE` для установки одного параметра за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это? 
-* **много команд или ответов на команды не указаны в сабджекте, но без них клиент работать не будет** (**какие именно команды необходимы?**)
-* The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа? Возможно, это легче, чем строкию.
-* когда мы в irssi, то после команды `join #ch` все сообщение идут в этот канал, нам тоже так надо?
+* The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа?
+* когда мы в irssi, то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
 * **wireshark** / netcat / a custom **proxy** etc… to
   + не понимаю, как использоать
   + Wireshark permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
