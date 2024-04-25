@@ -3,6 +3,7 @@ IRC = Internet Relay Chat
 * 1988 г
 * для группового общения, общаться через личные сообщения и обмениваться файлами
 * на основе IRC разработано множество мессенджеров, такие как: ICQ, Skype, Discord, Telegram, Slack, etc...
+* * **most public IRC servers don't usually set a connection password**
  
 ## Сообщения (Internet Relay Chat Protocol)
 * https://www.lissyara.su/doc/rfc/rfc1459/ 
