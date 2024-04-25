@@ -97,7 +97,6 @@ public:
   int                      execTopic();
   int                      execMode();
   int                      execPing();
-  int                      execPong();
   int                      execWhois();
   int                      execPart();
   int                      execCap();
