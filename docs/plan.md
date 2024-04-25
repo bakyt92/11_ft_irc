@@ -20,10 +20,9 @@
     - В масках используются '*' и '?', это расширение команды PRIVMSG доступно только IRC-операторам
 * The command MUST either be a valid IRC command or **a three (3) digit number represented in ASCII text** - то есть возможно надо понимать просто сообщения-числа?
 * когда мы в irssi, то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
-* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**. 
-  + we used a modified version of this proxy: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
-  + easily debug your server and also gives you the ability to check how already existing one behaves
-* Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
+* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
+  + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
+  Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 * Once a user has joined a channel, he receives information about all commands his server receives affecting the channel: JOIN, MODE, KICK, QUIT and of course PRIVMSG/NOTICE
 * non-blocking
   + https://www.ibm.com/docs/en/i/7.3?topic=designs-example-nonblocking-io-select
