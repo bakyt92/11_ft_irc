@@ -55,15 +55,6 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + обрабатывать потенциальные разъединения при любом вызове recv()
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
   + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
-* TCP is stream oriented
-  + You can't rely on "getting the whole message" at once, or in any predictable size of pieces
-  + You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
-  + You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
-* TCP is a streaming protocol, not a message protocol
-* The only guarantee is that you send n bytes, you will receive n bytes in the same order
-* You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
-* You could send 100 1 byte chunks and receive 4 25 byte messages
-* **You must deal with message boundaries yourself**
 
 ## Non-blocking I/O
 * http://www.kegel.com/dkftpbench/nonblocking.html
