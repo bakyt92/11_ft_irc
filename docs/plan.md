@@ -11,6 +11,7 @@
 * RFC 2812: IRC messages are always lines of characters terminated with a CR-LF pair, and these messages SHALL NOT exceed 512 characters in length, counting all characters including the trailing CR-LF. Thus, there are 510 characters maximum allowed for the command and its parameters. **There is no provision for continuation of message lines**. 
 * Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
 * littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
+* у марии тоже size - 1
 * данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
 * в проекте mariia есть "tokenize the buffer line by line"
 * Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
