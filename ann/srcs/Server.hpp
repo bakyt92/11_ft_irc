@@ -11,9 +11,9 @@
 # include <netdb.h>
 # include <set>
 # include <stdlib.h>
-//# include <string>
 # include <sstream>
 # include <sys/poll.h>
+# include <sys/socket.h>
 # include <vector>
 # include <unistd.h>
 using std::map;

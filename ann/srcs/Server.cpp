@@ -16,7 +16,11 @@ std::vector<string> split(string s, string delim) {
   for (size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
     if (pos > 0) {
       string part = s.substr(0, pos);
-      part.erase(std::remove(part.begin(), part.end(), '\r'), part.end());
+      if (delim == " " && part[0] == ':') {
+        parts.push_back(s.substr(1, s.size() - 1));
+        return parts;
+      }
+      part.erase(std::remove(part.begin(), part.end(), '\r'), part.end()); // ?
       parts.push_back(part);
     }
     s.erase(0, pos + delim.size());
@@ -36,8 +40,8 @@ Cli* Server::getCli(string &name) {
   return NULL;
 }
 
-string mode(Ch *ch) { // +o ?
-  string mode = "";
+string mode(Ch *ch) {
+  string mode = "+";
   if (ch->optT == true)
     mode += "t";
   if (ch->optI == true)
@@ -46,7 +50,7 @@ string mode(Ch *ch) { // +o ?
     mode += "k";
   if (ch->limit < std::numeric_limits<unsigned int>::max())
     mode += "l";
-  return mode;
+  return mode == "+" ? "by default" : mode;  // +o ? перечислить пользлователей канала и админов?
   //static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
@@ -58,8 +62,7 @@ int Server::send_(Cli *to, string msg) {
   cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
   if (msg.substr(msg.size() - 3, 2) != "\r\n")
     msg += "\r\n";
-  send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-  return 0;
+  return send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
 int Server::send_(Ch *ch, string msg) {
@@ -74,7 +77,6 @@ void Server::printNewCli(int fd) { // for debugging only
 }
 
 void Server::printCmd() { // for debugging only
-  // cout << "I execute (cmd from fd=" << cli->fd << ") : ";
   cout << "I execute (cmd from fd=" << static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd) )).str() << ") : ";
   for (vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
     cout << "[" << *it << "]" << " ";
@@ -94,12 +96,6 @@ void Server::printServState() { // for debugging only
   }
   cout << endl;
 }
-
-// I execute (cmd from fd=5) : [PRIVMSG] [#ch] [:hello]
-// I send to 4                : [an PRIVMSG #ch ::hello]
-
-// I execute (cmd from fd=4) : [PRIVMSG] [an] [hello2] 
-// I send to 5                : [a PRIVMSG an :hello2]
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
 Server::Server(string port_, string pass_) : port(port_), pass(pass_) {}
@@ -135,7 +131,7 @@ void Server::init() {
       break ;
   }
   freeaddrinfo(listRes);
-  if (listen(fdForNewClis, 10))
+  if (listen(fdForNewClis, SOMAXCONN))
     throw(std::runtime_error("listen"));
   struct pollfd pollForNewClis = {fdForNewClis, POLLIN, 0};
   polls.push_back(pollForNewClis);
@@ -144,7 +140,7 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
-    if (poll(polls.data(), polls.size(), 1) > 0) {                     // в сокетах есть какие-то данные
+    if (poll(polls.data(), polls.size(), 1) > 0) { // в сокетах есть данные, попробовать 1000 вместо 1 и убрать unsleep
       for (std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
         if ((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
           struct sockaddr sa;
@@ -205,49 +201,50 @@ int Server::exec() {
     return execUser();
   if (ar[0] == "QUIT")
     return execQuit();
-  if (ar[0] == "TOPIC")
-    return execTopic();
+  if (ar[0] == "PING")
+    return execPing();
+  if (ar[0] == "CAP")
+    return execCap();
+  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk) // выше этой строки те команды, которые можно выполнять без аккаунт
+    return send_(cli, "451 " + cli->nick + " :User not logged in" ); // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
+  if (ar[0] == "PRIVMSG" || ar[0] == "NOTICE") //
+    return execPrivmsg();
+  if (ar[0] == "WHOIS")
+    return execWhois();
   if (ar[0] == "JOIN")
     return execJoin();
+  if (ar[0] == "PART")
+    return execPart();
+  if (ar[0] == "MODE")
+    return execMode();
+  if (ar[0] == "TOPIC")
+    return execTopic();
   if (ar[0] == "INVITE")
     return execInvite();
   if (ar[0] == "KICK")
     return execKick();
-  if (ar[0] == "PRIVMSG" || ar[0] == "NOTICE") //
-    return execPrivmsg();
-  if (ar[0] == "MODE")
-    return execMode();
-  if (ar[0] == "PING")
-    return execPing();
-  if (ar[0] == "PONG") //
-    return execPong();
-  if (ar[0] == "WHOIS")
-    return execWhois();
-  if (ar[0] == "CAP")
-    return execCap();
-  if (ar[0] == "PART")
-    return execPart();
-  return send_(cli, "421 :" + ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
+  return send_(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");                // ERR_UNKNOWNCOMMAND
 }
 
 int Server::execPass() {
   if(ar.size() < 2)
-    return send_(cli, "461 :PASS :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 PASS :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(cli->passOk)
     return send_(cli, "462 :You may not reregister");                                 // ERR_ALREADYREGISTRED
   if(ar[1] == pass)
     cli->passOk = true;
   if (cli->nick != "" && cli->uName != "" && cli->capOk)
-    send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
+    send_(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
 
+// not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0) 
     return send_(cli, "431 :No nickname given");                                      // ERR_NONICKNAMEGIVEN
   for (size_t i = 0; i < ar[1].size() && ar[1].size() <= 9; ++i)
     if(string("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").find(ar[1][i]) == string::npos)
-      return send_(cli, "432 :" + ar[1] + " :Erroneus nickname");                           // ERR_ERRONEUSNICKNAME
+      return send_(cli, "432 " + ar[1] + " :Erroneus nickname");                      // ERR_ERRONEUSNICKNAME
   for (std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if(itCli->second->nick.size() == ar[1].size()) {
       bool nickInUse = true;
@@ -255,88 +252,89 @@ int Server::execNick() {
         if(std::tolower(ar[1][i]) != std::tolower(itCli->second->nick[i]))
           nickInUse = false;
       if(nickInUse)
-        return send_(cli, "433 :" + ar[1] + " :Nickname collision");                        // ERR_NICKNAMEINUSE
+        return send_(cli, "436 " + ar[1] + " :Nickname collision"); // ERR_NICKCOLLISION ERR_NICKNAMEINUSE ?
     }
   }
   cli->nick = ar[1];
   if(cli->uName != "" && cli->passOk && cli->capOk)
-    send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
+    send_(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
 
 int Server::execUser() {
   if(ar.size() < 5)
-    return send_(cli, "461 :USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 USER :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(cli->uName != "")
     return send_(cli, "462 :You may not reregister");                                 // ERR_ALREADYREGISTRED
   cli->uName = ar[1];
   cli->rName = ar[4];
   if (cli->nick != "" && cli->passOk && cli->capOk)
-    send_(cli, cli->nick + " :Welcome to the Internet Relay Network " + cli->uName);
+    send_(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
+
+// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL ERR_TOOMANYTARGETS RPL_AWAY
+// I execute (cmd from fd=5) : [PRIVMSG] [#ch] [:hello]
+// I send to 4                : [an PRIVMSG #ch ::hello]
+
+// I execute (cmd from fd=4) : [PRIVMSG] [an] [hello2] 
+// I send to 5                : [a PRIVMSG an :hello2]
 
 int Server::execPrivmsg() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
-    return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() == 1) 
-    return send_(cli, ":No recipient given (" + ar[1] + ")");                     // ERR_NORECIPIENT
+    return send_(cli, "411 :No recipient given (" + ar[1] + ")");                 // ERR_NORECIPIENT
   if(ar.size() == 2)
-    return send_(cli, ":No text to send");                                       // ERR_NOTEXTTOSEND
+    return send_(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND
   vector<string> tos = split(ar[1], ",");
+  string toSendToCli = "";
   for (vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if(((*to)[0] == '#' && chs.find(*to) == chs.end()) || ((*to)[0] != '#' && !getCli(*to)))
-      send_(cli, *to + " :No such nick/channel");                                 // ERR_NOSUCHNICK
-    else if((*to)[0] == '#' && chs[*to]->clis.find(cli) != chs[*to]->clis.end())    // ERR_NOTONCHANNEL нужно ?
-      send_(chs[*to], cli->nick + " PRIVMSG " + *to + " :" + ar[2]);
+      toSendToCli += "401 " + *to + " :No such nick/channel\r\n";                 // ERR_NOSUCHNICK
     else
-      send_(getCli(*to), cli->nick + " PRIVMSG " + *to + " :" + ar[2]);
+      send_(getCli(*to), cli->nick + " " + *to + " :" + ar[2]);
+  send_(cli, toSendToCli);
   return 0;
 }
 
-// the user receives a JOIN message as confirmation 
-//  the channel's topic (using RPL_TOPIC)
-// the list of users who are on the channel (using RPL_NAMREPLY), which MUST include the user joining
+// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_TOOMANYTARGETS ERR_UNAVAILRESOURCE 
+// `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа - я пока ничего не сделала насчёт `&`, надо ли?
+// Once a user has joined a channel, he receives information about all commands his server receives affecting the channel: JOIN, MODE, KICK, QUIT, PRIVMSG/NOTICE
 int Server::execJoin() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
-    return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 2)
-    return send_(cli, "461 :JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
+    return send_(cli, "461 JOIN :Not enough parameters");                             // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ",");
   //vector<string> passes  = ar.size() > 2 ? split(ar[2], ",") : vector<string>();
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     if(chName->size() > 200 || (*chName)[0] != '#') // проверить
       send_(cli, *chName + " :Cannot join channel (bad channel name)");           // ?
     else {
-      chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName]; // ERR_NOSUCHCHANNEL ? 
+      chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName]; // зачем указан RR_NOSUCHCHANNEL ?
       // string pass = passes.size() > i ? passes[i] : "";
       // if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-      //   send_(cli, *chName + " :Cannot join channel (+k)\n");                    // ERR_BADCHANNELKEY
+      //   send_(cli, "'475 :" + *chName + " Cannot join channel (+k)\n");                    // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit) 
-        send_(cli, *chName + " :Cannot join channel (+l)");                       // ERR_CHANNELISFULL
+        send_(cli, "471 " + *chName + " :Cannot join channel (+l)");                       // ERR_CHANNELISFULL
       else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
-        send_(cli, *chName + " :Cannot join channel (+i)");                       // ERR_INVITEONLYCHAN
+        send_(cli, "473 " + *chName + " :Cannot join channel (+i)");                       // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        send_(chs[*chName], cli->nick + " JOIN :" + *chName);  // объедиить два send
-        send_(cli, *chName + " " + chs[*chName]->topic + " " + mode(chs[*chName])); 
-      }                                                                             // нужно ли исключение "пользователь уже на канале" ?   
+        send_(chs[*chName], cli->nick + " JOIN :" + *chName);  // два send ?
+        send_(cli, *chName + " " + chs[*chName]->topic + " " + mode(chs[*chName])); // RPL_TOPIC + RPL_NAMREPLY !
+      }                                        // нужно ли исключение "пользователь уже на канале" ?
     }
   }
   return 0;
 }
 
 int Server::execPart() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
-    return send_(cli, cli->nick + " :User not logged in" );                         // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 2)
-    return send_(cli, "461 :JOIN :Not enough parameters");                          // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 JOIN :Not enough parameters");                          // ERR_NEEDMOREPARAMS
   vector<string> chNames = split(ar[1], ",");
   for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (chs.find(*chName) == chs.end())
-      send_(cli, *chName + " " + chs[*chName]->topic + " " + mode(chs[*chName]));   // ERR_NOSUCHCHANNEL
+      send_(cli, "403 :" + *chName + " :No such channel"); // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
-      send_(cli, *chName + " :You're not on that channel");                         // ERR_NOTONCHANNEL
+      send_(cli, "442 " + *chName + " :You're not on that channel");                         // ERR_NOTONCHANNEL
     else {
       send_(chs[*chName], cli->nick + " PART :" + *chName);                         // нужно ли сообщение
       chs.erase(*chName);
@@ -344,64 +342,64 @@ int Server::execPart() {
   return 0;
 }
 
+// not implemented here RPL_AWAY
 int Server::execInvite() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
-    return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ? 
   if(ar.size() < 3)
-    return send_(cli, "461 :INVITE :Not enough parameters");                           // ERR_NEEDMOREPARAMS 
+    return send_(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS 
   if(chs.find(ar[2]) == chs.end())
-    return send_(cli, ar[2] + " :No such channel");                               // ERR_NOSUCHCHANNEL ? 
+    return send_(cli, "403 " + ar[2] + " :No such channel");                      // ERR_NOSUCHCHANNEL ???
   if(chs[ar[2]]->adms.find(cli) == chs[ar[2]]->adms.end()) 
-    return send_(cli, ar[2] + " :You're not channel operator");                   // ERR_CHANOPRIVSNEEDED
+    return send_(cli, "482 " + ar[2] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(chs[ar[2]]->clis.find(cli) == chs[ar[2]]->clis.end()) 
-    return send_(cli, ar[2] + " :You're not on that channel");                    // ERR_NOTONCHANNEL
+    return send_(cli, "442 " + ar[2] + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(getCli(ar[1]) == NULL)
-    return send_(cli, ar[1] + " :No such nick");                                  // ERR_NOSUCHNICK
+    return send_(cli, "401 :" + ar[1] + " No such nick");                         // ERR_NOSUCHNICK
+  if(chs[ar[2]]->clis.find(cli) != chs[ar[2]]->clis.end()) 
+    return send_(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
   getCli(ar[1])->invits.insert(ar[2]);
-  send_(chs[ar[2]], ar[2] + " " + ar[1]);                                    // RPL_INVITING
+  send_(chs[ar[2]], "341" + ar[2] + " " + ar[1]);                                 // RPL_INVITING
   return 0;
 }
 
+// not implemented here ERR_NOCHANMODES
 int Server::execTopic() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
-    return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 1)
-    return send_(cli, "461 :TOPIC :Not enough parameters");                            // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 TOPIC :Not enough parameters");                       // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
-    return send_(cli, ar[1] + " :No such channel");                               // ERR_NOSUCHCHANNEL
+    return send_(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
-    return send_(cli, ar[1] + " :You're not on that channe");                     // ERR_NOTONCHANNEL
+    return send_(cli, "442 " + ar[1] + " :You're not on that channe");            // ERR_NOTONCHANNEL
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end()) 
-    return send_(cli, ar[1] + " :You're not channel operator");                   // ERR_CHANOPRIVSNEEDED
+    return send_(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if (ar.size() == 2) {
     chs[ar[1]]->topic = "";
-    return send_(chs[ar[2]], ar[1] + " No topic is set");                         // RPL_NOTOPIC
+    return send_(chs[ar[2]], "331 " + ar[1] + " :No topic is set");               // RPL_NOTOPIC
   }
-  chs[ar[1]]->topic = ar[2];                                             
-  return send_(chs[ar[1]], ar[1] + " " + ar[2]);                             // RPL_TOPIC
+  chs[ar[1]]->topic = ar[2];
+  return send_(chs[ar[1]], "332 " + ar[1] + " :" + ar[2]);                        // RPL_TOPIC
 }
 
+// not implemented here ERR_BADCHANMASK
 int Server::execKick() {
-  if(!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk)
-    return send_(cli, cli->nick + " :User not logged in" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 3)
-    return send_(cli, "461 :KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 KICK :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   std::vector<string> chNames    = split(ar[1], ",");
   std::vector<string> targetClis = split(ar[2], ",");
-  for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
+  for (vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chs.find(*chName) == chs.end())
-      send_(cli, *chName + " :No such channel");                                  // ERR_NOSUCHCHANNEL
+      send_(cli, "403 " + *chName + " :No such channel");                                  // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end()) 
-      send_(cli, *chName + " :You're not on that channe");                        // ERR_NOTONCHANNEL
+      send_(cli, "442 " + *chName + " :You're not on that channe");               // ERR_NOTONCHANNEL
     else if(chs[*chName]->adms.find(cli) == chs[*chName]->adms.end()) 
-      send_(cli, *chName + " :You're not channel operator");                      // ERR_CHANOPRIVSNEEDED
+      send_(cli, "482 " + *chName + " :You're not channel operator");             // ERR_CHANOPRIVSNEEDED
     else {
       for (vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++)
-        if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end())
+        if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
+          send_(cli, "442 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
+        else if (chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end())
           chs[*chName]->erase(*targetCli);                                          // send_(chs[*chName], " KICK"); ?
       // if (chs[*chName]->size() == 0)
       //   chs.erase(*chName);
-    }
   }
   return 0;
 }
@@ -421,20 +419,20 @@ int Server::execQuit() {
   return 0;
 }
 
+// not implemented here: ERR_NOCHANMODES RPL_BANLIST RPL_ENDOFBANLIST RPL_EXCEPTLIST RPL_ENDOFEXCEPTLIST RPL_INVITELIST RPL_ENDOFINVITELIST RPL_UNIQOPIS (creator of the channel)
+// `MODE` устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
 int Server::execMode() {
   char *notUsed; // ?
-  if(!cli->passOk || cli->nick == "" || cli->uName == "")
-    return send_(cli, cli->nick + " :User not logged in *" );                       // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
   if(ar.size() < 2)
-    return send_(cli, "461 :MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
-    return send_(cli, ar[1] + " :No such channel");                               // ERR_NOSUCHCHANNEL
+    return send_(cli, ar[1] + " :No such channel");                                   // ERR_NOSUCHCHANNEL ???
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
-    return send_(cli, ar[1] + " :You're not on that channel");                    // ERR_NOTONCHANNEL
+    return send_(cli, "442 " + ar[1] + " :You're not on that channel");               // ERR_NOTONCHANNEL ???
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end())
-    return send_(cli, ar[1] + " :You're not channel operator");                   // ERR_CHANOPRIVSNEEDED
+    return send_(cli, "482 " + ar[1] + " :You're not channel operator");              // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
-    return send_(cli, ar[1] + " mode = " + mode(chs[ar[1]]));                            // RPL_CHANNELMODEIS
+    return send_(cli, ar[1] + " mode = " + mode(chs[ar[1]]));                         // RPL_CHANNELMODEIS
   if(ar.size() == 3 && ar[2] == "+i")
     return (chs[ar[1]]->optI = true);
   if(ar.size() == 3 && ar[2] == "-i")
@@ -448,17 +446,17 @@ int Server::execMode() {
   if(ar.size() == 3 && ar[2] == "-k")
     return (chs[ar[1]]->pass = "", 0);
   if(ar.size() == 3 && (ar[2] == "+k" || ar[1] == "+l" || ar[1] == "+o" || ar[1] == "-o"))
-    return send_(cli, "461 :MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
+    return send_(cli, "461 MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(ar.size() == 3)
-    return send_(cli, "461 :MODE :Not enough parameters");                             //  ERR_NEEDMOREPARAMS
+    return send_(cli, "461 MODE :Not enough parameters");                             // ERR_NEEDMOREPARAMS
   if(ar[2] == "+k" && chs[ar[1]]->pass != "")
-    return send_(cli, ar[1] + " :Channel key already set");                       // ERR_KEYSET
+    return send_(cli, ar[1] + " :Channel key already set");                           // ERR_KEYSET
   if(ar[2] == "+k")
     return (chs[ar[1]]->pass = ar[3], 0);
   if(ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
     return (chs[ar[1]]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10)), 0);
   if(ar[2] == "+o")
-    return (chs[ar[1]]->adms.insert(getCli(ar[3])), 0); // если такого ника нет?
+    return send_(cli, ar[3] + " " + ar[1] + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
   if(ar[2] == "-o")
     return chs[ar[1]]->adms.erase(getCli(ar[3]));
   return send_(cli, ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
@@ -480,7 +478,7 @@ int Server::execWhois() {
   string toSend = "";
   for (vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
-      toSend += ar[1] + " :No such nick\r\n";                                       // ERR_NOSUCHNICK
+      toSend += "401 :" + ar[1] + " No such nick\r\n";                                       // ERR_NOSUCHNICK
     else
       toSend += getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName + "\r\n"; // RPL_WHOISUSER
   return send_(cli, toSend + " " + nicks[0] + " :End of WHOIS list\r\n");              // RPL_ENDOFWHOIS ?
@@ -493,7 +491,7 @@ int Server::execCap() {
   }
   else if(ar.size() >= 2 && ar[1] == "END") {
     cli->capOk = true;
-    send_(cli, "001"); // :Welcome to the Internet Relay Network " + cli->uName); // RPL_WELCOME
+    send_(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
     //send_(cli, "002"); // :Your host is " + cli->host  + ", running version 1.0");            // RPL_YOURHOST
     //send_(cli, "003"); // :This server was created 24.04.2024");                  // RPL_CREATED // ?
     //send_(cli, "004"); // :ircserv 1.0  ptkio");                                // RPL_MYINFO
@@ -504,7 +502,7 @@ int Server::execCap() {
 
 int main(int argc, char *argv[]) {
   // проверить с помощью strtol, не выходим ли за рамки int
-  if(argc != 3 || atoi(argv[1]) < 1024) {
+  if(argc != 3 || atoi(argv[1]) < 1024 || atoi(argv[1]) > 65535) {
     std::cout << "Invalid arguments.\nRun ./ircserv <port> <password>, port should be between 1024 and 65535\n";
     return 0;
   }
