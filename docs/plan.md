@@ -176,7 +176,7 @@ Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un i
 * что делать, если админ покинул чат?
 
 ## Инфо
-* **most public IRC servers don't usually set a connection password**
+* https://github.com/levensta/IRC-Server?tab=readme-ov-file#message
 * https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
 * https://modern.ircdocs.horse/   
 * https://irc.dalexhd.dev/index.html  
