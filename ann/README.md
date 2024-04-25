@@ -1,9 +1,6 @@
 group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md   
-
-## IRC = Internet Relay Chat
-* a text-based communication protocol on the Internet
-* use case https://dev.twitch.tv/docs/irc/ 
-
+IRC = Internet Relay Chat  
+ 
 ## Сообщения (Internet Relay Chat Protocol)
 * https://www.lissyara.su/doc/rfc/rfc1459/ 
 * Серверы и клиенты создают сообщения на которые можно ответить, а можно и нет
@@ -55,15 +52,6 @@ group: https://github.com/bakyt92/11_ft_irc/blob/master/docs/plan.md
   + обрабатывать потенциальные разъединения при любом вызове recv()
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
   + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
-
-## Non-blocking I/O
-* http://www.kegel.com/dkftpbench/nonblocking.html
-* Programs that use non-blocking I/O: every function has to return immediately, i.e. all the functions in such programs are nonblocking
-* Instead, they use the "state machine" technique.
-* ...
-*  A way to query the available data on a socket
-  + Non-bloking sockets
-  + select()/poll()
 
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
