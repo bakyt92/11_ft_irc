@@ -176,7 +176,13 @@ Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un i
 * что делать, если админ покинул чат?
 
 ## Инфо
-* https://github.com/levensta/IRC-Server?tab=readme-ov-file#message
+* https://github.com/levensta/IRC-Server
+* https://github.com/marineks/Ft_irc
+* https://github.com/miravassor/irc
+* https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
+* https://masandilov.ru/network/guide_to_network_programming – гайд по сетевому программированию
+* https://ncona.com/2019/04/building-a-simple-server-with-cpp/ – про сокеты и TCP-сервер на C++
+* https://youtu.be/cNdlrbZSkyQ – еще немного про сокеты
 * https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9  
 * https://modern.ircdocs.horse/   
 * https://irc.dalexhd.dev/index.html  
@@ -188,10 +194,6 @@ Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un i
 * https://www.youtube.com/watch?v=I9o-oTdsMgI  
 * https://www.youtube.com/@edueventsmow/videos  
 * https://www.youtube.com/watch?v=I9o-oTdsMgI&list=PLUJCSGGiox1Q-QvHfMMydtoyEa1IEzeLe&index=1   
-* https://github.com/shuygena/intra42_ru_guides?tab=readme-ov-file#irc (много информации по проектам)  
-* https://github.com/mharriso/school21-checklists/blob/master/ng_5_ft_irc.pdf   
-* https://github.com/marineks/Ft_irc
-* https://github.com/miravassor/irc
 * [Сетевое программирование от Биджа. Использование	Интернет Сокетов. (кратко)](https://github.com/bakyt92/11_ft_irc/blob/master/docs/book_sockets_short.md)   
 * https://www.irchelp.org/
 * https://ircgod.com/ (!)
