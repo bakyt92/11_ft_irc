@@ -33,8 +33,9 @@
 * сигналы
   + EOF processing (Control-D) is handled in canonical mode; it actually means 'make the accumulated input available to read()'; if there is no accumulated input (if you type Control-D at the beginning of a line), then the read() will return zero bytes, which is then interpreted as EOF by programs. Of course, you can merrily type more characters on the keyboard after that, and programs that ignore EOF (or run in non-canonical mode) will be quite happy 
 https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-input
-+ CTRL+D посылает 0 байт только если при пустой строке мы это вводим
-+ если вводим сначала символы и потом CTRL+D, то это своего рода сигнал отправить текущие символы из командной строки
+  + CTRL+D посылает 0 байт только если при пустой строке мы это вводим
+  + если вводим сначала символы и потом CTRL+D, то это своего рода сигнал отправить текущие символы из командной строки
+  + если брать наш пример `PRIV ^D MSG ^D Nickname Hello! \r \n`, то команда CTRL+D сначала отправит <PRIV EOF> - это видимо 6 байт, а потом <MSG EOF> - 5 байт, а не ноль
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 
