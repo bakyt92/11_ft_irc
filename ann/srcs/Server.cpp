@@ -349,10 +349,13 @@ int Server::execJoin() {
       prepareResp(cli, "403 " + *chName + " :Cannot join channel (bad channel name)"); // ERR_NOSUCHCHANNEL ?
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
-      // string pass = passes.size() > 1 ? passes[0] : "";
-      // passes.erase(passes.begin());
-      // if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-      //   prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");       // ERR_BADCHANNELKEY
+      string pass = "";
+      if (passes.size() > 1) {
+        string pass = *(passes.begin());
+        passes.erase(passes.begin());
+      }
+      if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
+        prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");       // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");       // ERR_CHANNELISFULL
       else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
