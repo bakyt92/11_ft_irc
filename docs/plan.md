@@ -58,6 +58,7 @@ https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-i
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)** (rfc 2813 server -> server, нам не нужно, rfc 1459 устарел)
+* http://abcdrfc.free.fr/rfc-vf/rfc1459.html
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
   + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
 * https://modern.ircdocs.horse/

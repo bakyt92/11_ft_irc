@@ -57,6 +57,14 @@ IRC = Internet Relay Chat
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
   + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
 
+## three non-blocking I/O strategies
+All require that the socket be set non-blocking
+* call poll before you perform an I/O operation. You then attempt a single read or write operation only if you get a read or write hit from poll or select.
+* attempt the read or write operation first. If it succeeds immediately, great. If not, wait for a poll hit before retrying the operation.
+  + this method is the most common for writes
+* call poll before you perform an I/O operation. You then attempt multiple reads or writes until you either finish everything you need to do or get a "would block" indication. When you get a "would block" indication, you wait until  poll tells you before you attempt another operation in that direction on that socket.
+  + this method is the most common for reads
+
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
 * ждёт, пока один дескриптор из набора файловых дескрипторов не станет готов выполнить операцию ввода-вывода
@@ -75,7 +83,6 @@ IRC = Internet Relay Chat
   + le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
   + NULL: un dépassement du délai d'attente et qu'aucun descripteur de fichier n'était prêt
   + -1: s'ils échouent, errno contient le code d'erreur  
-
 ```
 struct pollfd {
     int   fd;         
@@ -123,7 +130,7 @@ struct pollfd {
 * you have to call accept() for each client that you want to communicate with
 
 ## send()
-* POSIX stqndqnt for system calls
+* send (2) is a POSIX stqndqnt for system calls
 * is generally associated with low level system calls
 * transmit a message to another socket
 * may be used only when the socket is in a connected state (so that the intended recipient is known)
@@ -132,12 +139,13 @@ struct pollfd {
 * `ssize_t sendto(int sockfd, const void buf[.len], size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen)`
 * `ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)`
 * флаг MSG_NOSIGNAL
-  + MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
+  + = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
   + don't generate a SIGPIPE signal if the peer has closed the connection
-
-## `send(3)`
-* `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
-* associated with high-level functions
+* if there is not enough available buffer space to hold the socket data to be transmitted
+  + if the socket is in blocking mode, **send() blocks** the caller until additional buffer space becomes available
+  + if the socket is in nonblocking mode, send() returns -1 and sets the error code to EWOULDBLOCK
+* `send(3)` `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
+  + associated with high-level functions
 
 ## recv recvfrom recvmsg
 * if a message is too long to fit in the supplied buffer, excess bytes may be discarded depending on the type of socket the message is received from
@@ -155,6 +163,9 @@ struct pollfd {
 * How to query the available data on a socket:
   + Non-bloking sockets
   + select()/poll()
+* the call to poll has no effect on the call to recv, whether or not recv blocks depends on:
+  + what data is available at the time you call recv
+  + whether the socket is in blocking or non-blocking mode
 
 ### `ssize_t recv(int sockfd, void buf[.len], size_t len, int flags)`
 * ждёт, пока данные не появятся
@@ -174,15 +185,12 @@ struct pollfd {
 ### `ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)`
 
 ## Requirements
-* multiple clients at the same time
-* never hang
-* forking is not allowed
 * I/O operations must be non-blocking
 * only 1 poll() can be used for handling all I/O operations (read, write, listen, ...)
 * non-blocking file descriptors => we may use read/recv or write/send functions with no poll()
   + ther server is not blocking
   + it consumes more system resources
-* forbdden:  read/recv,r write/send without poll() (in any file descriptor)
+* forbdden: read/recv write/send without poll() (in any file descriptor)
 * communication between client and server has to be done via TCP/IP (v4 or v6)
 * Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...)
 * **In order to process a command, you have to first aggregate the received packets in order to rebuild it**
