@@ -6,6 +6,53 @@ void Server::sigHandler(int sig) {
   (void)sig;
 }
 
+string mode(Ch *ch) { // +o ? перечислить пользлователей и админов?
+  string mode = "+";
+  if(ch->optT == true)
+    mode += "t";
+  if(ch->optI == true)
+    mode += "i";
+  if(ch->pass != "")
+    mode += "k";
+  if(ch->limit < std::numeric_limits<unsigned int>::max())
+    mode += "l";
+  return mode == "+" ? "default" : mode;
+  //static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
+}
+
+string without_r_n(string s) {     // debugging
+  for(size_t pos = s.find('\r'); pos != string::npos; pos = s.find('\r', pos))
+    s.replace(pos, 1, "\\r");
+  for(size_t pos = s.find('\n'); pos != string::npos; pos = s.find('\n', pos))
+    s.replace(pos, 1, "\\n");
+  return s;
+}
+
+void Server::printNewCli(int fd) { // debugging
+  cout << "New cli (fd=" << fd << ")" << endl;
+}
+
+void Server::printCmd() {          // debugging
+  cout << "I execute (cmd from fd=" << static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd) )).str() << ") : ";
+  for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
+    cout << "[" << *it << "]" << " ";
+  cout << endl;
+}
+
+void Server::printServState() {    // debugging
+  cout << "My clients                : ";
+  for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
+    cout << "[[" << it->second->nick << "] with buf [" + it->second->buf + "]] ";
+  cout << endl;
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
+    cout << "My channel                : name = " << ch->first << ", topic = " << ch->second->topic << ", pass = " << ch->second->pass << ", users = ";
+    for(set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
+      cout << (*itCli)->nick << " ";
+    cout << ", mode = " << mode(ch->second) << endl;
+  }
+  cout << endl;
+}
+
 std::vector<string> split_space(string s) {
   if (s.size() == 0)
     return vector<string>();
@@ -32,117 +79,61 @@ vector<string> split(string s, char delim) {
     return vector<string>();
   vector<string> parts;
   for(size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
-    if(pos > 0) {
-      cout << "push " << s.substr(0, pos) << endl;
+    if(pos > 0)
       parts.push_back(s.substr(0, pos));
-    }
     s.erase(0, pos + 1);
   }
-  if(s.size() > 0) {
-    cout << "push* " << s << endl;
+  if(s.size() > 0)
     parts.push_back(s);
-  }
   return parts;
 }
 
-// '\r' = 13
-vector<string> split_r_n(string s) {
+vector<string> Server::split_r_n(string s) {
   if (s.size() == 0)
-    return vector<string>(); // можно убрать?
-  cout << "1. call split " << s << endl;
-  // for (string::iterator it = s.begin(); it != s.end(); it++) {
-  //   printf("%c %d == \\r %d ? %d\n", *it, *it, '\r', (*it == '\r'));
-  //   //cout << *it << " == \\r ? " << (*it == '\r') << endl;
-  //   if (*it == '\r')
-  //     s.erase(it);
-  // }
-  s.erase(std::remove(s.begin(), s.end(), 13), s.end());
-  cout << "2. call split " << s << endl;
-  return split(s, '\n');
-  // if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r' && s.find("\r\n") == string::npos) // через nc на конце строки \n а не \r\n
-  // vector<string> parts;
-  // for(size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
-  //   if(pos > 0)
-  //     parts.push_back(s.substr(0, pos));
-  //   s.erase(0, pos + 2);
-  // }
-  // if(s.size() > 0)
-  //   parts.push_back(s);
-  // return parts;
-}
-
-string mode(Ch *ch) {
-  string mode = "+";
-  if(ch->optT == true)
-    mode += "t";
-  if(ch->optI == true)
-    mode += "i";
-  if(ch->pass != "")
-    mode += "k";
-  if(ch->limit < std::numeric_limits<unsigned int>::max())
-    mode += "l";
-  return mode == "+" ? "by default" : mode;  // +o ? перечислить пользлователей канала и админов?
-  //static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
+    return vector<string>();
+  if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r' && s.find("\r\n") == string::npos) { // в конце \n и в буфере одна команда, т.е. почти наерняка это пришло через nc
+    s[s.size() - 1] = '\r';
+    s += '\n';
+  }
+  vector<string> parts;
+  for(size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
+    if(pos > 0)
+      parts.push_back(s.substr(0, pos));
+    s.erase(0, pos + 2);
+  }
+  if(s.size() > 0)
+    cli->buf = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть по скорее всего начало следующей команды)
+  else
+    cli->buf = "";
+  return parts;
 }
 
 int Server::prepareResp(Cli *to, string msg) {
-  to->cmdsToSend.push_back(msg + "\r\n"); //
+  to->cmdsToSend.push_back(msg + "\r\n");
   return 0;
 }
 
 int Server::prepareResp(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
-    if((*to)->fd != cli->fd)
+    if((*to)->fd != cli->fd) // но некоторые команды надо и самому себе посылать
       prepareResp(*to, msg);
   return 0;
 }
 
 void Server::sendResp(Cli *to, string msg) {
-  string end = msg.substr(msg.size() - 3, 2);
-  if(end == "\r\n")
-    msg = msg.substr(0, msg.size() - 2);
-  string toPrint(msg);
-  for(size_t pos = toPrint.find("\r\n"); pos != string::npos; pos = toPrint.find("\r\n", pos))
-    toPrint.replace(pos, 2, "\n                            ");
-  cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
-  msg += "\r\n";
+  cout << "I send to fd=" << to->fd << "            : [" << without_r_n(msg) << "]\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL); // flag ?
   for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
     if (poll->fd == to->fd)
       poll->events = POLLIN;
 }
 
-void Server::sendResps(Cli *to) {
+void Server::sendAccumulatedResps(Cli *to) {
   while (to->cmdsToSend.size() > 0) {
     string msg = *(to->cmdsToSend.begin());
     to->cmdsToSend.erase(to->cmdsToSend.begin());
     sendResp(to, msg);
   }
-}
-
-void Server::printNewCli(int fd) { // debugging
-  cout << "New cli (fd=" << fd << ")" << endl;
-}
-
-void Server::printCmd() {         // debugging
-  cout << "I execute (cmd from fd=" << static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd) )).str() << ") : ";
-  for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
-    cout << "[" << *it << "]" << " ";
-  cout << endl;
-}
-
-void Server::printServState() {   // debugging
-  cout << "My clients                : ";
-  for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-    cout << "[" << it->second->nick << "] ";
-  cout << endl;
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << "My channel                : name = " << ch->first << ", topic = " << ch->second->topic << ", pass = " << ch->second->pass << ", users = ";
-    for(set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
-      cout << (*itCli)->nick << " ";
-    cout << ", mode = " << mode(ch->second) << endl;
-  }
-  cout << endl;
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
@@ -188,7 +179,7 @@ void Server::run() {
   while (sigReceived == false) {
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
       if (it->second->cmdsToSend.size() > 0) {
-        std::cout << "I have data to send for " << it->second->fd << "\n";
+        //std::cout << "I have data to send for " << it->second->fd << "\n";
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
           if (poll->fd == it->first) {
             poll->events = POLLOUT;
@@ -196,11 +187,11 @@ void Server::run() {
           }
       }
     usleep(1000);
-    int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0? 1000 и без nspeel?
+    int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0? 1000 и без usleep?
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]"); // везде добавить strerror(errno) ?
     if(countEvents > 0) { // в сокетах есть данные
-      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) { // check sockets
+      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
         if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
           struct sockaddr sa;
           socklen_t       saLen = sizeof(sa);
@@ -221,18 +212,21 @@ void Server::run() {
         else if((poll->revents & POLLIN) && poll->fd != fdForNewClis) { // клиент прислал сообщение в свой fdForMsgs
           if(!(cli = clis.at(poll->fd)))
             continue ;
-          vector<unsigned char> buf(513);
-          for(size_t i = 0; i < buf.size(); i++)
-            buf[i] = '\0';
-          int bytes = recv(cli->fd, buf.data(), buf.size() - 1, 0); // добавить к send() и recv() MSG_NOSIGNAL ?
+          vector<unsigned char> buf0(513);
+          for(size_t i = 0; i < buf0.size(); i++)
+            buf0[i] = '\0';
+          int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, 0); // добавить MSG_NOSIGNAL ?
           if(bytes < 0) 
             perror("recv");
-          else if(bytes == 0) // если клиент пропал
-            execQuit(); 
+          else if(bytes == 0) // клиент пропал
+            execQuit();
           else {
-            string bufStr = string(buf.begin(), buf.end());
-            bufStr.resize(bytes);
-            std::vector<string> cmds = split_r_n(bufStr);
+            string buf = string(buf0.begin(), buf0.end());
+            buf.resize(bytes);
+            cout << without_r_n("I have received buf       : [" + buf + "] -> [" + cli->buf + buf + "]") << "\n";
+            buf = cli->buf + buf;
+            printServState();
+            std::vector<string> cmds = split_r_n(buf);
             for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               // for(int i = 0; i < ar.size(); i++)
               //   ar[i] = ""; !
@@ -245,9 +239,8 @@ void Server::run() {
           }
         }
         else if (poll->revents & POLLOUT) {
-          sendResps(clis.at(poll->fd));
+          sendAccumulatedResps(clis.at(poll->fd));
         }
-      }
     }
   }
   std::cout << "Terminated\n";
@@ -543,13 +536,12 @@ int Server::execWhois() {
   if(ar.size() < 2)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   std::vector<string> nicks = split(ar[1], ',');
-  string toSend = "";
   for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
-      toSend += "401 :" + ar[1] + " No such nick\r\n";                            // ERR_NOSUCHNICK
+      prepareResp(cli, "401 :" + ar[1] + " No such nick");                            // ERR_NOSUCHNICK
     else
-      toSend += getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName + "\r\n"; // RPL_WHOISUSER
-  return prepareResp(cli, toSend + " " + nicks[0] + " :End of WHOIS list\r\n");         // RPL_ENDOFWHOIS ?
+      prepareResp(cli, getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName); // RPL_WHOISUSER
+  return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");              // RPL_ENDOFWHOIS ?
 }
 
 int Server::execCap() {
