@@ -74,18 +74,29 @@ private:
   vector<struct pollfd>    polls;
   map<int, Cli*>           clis;
   map<string, Ch*>         chs;
-  vector<string>           ar;  // the command being treated at the moment, args[0] = command
-  Cli                      *cli;  // the client  being treated at the moment
+  vector<string>           ar;    // the command being treated at the moment, args[0] = command
+  Cli                      *cli;  // автор команды
+  map<Cli*, string>        responses;
 public:
                            Server(string port, string pass);
-                           ~Server(); 
+                           ~Server() {
+                             // close all fd
+                             // free clis, chs ?
+                           }
   static  void             sigHandler(int sig);
   void                     init();
   void                     run();
-  Cli*                     getCli(string &name);
-  int                      send_(Cli *to, string msg);
-  int                      send_(Ch *ch, string msg);
-  int                      exec(); 
+  Cli*                     getCli(string &name) {
+                             for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
+                               if(it->second->nick == name)
+                                 return it->second;
+                             return NULL;
+                           }
+  int                      prepareResp(Cli *to, string msg);
+  int                      prepareResp(Ch *ch, string msg);
+  int                      sendResp(Cli *to, string msg);
+  int                      sendRespToAll();
+  int                      execCmd();
   int                      execPass();
   int                      execNick();
   int                      execUser();
@@ -103,5 +114,15 @@ public:
   void                     printNewCli(int fd);
   void                     printCmd();
   void                     printServState();
+  void                     erase(Ch *toErase) {
+                             for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
+                               if((it->second) == toErase)
+                                 chs.erase(it);
+                           }
+  void                     erase(Cli *toErase) {
+                             for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
+                               if((it->second) == toErase)
+                                 clis.erase(it);
+                           }
 };
 #endif
