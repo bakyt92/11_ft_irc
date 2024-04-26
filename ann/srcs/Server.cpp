@@ -294,7 +294,7 @@ int Server::execCmd() {
 
 // если неправильный пароль никакого сообщения?
 int Server::execPass() {
-  if(ar.size() < 2)
+  if(ar.size() < 2 || ar[1] == "")
     return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(cli->passOk)
     return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
