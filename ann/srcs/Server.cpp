@@ -73,7 +73,7 @@ string mode(Ch *ch) {
 }
 
 int Server::prepareResp(Cli *to, string msg) {
-  responses[to] += msg + "\r\n";
+  to->sendQueue.push_back(msg + "\r\n"); //
   return 0;
 }
 
@@ -84,7 +84,7 @@ int Server::prepareResp(Ch *ch, string msg) {
   return 0;
 }
 
-int Server::sendResp(Cli *to, string msg) {
+void Server::sendResp(Cli *to, string msg) {
   string end = msg.substr(msg.size() - 3, 2);
   if(end == "\r\n")
     msg = msg.substr(0, msg.size() - 2);
@@ -93,14 +93,15 @@ int Server::sendResp(Cli *to, string msg) {
     toPrint.replace(pos, 2, "\n                            ");
   cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
   msg += "\r\n";
-  return send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL); // flag ?
+  send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL); // flag ?
 }
 
-int Server::sendRespToAll() {
-  for(map<Cli*, string>::iterator to = responses.begin(); to != responses.end(); to++)
-    if(to->second != "")
-      sendResp(to->first, to->second);
-  return 0;
+void Server::sendResps(Cli *to) {
+  while (to->sendQueue.size() > 0) {
+    string msg = *(to->sendQueue.begin());
+    to->sendQueue.erase(to->sendQueue.begin());
+    sendResp(to, msg);
+  }
 }
 
 void Server::printNewCli(int fd) { // debugging
@@ -171,7 +172,17 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
-    if(poll(polls.data(), polls.size(), 1) > 0) { // в сокетах есть данные, попробовать 1000 вместо 1 и убрать unsleep
+    for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
+      if (it->second->sendQueue.size() > 0)
+        for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+          if (poll->fd == it->first) {
+            poll->events = POLLOUT;
+            break;
+          }
+    int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0?
+    if (countEvents < 0)
+      throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]"); // везде добавить strerror(errno) ?
+    if(countEvents > 0) { // в сокетах есть данные, попробовать 1000 вместо 1 и убрать unsleep
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
         if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
           struct sockaddr sa;
@@ -205,8 +216,6 @@ void Server::run() {
             string bufS = string(buf.begin(), buf.end());
             bufS.resize(bytes);
             std::vector<string> cmds = split_r_n(bufS);
-            for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-              responses[it->second] = "";
             for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               // for(int i = 0; i < ar.size(); i++)
               //   ar[i] = ""; !
@@ -216,10 +225,10 @@ void Server::run() {
               execCmd();
               printServState();
             }
-            cout << "call send resp\n";
-            sendRespToAll();
           }
         }
+        else if (poll->revents & POLLOUT)
+          sendResps(clis.at(poll->fd));
     }
     usleep(1000);
   }
@@ -344,7 +353,7 @@ int Server::execJoin() {
     return prepareResp(cli, "461 JOIN :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ',');
   vector<string> passes  = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
-  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
+  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos) // ^G ?
       prepareResp(cli, "403 " + *chName + " :Cannot join channel (bad channel name)"); // ERR_NOSUCHCHANNEL ?
     else {
@@ -367,7 +376,6 @@ int Server::execJoin() {
         prepareResp(cli, "353 " + *chName + " " /* перечилсить все ники*/); // RPL_NAMREPLY ?
       }
     }
-  }
   return 0;
 }
 
