@@ -57,6 +57,14 @@ IRC = Internet Relay Chat
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
   + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
 
+## three non-blocking I/O strategies
+All require that the socket be set non-blocking
+* call poll before you perform an I/O operation. You then attempt a single read or write operation only if you get a read or write hit from poll or select.
+* attempt the read or write operation first. If it succeeds immediately, great. If not, wait for a poll hit before retrying the operation.
+  + this method is the most common for writes
+* call poll before you perform an I/O operation. You then attempt multiple reads or writes until you either finish everything you need to do or get a "would block" indication. When you get a "would block" indication, you wait until  poll tells you before you attempt another operation in that direction on that socket.
+  + this method is the most common for reads
+
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
 * ждёт, пока один дескриптор из набора файловых дескрипторов не станет готов выполнить операцию ввода-вывода
