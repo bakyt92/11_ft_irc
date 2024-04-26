@@ -78,11 +78,11 @@ private:
   vector<string>           ar;    // the command being treated at the moment, args[0] = command
   Cli                      *cli;  // автор команды
 public:
-                           Server(string port, string pass);
+                           Server(string port_, string pass_) : port(port_), pass(pass_) {};
                            ~Server() {
                              // close all fd
                              // free clis, chs ?
-                           }
+                           };
   static  void             sigHandler(int sig);
   void                     init();
   void                     run();
@@ -91,7 +91,7 @@ public:
                                if(it->second->nick == name)
                                  return it->second;
                              return NULL;
-                           }
+                           };
   int                      prepareResp(Cli *to, string msg);
   int                      prepareResp(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
@@ -118,11 +118,11 @@ public:
                              for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
                                if((it->second) == toErase)
                                  chs.erase(it);
-                           }
+                           };
   void                     erase(Cli *toErase) {
                              for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
                                if((it->second) == toErase)
                                  clis.erase(it);
-                           }
+                           };
 };
 #endif

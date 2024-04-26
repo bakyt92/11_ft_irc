@@ -73,6 +73,7 @@ string mode(Ch *ch) {
 }
 
 int Server::prepareResp(Cli *to, string msg) {
+  cout << "msg prepares for " << to->fd << "       : " << msg << endl;
   to->sendQueue.push_back(msg + "\r\n"); //
   return 0;
 }
@@ -94,6 +95,9 @@ void Server::sendResp(Cli *to, string msg) {
   cout << "I send to fd=" << to->fd << "            : [" << toPrint << "]\n";
   msg += "\r\n";
   send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL); // flag ?
+  for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+    if (poll->fd == to->fd)
+      poll->events = POLLIN;
 }
 
 void Server::sendResps(Cli *to) {
@@ -130,12 +134,10 @@ void Server::printServState() {   // debugging
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
-Server::Server(string port_, string pass_) : port(port_), pass(pass_) {}
-
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler);
-    signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal
+    signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal ?
     // SIitCliGQUIT ?
   }
   catch(const std::exception& e) {
@@ -173,17 +175,21 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
-      if (it->second->sendQueue.size() > 0)
+      if (it->second->sendQueue.size() > 0) {
+        std::cout << "I have data to send for " << it->second->fd << "\n";
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
           if (poll->fd == it->first) {
             poll->events = POLLOUT;
+            std::cout << "break\n";
             break;
           }
-    int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0?
+      }
+    usleep(1000);
+    int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0? 1000 и без nspeel?
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]"); // везде добавить strerror(errno) ?
-    if(countEvents > 0) { // в сокетах есть данные, попробовать 1000 вместо 1 и убрать unsleep
-      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
+    if(countEvents > 0) { // в сокетах есть данные
+      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) { // check sockets
         if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
           struct sockaddr sa;
           socklen_t       saLen = sizeof(sa);
@@ -227,10 +233,11 @@ void Server::run() {
             }
           }
         }
-        else if (poll->revents & POLLOUT)
+        else if (poll->revents & POLLOUT) {
           sendResps(clis.at(poll->fd));
+        }
+      }
     }
-    usleep(1000);
   }
   std::cout << "Terminated\n";
 }
@@ -253,9 +260,11 @@ int Server::execCmd() {
     return execCap();
   if(ar[0] == "WHOIS")
     return execWhois();
+  std::cout << "here\n";
   if((!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk) && ar[0] != "PRIVMSG" && ar[0] != "NOTICE" && ar[0] != "JOIN" && ar[0] != "PART" && ar[0] != "MODE" && ar[0] != "TOPIC" && ar[0] != "INVITE" && ar[0] != "KICK") // нельзя выполнять без входа
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
-  if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")                
+  std::cout << "here 2\n";
+  if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")
     return execPrivmsg();
   if(ar[0] == "JOIN")
     return execJoin();
@@ -272,6 +281,7 @@ int Server::execCmd() {
   return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");       // ERR_UNKNOWNCOMMAND
 }
 
+// если неправильный пароль никакого сообщения?
 int Server::execPass() {
   if(ar.size() < 2)
     return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
