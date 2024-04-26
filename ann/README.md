@@ -75,7 +75,6 @@ IRC = Internet Relay Chat
   + le nombre de structures ayant un champ revents non nul = le nombre de structures pour lesquels un événement attendu
   + NULL: un dépassement du délai d'attente et qu'aucun descripteur de fichier n'était prêt
   + -1: s'ils échouent, errno contient le code d'erreur  
-
 ```
 struct pollfd {
     int   fd;         
@@ -132,12 +131,14 @@ struct pollfd {
 * `ssize_t sendto(int sockfd, const void buf[.len], size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen)`
 * `ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)`
 * флаг MSG_NOSIGNAL
-  + MSG_NOSIGNAL = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
+  + = requests not to send the SIGPIPE signal if an attempt to send is made on a stream-oriented socket that is no longer connected
   + don't generate a SIGPIPE signal if the peer has closed the connection
-
-## `send(3)`
-* `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
-* associated with high-level functions
+* if there is not enough available buffer space to hold the socket data to be transmitted
+  + if the socket is in blocking mode, **send() blocks** the caller until additional buffer space becomes available
+  + if the socket is in nonblocking mode, send() returns -1 and sets the error code to EWOULDBLOCK
+* `send(3)`
+  + `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
+  + associated with high-level functions
 
 ## recv recvfrom recvmsg
 * if a message is too long to fit in the supplied buffer, excess bytes may be discarded depending on the type of socket the message is received from
@@ -155,6 +156,9 @@ struct pollfd {
 * How to query the available data on a socket:
   + Non-bloking sockets
   + select()/poll()
+* the call to poll has no effect on the call to recv, whether or not recv blocks depends on:
+  + what data is available at the time you call recv
+  + whether the socket is in blocking or non-blocking mode
 
 ### `ssize_t recv(int sockfd, void buf[.len], size_t len, int flags)`
 * ждёт, пока данные не появятся
