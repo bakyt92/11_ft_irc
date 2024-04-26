@@ -216,6 +216,7 @@ void Server::run() {
               execCmd();
               printServState();
             }
+            cout << "call send resp\n";
             sendRespToAll();
           }
         }
@@ -342,16 +343,16 @@ int Server::execJoin() {
   if(ar.size() < 2)
     return prepareResp(cli, "461 JOIN :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ',');
-  vector<string> passes  = split(ar[2], ',');
+  vector<string> passes  = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos) // ^G ?
       prepareResp(cli, "403 " + *chName + " :Cannot join channel (bad channel name)"); // ERR_NOSUCHCHANNEL ?
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
-      string pass = passes.size() > 1 ? passes[0] : "";
-      passes.erase(passes.begin());
-      if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-        prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");       // ERR_BADCHANNELKEY
+      // string pass = passes.size() > 1 ? passes[0] : "";
+      // passes.erase(passes.begin());
+      // if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
+      //   prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");       // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");       // ERR_CHANNELISFULL
       else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
@@ -546,10 +547,10 @@ int main(int argc, char *argv[]) {
   Server s = Server(argv[1], argv[2]);
   try {
     s.init();
+    s.run();
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 0;
   }
-  s.run();
   return 0;
 }
