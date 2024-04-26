@@ -73,7 +73,6 @@ string mode(Ch *ch) {
 }
 
 int Server::prepareResp(Cli *to, string msg) {
-  cout << "msg prepares for " << to->fd << "       : " << msg << endl;
   to->sendQueue.push_back(msg + "\r\n"); //
   return 0;
 }
@@ -180,7 +179,6 @@ void Server::run() {
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
           if (poll->fd == it->first) {
             poll->events = POLLOUT;
-            std::cout << "break\n";
             break;
           }
       }
@@ -317,10 +315,10 @@ int Server::execNick() {
   return 0;
 }
 
-// :IRCat 461  USER :Not enough parameters
 int Server::execUser() {
   if(ar.size() < 5)
-    return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS
+    return prepareResp(cli, "461 USER :Not enough parameters"); // levensta :IRCat 461  USER :Not enough parameters                        // ERR_NEEDMOREPARAMS 
+
   if(cli->uName != "")
     return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
   cli->uName = ar[1];
@@ -331,41 +329,35 @@ int Server::execUser() {
 }
 
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL ERR_TOOMANYTARGETS RPL_AWAY
-// самом себе тоже может написать (проверить!)
-// :IRCat 411 a :No recipient given (PRIVMSG)
-// :IRCat 412 a :No text to send
-// :IRCat 401 a #ch :No such nick/channel
 int Server::execPrivmsg() {
   if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (" + ar[1] + ")");                 // ERR_NORECIPIENT
+    return prepareResp(cli, "411 :No recipient given (" + ar[1] + ")"); // levensta :IRCat 411 a :No recipient given (PRIVMSG)                // ERR_NORECIPIENT
   if(ar.size() == 2)
-    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND
+    return prepareResp(cli, "412 :No text to send"); // levensta :IRCat 412 a :No text to send          // ERR_NOTEXTTOSEND
   vector<string> tos = split(ar[1], ',');
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(*to) == chs.end())
-      prepareResp(cli, "401 " + *to + " :No such channel");                         // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel"); // levensta :IRCat 401 a #ch :No such nick/channel     // ERR_NOSUCHNICK
     else if((*to)[0] == '#')
       prepareResp(chs[*to], "PRIVMSG " + *to + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + *to + " :No such nick");                         // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel");                         // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
       prepareResp(getCli(*to), "PRIVMSG " + *to + " ::" + ar[2]);                         // ERR_NOSUCHNICK
   return 0;
 }
 
 // not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_TOOMANYTARGETS ERR_UNAVAILRESOURCE 
-// `JOIN #foo,&bar fubar` вход на канал #foo, используя ключ "fubar" и на канал &bar без использования ключа
 // Once a user has joined a channel, he receives information about JOIN, MODE, KICK, QUIT, PRIVMSG/NOTICE
-// Оператор канала: "nick@" всякий раз, когда он ассоциируется с каналом (например, ответы на NAMES WHO WHOIS)
-// проверить можно ли второй раз войти на канал
+// если второй раз JOIN #ch, то ничего не происходит
 int Server::execJoin() {
   if(ar.size() < 2)
-    return prepareResp(cli, "461 JOIN :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
+    return prepareResp(cli, "461 JOIN :Not enough parameters"); // levensta :IRCat 461 a JOIN :Not enough parameters // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ',');
   vector<string> passes  = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos) // ^G ?
-      prepareResp(cli, "403 " + *chName + " :Cannot join channel (bad channel name)"); // ERR_NOSUCHCHANNEL ?
+      prepareResp(cli, "403 " + *chName + " ::No such channel"); // levensta :IRCat 403 a ff :No such channel   // ERR_NOSUCHCHANNEL
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
       string pass = "";
@@ -488,12 +480,13 @@ int Server::execQuit() {
 
 // not implemented here: ERR_NOCHANMODES RPL_BANLIST RPL_ENDOFBANLIST RPL_EXCEPTLIST RPL_ENDOFEXCEPTLIST RPL_INVITELIST RPL_ENDOFINVITELIST RPL_UNIQOPIS (creator of the channel)
 // `MODE` устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
+// админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
 int Server::execMode() {
   char *notUsed; // ?
   if(ar.size() < 2)
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
-    return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL ???
+    return prepareResp(cli, "403 " + ar[1] + " :No such channel"); // levensta :IRCat 403 a #ch :No such channel // ERR_NOSUCHCHANNEL ???
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
     return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");           // ERR_NOTONCHANNEL ???
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end())
@@ -519,7 +512,7 @@ int Server::execMode() {
   if(ar[2] == "+k" && chs[ar[1]]->pass != "")
     return prepareResp(cli, ar[1] + " :Channel key already set");                       // ERR_KEYSET
   if(ar[2] == "+k")
-    return (chs[ar[1]]->pass = ar[3], 0);
+    return (chs[ar[1]]->pass = ar[3], 0); // levensta :a!a@127.0.0.1 MODE #ch +k
   if(ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
     return (chs[ar[1]]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10)), 0);
   if(ar[2] == "+o")
@@ -554,7 +547,7 @@ int Server::execCap() {
   }
   else if(ar.size() >= 2 && ar[1] == "END") {
     cli->capOk = true;
-    prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME ?
+    prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется.!
   }
   return 0;
 }
