@@ -65,6 +65,22 @@ All require that the socket be set non-blocking
 * call poll before you perform an I/O operation. You then attempt multiple reads or writes until you either finish everything you need to do or get a "would block" indication. When you get a "would block" indication, you wait until  poll tells you before you attempt another operation in that direction on that socket.
   + this method is the most common for reads
 
+## The usual pattern is to use non-blocking file descriptors with poll() 
+
+When getting ready to poll(),
+Always set POLLIN because you are always interested in reading what the other end of the socket has send you.
+Except if you have a large backlog of incoming data and you intentionally want to make the other end wait before sending more.
+Set POLLOUT only if you have outstanding data to send to the other end.
+Upon return from poll(), if it indicates that data is available to read,
+read it and do something with it
+Upon return from poll(), if it indicates that the socket is writable,
+Try sending your outstanding data.
+If you managed to write all of it, you're not going to set POLLOUT next time through the loop
+If you only managed to send some of it (or none of it) then keep the rest for later. You will set POLLOUT the next time through the loop.
+When you have new data to send (either in response to data you read or in response to some external event), you have two choices:
+Eagerly try to send some of it right away. You may successfully send none, some, or all of it. Just like with the previous case, keep the portion of the data that wasn't written for next time and plan to set POLLOUT the next time through the loop only if there was some data left.
+Just keep a hold on the data and plan to set POLLOUT the next time through the loop. (This choice is often easier to program because you only need to handle writing data in one place in your loop but on the other hand it delays writing the data until the next time through the loop.)
+
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
 * ждёт, пока один дескриптор из набора файловых дескрипторов не станет готов выполнить операцию ввода-вывода
