@@ -355,7 +355,7 @@ int Server::execPrivmsg() {
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + *to + " :No such nick/channel");                         // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
-      prepareResp(getCli(*to), "PRIVMSG " + *to + " ::" + ar[2]);                         // ERR_NOSUCHNICK
+      prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);                         // ERR_NOSUCHNICK
   return 0;
 }
 
@@ -369,7 +369,7 @@ int Server::execJoin() {
   vector<string> passes  = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos) // ^G ?
-      prepareResp(cli, "403 " + *chName + " ::No such channel"); // levensta :IRCat 403 a ff :No such channel   // ERR_NOSUCHCHANNEL
+      prepareResp(cli, "403 " + *chName + " :No such channel"); // levensta :IRCat 403 a ff :No such channel   // ERR_NOSUCHCHANNEL
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
       string pass = "";
