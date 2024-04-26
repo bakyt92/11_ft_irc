@@ -395,7 +395,7 @@ int Server::execJoin() {
 
 int Server::execPart() {
   if(ar.size() < 2)
-    return prepareResp(cli, "461 JOIN :Not enough parameters");                         // ERR_NEEDMOREPARAMS
+    return prepareResp(cli, "461 PART :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   vector<string> chNames = split(ar[1], ',');
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chs.find(*chName) == chs.end())
