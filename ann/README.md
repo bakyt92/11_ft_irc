@@ -122,7 +122,7 @@ struct pollfd {
 * you have to call accept() for each client that you want to communicate with
 
 ## send()
-* POSIX stqndqnt for system calls
+* send (2) is a POSIX stqndqnt for system calls
 * is generally associated with low level system calls
 * transmit a message to another socket
 * may be used only when the socket is in a connected state (so that the intended recipient is known)
@@ -136,8 +136,7 @@ struct pollfd {
 * if there is not enough available buffer space to hold the socket data to be transmitted
   + if the socket is in blocking mode, **send() blocks** the caller until additional buffer space becomes available
   + if the socket is in nonblocking mode, send() returns -1 and sets the error code to EWOULDBLOCK
-* `send(3)`
-  + `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
+* `send(3)` `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
   + associated with high-level functions
 
 ## recv recvfrom recvmsg
