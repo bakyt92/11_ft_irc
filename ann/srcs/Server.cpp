@@ -32,30 +32,43 @@ vector<string> split(string s, char delim) {
     return vector<string>();
   vector<string> parts;
   for(size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
-    if(pos > 0)
+    if(pos > 0) {
+      cout << "push " << s.substr(0, pos) << endl;
       parts.push_back(s.substr(0, pos));
+    }
     s.erase(0, pos + 1);
   }
-  if(s.size() > 0)
+  if(s.size() > 0) {
+    cout << "push* " << s << endl;
     parts.push_back(s);
-
+  }
   return parts;
 }
 
+// '\r' = 13
 vector<string> split_r_n(string s) {
   if (s.size() == 0)
-    return vector<string>();
-  if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r')
-    return split(s, '\n');
-  vector<string> parts;
-  for(size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
-    if(pos > 0)
-      parts.push_back(s.substr(0, pos));
-    s.erase(0, pos + 2);
-  }
-  if(s.size() > 0) //////// начало следующей команды в буфере !
-    parts.push_back(s);
-  return parts;
+    return vector<string>(); // можно убрать?
+  cout << "1. call split " << s << endl;
+  // for (string::iterator it = s.begin(); it != s.end(); it++) {
+  //   printf("%c %d == \\r %d ? %d\n", *it, *it, '\r', (*it == '\r'));
+  //   //cout << *it << " == \\r ? " << (*it == '\r') << endl;
+  //   if (*it == '\r')
+  //     s.erase(it);
+  // }
+  s.erase(std::remove(s.begin(), s.end(), 13), s.end());
+  cout << "2. call split " << s << endl;
+  return split(s, '\n');
+  // if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r' && s.find("\r\n") == string::npos) // через nc на конце строки \n а не \r\n
+  // vector<string> parts;
+  // for(size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
+  //   if(pos > 0)
+  //     parts.push_back(s.substr(0, pos));
+  //   s.erase(0, pos + 2);
+  // }
+  // if(s.size() > 0)
+  //   parts.push_back(s);
+  // return parts;
 }
 
 string mode(Ch *ch) {
@@ -73,7 +86,7 @@ string mode(Ch *ch) {
 }
 
 int Server::prepareResp(Cli *to, string msg) {
-  to->sendQueue.push_back(msg + "\r\n"); //
+  to->cmdsToSend.push_back(msg + "\r\n"); //
   return 0;
 }
 
@@ -100,9 +113,9 @@ void Server::sendResp(Cli *to, string msg) {
 }
 
 void Server::sendResps(Cli *to) {
-  while (to->sendQueue.size() > 0) {
-    string msg = *(to->sendQueue.begin());
-    to->sendQueue.erase(to->sendQueue.begin());
+  while (to->cmdsToSend.size() > 0) {
+    string msg = *(to->cmdsToSend.begin());
+    to->cmdsToSend.erase(to->cmdsToSend.begin());
     sendResp(to, msg);
   }
 }
@@ -174,7 +187,7 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
-      if (it->second->sendQueue.size() > 0) {
+      if (it->second->cmdsToSend.size() > 0) {
         std::cout << "I have data to send for " << it->second->fd << "\n";
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
           if (poll->fd == it->first) {
@@ -214,12 +227,12 @@ void Server::run() {
           int bytes = recv(cli->fd, buf.data(), buf.size() - 1, 0); // добавить к send() и recv() MSG_NOSIGNAL ?
           if(bytes < 0) 
             perror("recv");
-          else if(bytes == 0)                                 // клиент пропал
+          else if(bytes == 0) // если клиент пропал
             execQuit(); 
           else {
-            string bufS = string(buf.begin(), buf.end());
-            bufS.resize(bytes);
-            std::vector<string> cmds = split_r_n(bufS);
+            string bufStr = string(buf.begin(), buf.end());
+            bufStr.resize(bytes);
+            std::vector<string> cmds = split_r_n(bufStr);
             for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               // for(int i = 0; i < ar.size(); i++)
               //   ar[i] = ""; !
@@ -318,9 +331,8 @@ int Server::execNick() {
 int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters"); // levensta :IRCat 461  USER :Not enough parameters                        // ERR_NEEDMOREPARAMS 
-
   if(cli->uName != "")
-    return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
+    return prepareResp(cli, "462 :You may not reregister"); // levensta регистрирует пользлвтаеля даже если rName = ""       // ERR_ALREADYREGISTRED
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && cli->capOk)
