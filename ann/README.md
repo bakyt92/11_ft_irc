@@ -190,7 +190,7 @@ struct pollfd {
 * non-blocking file descriptors => we may use read/recv or write/send functions with no poll()
   + ther server is not blocking
   + it consumes more system resources
-* forbdden: read/recv,r write/send without poll() (in any file descriptor)
+* forbdden: read/recv write/send without poll() (in any file descriptor)
 * communication between client and server has to be done via TCP/IP (v4 or v6)
 * Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...)
 * **In order to process a command, you have to first aggregate the received packets in order to rebuild it**
