@@ -139,10 +139,12 @@ void Server::sendAccumulatedResps(Cli *to) {
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
 void Server::init() {
   try {
-    signal(SIGINT,  sigHandler);
-		signal(SIGQUIT, sigHandler);
+    signal(SIGINT,  sigHandler); // catch ctrl + c
+		signal(SIGQUIT, sigHandler); // catch ctrl + backslash
+		signal(SIGTERM, sigHandler); // catch kill command
     signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal ?
     // SIitCliGQUIT ?
+    // 	_sendMessage("QUIT\r\n", ircsock);
   }
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
