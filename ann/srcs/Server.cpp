@@ -22,7 +22,7 @@ string mode(Ch *ch) { // +o ? перечислить пользлователе�
   //static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->limit) )).str());
 }
 
-string without_r_n(string s) {     // debugging
+string without_r_n(string s) {                // debugging
   for(size_t pos = s.find('\r'); pos != string::npos; pos = s.find('\r', pos))
     s.replace(pos, 1, "\\r");
   for(size_t pos = s.find('\n'); pos != string::npos; pos = s.find('\n', pos))
