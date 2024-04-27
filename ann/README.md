@@ -58,30 +58,6 @@ IRC = Internet Relay Chat
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
   + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
 
-## three non-blocking I/O strategies
-All require that the socket be set non-blocking
-* call poll before you perform an I/O operation. You then attempt a single read or write operation only if you get a read or write hit from poll or select.
-* attempt the read or write operation first. If it succeeds immediately, great. If not, wait for a poll hit before retrying the operation.
-  + this method is the most common for writes
-* call poll before you perform an I/O operation. You then attempt multiple reads or writes until you either finish everything you need to do or get a "would block" indication. When you get a "would block" indication, you wait until  poll tells you before you attempt another operation in that direction on that socket.
-  + this method is the most common for reads
-
-## The usual pattern is to use non-blocking file descriptors with poll() 
-
-When getting ready to poll(),
-Always set POLLIN because you are always interested in reading what the other end of the socket has send you.
-Except if you have a large backlog of incoming data and you intentionally want to make the other end wait before sending more.
-Set POLLOUT only if you have outstanding data to send to the other end.
-Upon return from poll(), if it indicates that data is available to read,
-read it and do something with it
-Upon return from poll(), if it indicates that the socket is writable,
-Try sending your outstanding data.
-If you managed to write all of it, you're not going to set POLLOUT next time through the loop
-If you only managed to send some of it (or none of it) then keep the rest for later. You will set POLLOUT the next time through the loop.
-When you have new data to send (either in response to data you read or in response to some external event), you have two choices:
-Eagerly try to send some of it right away. You may successfully send none, some, or all of it. Just like with the previous case, keep the portion of the data that wasn't written for next time and plan to set POLLOUT the next time through the loop only if there was some data left.
-Just keep a hold on the data and plan to set POLLOUT the next time through the loop. (This choice is often easier to program because you only need to handle writing data in one place in your loop but on the other hand it delays writing the data until the next time through the loop.)
-
 ## `int poll(struct pollfd *fds, nfds_t nfds, int délai)`
 * ожидает некоторое событие над файловым дескриптором
 * ждёт, пока один дескриптор из набора файловых дескрипторов не станет готов выполнить операцию ввода-вывода
@@ -107,17 +83,10 @@ struct pollfd {
     short revents;    /* Événements détectés    */
 };
 ```
-## epoll()
-* improves upon the mechanism
-* http://scotdoyle.com/python-epoll-howto.html
-
-## kqueue()
-...
-
-## select() 
-* three bitmasks to mark which fd-s you want to watch for reading, writing, errors
-* the OS marks which ones have had some kind of activity
-* clunky and inefficient
+* альтернативы poll:
+  + epoll() improves upon the mechanism
+  + kqueue()
+  + select(), clunky and inefficient
 
 ## `listen(int s, int backlog)`
 1. listen слушает подключающихся
@@ -164,7 +133,7 @@ struct pollfd {
 * `send(3)` `ssize_t send(int socket, const void *bufr, size_t leng, int flags)`
   + associated with high-level functions
 
-## recv recvfrom recvmsg
+## recv, recvfrom, recvmsg
 * if a message is too long to fit in the supplied buffer, excess bytes may be discarded depending on the type of socket the message is received from
 * if no messages are available at the socket, the receive calls wait for a message to arrive, unless the socket is nonblocking
 * the receive calls normally return any data available, up to the requested amount, rather than waiting for receipt of the full amount requested
@@ -200,26 +169,4 @@ struct pollfd {
 * `recvfrom(sockfd, buf, len, flags, NULL, NULL)` = `recv(sockfd, buf, len, flags)`
            
 ### `ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)`
-
-## Requirements
-* I/O operations must be non-blocking
-* only 1 poll() can be used for handling all I/O operations (read, write, listen, ...)
-* non-blocking file descriptors => we may use read/recv or write/send functions with no poll()
-  + ther server is not blocking
-  + it consumes more system resources
-* forbdden: read/recv write/send without poll() (in any file descriptor)
-* communication between client and server has to be done via TCP/IP (v4 or v6)
-* Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...)
-* **In order to process a command, you have to first aggregate the received packets in order to rebuild it**
-      
-## You only have to implement the following features
-  + INVITE: Invite a client to a channel (only by channel operators)
-  + TOPIC: to change or view the channel topic (only by channel operators)
-    - if <topic> is given, it sets the channel topic to <topic>
-  + MODE: Change the channel’s mode (only by channel operators):
-    - i: Invite-only channel
-    - t: the restrictions of the TOPIC command to channel operators
-    - k: the channel key (password)
-    - o: Give/take channel operator privilege
-    - l: Set/remove the user limit to channel
 
