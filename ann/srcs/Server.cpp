@@ -331,7 +331,7 @@ int Server::execUser() {
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL ERR_TOOMANYTARGETS RPL_AWAY
 int Server::execPrivmsg() {
   if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (" + ar[1] + ")"); // levensta :IRCat 411 a :No recipient given (PRIVMSG)                // ERR_NORECIPIENT
+    return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")"); // levensta :IRCat 411 a :No recipient given (PRIVMSG)                // ERR_NORECIPIENT
   if(ar.size() == 2)
     return prepareResp(cli, "412 :No text to send"); // levensta :IRCat 412 a :No text to send          // ERR_NOTEXTTOSEND
   vector<string> tos = split(ar[1], ',');
