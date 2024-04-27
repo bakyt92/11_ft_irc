@@ -140,6 +140,7 @@ void Server::sendAccumulatedResps(Cli *to) {
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler);
+		signal(SIGQUIT, sigHandler);
     signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal ?
     // SIitCliGQUIT ?
   }
