@@ -90,11 +90,11 @@
 * when a user joins a server you have to greed him with a welcome message
 * ставить @ перед ником админа?
 * Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...) (checklist)
+* to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
 
 ## Читаю группу дискорд:
 * To test ipv6 you can use irssi and add -6 during the /connect
 * on gere ipv4 et ipv6, impossible de recup **l'addr ipv4**
-* that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
 * Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
 * остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
 
