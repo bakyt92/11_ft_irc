@@ -4,6 +4,8 @@ void Server::sigHandler(int sig) {
   cout << endl << "Signal Received\n";
   sigReceived = true;
   (void)sig;
+  // sendMessage("QUIT\r\n"); ?
+	// server->setStatus(0);
 }
 
 string mode(Ch *ch) { // +o ? перечислить пользлователей и админов?
@@ -102,43 +104,48 @@ vector<string> Server::split_r_n(string s) {
     s.erase(0, pos + 2);
   }
   if(s.size() > 0)
-    cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть по скорее всего начало следующей команды)
+    cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть это скорее всего начало следующей команды)
   else
     cli->bufRecv = "";
   return parts;
 }
 
 int Server::prepareResp(Cli *to, string msg) {
+  if(msg.size() > 510)
+    msg.resize(510);
   to->bufToSend += (msg + "\r\n");
   return 0;
 }
 
 int Server::prepareResp(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
-    if((*to)->fd != cli->fd) // но некоторые команды надо и самому себе посылать
-      (*to)->bufToSend += (msg + "\r\n");
+    if((*to)->fd != cli->fd) // некоторые команды надо и самому себе посылать?
+      prepareResp(*to, msg);
   return 0;
 }
 
 void Server::sendPreparedResps(Cli *to) {
   cout << "I send to fd=" << to->fd << "            : [" << without_r_n(to->bufToSend) << "]\n";
-  send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL); // flag ?
-  to->bufToSend = "";
-  for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
-    if (poll->fd == to->fd)
-      poll->events = POLLIN;
+  int bytes = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL); // не посылать SIGPIPE, если другая сторона обрывает соединение, signal(SIGPIPE, SIG_IGN) не нужно
+  if (bytes == -1)
+    std::cerr << "send() faild" << std::endl;
+  else if (bytes == 0)
+    std::cerr << "send() faild" << std::endl; // распрощаться с этим клиентом ?
+  else { 
+    to->bufToSend = "";
+    for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+      if (poll->fd == to->fd)
+        poll->events = POLLIN;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler); // catch ctrl + c
-		signal(SIGQUIT, sigHandler); // catch ctrl + backslash
+		signal(SIGQUIT, sigHandler); // catch ctrl + '\'
 		signal(SIGTERM, sigHandler); // catch kill command
-    signal(SIGPIPE, SIG_IGN);    // to ignore the SIGPIPE signal ?
-    // SIitCliGQUIT ?
-    // 	_sendMessage("QUIT\r\n", ircsock);
-  }
+   }
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
@@ -180,16 +187,16 @@ void Server::run() {
             poll->events = POLLOUT;
             break;
           }
-    usleep(1000);
-    int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0? 1000 и без usleep?
+    // usleep(1000);
+    int countEvents = poll(polls.data(), polls.size(), 100); // delai?
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
-    if(countEvents > 0) { // в сокетах есть данные
-      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
-        if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
+    if(countEvents > 0) {                                                                         // в сокетах есть данные
+      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+        if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {                                // 1. новый клиент подключился к сокету fdServ
           struct sockaddr sa;
           socklen_t       saLen = sizeof(sa);
-          int fdForMsgs = accept(poll->fd, &sa, &saLen); // у каждого киента свой fd
+          int fdForMsgs = accept(poll->fd, &sa, &saLen);                                          // у каждого клиента свой fd для сообщений
           if(fdForMsgs == -1)
             perror("accept");
           else {
@@ -203,16 +210,16 @@ void Server::run() {
           }
           break ;
         }
-        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis) { // клиент прислал сообщение в свой fdForMsgs
+        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis) {                           // 2. клиент прислал сообщение в свой fdForMsgs
           if(!(cli = clis.at(poll->fd)))
             continue ;
           vector<unsigned char> buf0(513);
           for(size_t i = 0; i < buf0.size(); i++)
             buf0[i] = '\0';
-          int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, 0); // добавить MSG_NOSIGNAL ?
+          int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL);
           if(bytes < 0)
-            perror("recv");
-          else if(bytes == 0) // клиент пропал
+            perror("recv");                                                                       // ошибка, но не делаем execQuit(), возможно клиент ещё тут
+          else if(bytes == 0)                                                                     // клиент пропал
             execQuit();
           else {
             string buf = string(buf0.begin(), buf0.end());
@@ -221,9 +228,7 @@ void Server::run() {
             buf = cli->bufRecv + buf;
             std::vector<string> cmds = split_r_n(buf);
             for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
-              // for(int i = 0; i < ar.size(); i++)
-              //   ar[i] = ""; !
-              vector<string>().swap(ar);
+              vector<string>().swap(ar);                                                          // ?
               ar = split_space(*cmd);
               cout << infoCmd();
               execCmd();
@@ -231,7 +236,7 @@ void Server::run() {
             cout << infoServ() << endl;
           }
         }
-        else if (poll->revents & POLLOUT) {
+        else if (poll->revents & POLLOUT) {                                                       // 3. есть сообщение, которое надо отправить клиенту
           sendPreparedResps(clis.at(poll->fd));
         }
     }
@@ -257,10 +262,8 @@ int Server::execCmd() {
     return execCap();
   if(ar[0] == "WHOIS")
     return execWhois();
-  std::cout << "here\n";
   if((!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk) && (ar[0] == "PRIVMSG" || ar[0] == "NOTICE" || ar[0] == "JOIN" || ar[0] == "PART" || ar[0] == "MODE" || ar[0] == "TOPIC" || ar[0] == "INVITE" || ar[0] == "KICK")) // нельзя выполнять без входа
-    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOLOGIN ? ERR_NOTREGISTERED ?
-  std::cout << "here 2\n";
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")
     return execPrivmsg();
   if(ar[0] == "JOIN")
@@ -337,9 +340,9 @@ int Server::execPrivmsg() {
     else if((*to)[0] == '#')
       prepareResp(chs[*to], "PRIVMSG " + *to + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + *to + " :No such nick/channel");                         // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel");                        // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
-      prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);                         // ERR_NOSUCHNICK
+      prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);                        // ERR_NOSUCHNICK
   return 0;
 }
 
@@ -362,16 +365,16 @@ int Server::execJoin() {
         passes.erase(passes.begin());
       }
       if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-        prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");       // ERR_BADCHANNELKEY
+        prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit)
-        prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");       // ERR_CHANNELISFULL
+        prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
       else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
-        prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");       // ERR_INVITEONLYCHAN
+        prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
         prepareResp(chs[*chName], cli->nick + " JOIN " + *chName);
-        prepareResp(cli, "332 " + *chName + " " + chs[*chName]->topic);          // RPL_TOPIC ?
-        prepareResp(cli, "353 " + *chName + " " /* перечилсить все ники*/);      // RPL_NAMREPLY ?
+        prepareResp(cli, "332 " + *chName + " " + chs[*chName]->topic);                 // RPL_TOPIC ?
+        prepareResp(cli, "353 " + *chName + " " /* перечилсить все ники*/);             // RPL_NAMREPLY ?
       }
     }
   return 0;
@@ -383,16 +386,16 @@ int Server::execPart() {
   vector<string> chNames = split(ar[1], ',');
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chs.find(*chName) == chs.end())
-      prepareResp(cli, "403 :" + *chName + " :No such channel");                 // ERR_NOSUCHCHANNEL
+      prepareResp(cli, "403 :" + *chName + " :No such channel");                        // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
-      prepareResp(cli, "442 " + *chName + " :You're not on that channel");       // ERR_NOTONCHANNEL
+      prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      prepareResp(chs[*chName], cli->nick + " PART :" + *chName);           // нужно ли сообщение для автора команды?
+      prepareResp(chs[*chName], cli->nick + " PART :" + *chName);                       // нужно ли сообщение для автора команды?
       chs.erase(*chName);
       if(chs[*chName]->size() == 0)
         erase(chs[*chName]);
       else if(chs[*chName]->adms.size() == 0)
-        chs[*chName]->adms.insert(*(chs[*chName]->clis.begin())); // сделать самого старого пользователя админом
+        chs[*chName]->adms.insert(*(chs[*chName]->clis.begin()));                       // сделать самого старого пользователя админом
     }
   return 0;
 }
@@ -529,10 +532,10 @@ int Server::execWhois() {
   std::vector<string> nicks = split(ar[1], ',');
   for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(ar[1]) == NULL)
-      prepareResp(cli, "401 :" + ar[1] + " No such nick");                            // ERR_NOSUCHNICK
+      prepareResp(cli, "401 :" + ar[1] + " No such nick");                              // ERR_NOSUCHNICK
     else
       prepareResp(cli, getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName); // RPL_WHOISUSER
-  return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");              // RPL_ENDOFWHOIS ?
+  return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ?
 }
 
 int Server::execCap() {
