@@ -1,43 +1,19 @@
-## сигналы
-  + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first **aggregate the received packets in order to rebuild it**
-  + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
-  + EOF processing (Control-D) is handled in canonical mode; it actually means 'make the accumulated input available to read()'; if there is no accumulated input (if you type Control-D at the beginning of a line), then the read() will return zero bytes, which is then interpreted as EOF by programs. Of course, you can merrily type more characters on the keyboard after that, and programs that ignore EOF (or run in non-canonical mode) will be quite happy 
-https://stackoverflow.com/questions/358342/canonical-vs-non-canonical-terminal-input
-  + CTRL+D посылает 0 байт только если при пустой строке мы это вводим
-  + если вводим сначала символы и потом CTRL+D, то это своего рода сигнал отправить текущие символы из командной строки
-  + если брать наш пример `PRIV ^D MSG ^D Nickname Hello! \r \n`, то команда CTRL+D сначала отправит <PRIV EOF> - это видимо 6 байт, а потом <MSG EOF> - 5 байт, а не ноль
-  + Наверное в сабджекте имелось также в виду, что мы игнорируем входящие символы ^D. Получается это ^D равен четырем, то есть char c == 4
-    - https://stackoverflow.com/questions/75676419/eof-and-ctrl-d
-    - https://www.physics.udel.edu/~watson/scen103/ascii.html
-  + writing to non-responding socket will cause a SIGPIPE and make my server crash
-     - `send(...MSG_NOSIGNAL)` = write() without SIGPIPE
-  + Ctrl+D is a keyboard input that typically represents the EOF character
-    - When entered at the beginning of a line in a terminal, it signals the end of input to the terminal
-    - It's commonly used to indicate the end of input when reading from stdin
-    - It doesn't directly raise a signal like SIGPIPE
-    - it's processed by the terminal or the program reading from stdin
-
 ## irssi
+`/connect 0 -tls_pass 2`
+* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify script unnotify admin echo  lastlog op scrollback unquery alias eval layout oper server unsilence away exec links part servlist upgrade ban flushbuffer list ping set uptime beep foreach load query sethost userhost bind format log quit silence ver cat hash lusers quote squery version cd help map rawlog squit voice channel hilight me recode stats wait clear ignore mircdcc  reconnect statusbar wall completion info mode redraw time wallops connect invite motd rehash toggle who ctcp      ircnet  msg reload topic whois cycle ison names resize trace whowas dcc join nctcp restart ts window dehilight kick netsplit rmreconns unalias deop kickban network rmrejoins unban devoice kill nick save unignore  
 * https://scripts.irssi.org/scripts/cap_sasl.pl
 * https://ircv3.net/specs/extensions/capability-negotiation.html
 * https://hub.docker.com/_/irssi
-* аня на личном компе:
-  + запустила наш сервер на порту 6667
-  + ввела в терминале `irssi`
-  + в самом irssi `/connect 0 -tls_pass 2`
-* альтернативы irssi: kvirc, bitchx (хвалят), ircnet (respecte completement (ou presque) les rfc), ngircd, libera chat, HexChat, gamja, sic, Quassel, Yaaic, relay.js, Circe, Smuxi, Konversation, Revolution IRC, IRC for Android, Iridium, IRC Vitamin, anope, oragono, irc omg, Bv, brew
-* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify script unnotify admin echo  lastlog op scrollback unquery alias eval layout oper server unsilence away exec links part servlist upgrade ban flushbuffer list ping set uptime beep foreach load query sethost userhost bind format log quit silence ver cat hash lusers quote squery version cd help map rawlog squit voice channel hilight me recode stats wait clear ignore mircdcc  reconnect statusbar wall completion info mode redraw time wallops connect invite motd rehash toggle who ctcp      ircnet  msg reload topic whois cycle ison names resize trace whowas dcc join nctcp restart ts window dehilight kick netsplit rmreconns unalias deop kickban network rmrejoins unban devoice kill nick save unignore  
 
-## Выбрать сервер для тестов (чтобы сравнивать с нашим)
-* https://oragono.io/
-* irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
-* freenode
-* liberachat
-* des serveurs qui étaient déjà installés sur l’application Hexchat
-* irc.ircgod.com:6667/6697
-* Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
   
 ## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
+* сервер для тестов
+  + https://oragono.io/
+  + irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
+  + freenode
+  + des serveurs qui étaient déjà installés sur l’application Hexchat
+  + irc.ircgod.com:6667/6697
+  + Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
 * **[rfc2812 messages client -> server](https://datatracker.ietf.org/doc/html/rfc2812)** (rfc 2813 server -> server, нам не нужно, rfc 1459 устарел)
 * http://abcdrfc.free.fr/rfc-vf/rfc1459.html
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
