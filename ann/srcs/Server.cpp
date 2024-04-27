@@ -1,10 +1,14 @@
 #include "Server.hpp"
 ////////////////////////////////////////////////////////////////////////////// UTILS
 Server::~Server() {
-  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
+  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++) {
     delete it->second;
-  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+  }
+  std::cout << "destructor I will delete " << clis.size() << " clis (destr)" << std::endl;
+  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
+    std::cout << "delete cli " << &(*it) << std::endl;
     delete it->second;
+  }
   // close all fd
   // free clis, chs ?
 };
@@ -15,7 +19,6 @@ void Server::sigHandler(int sig) {
   (void)sig;
   // sendMessage("QUIT\r\n"); ?
 	// free all memory?
-
 }
 
 string mode(Ch *ch) { // +o ? перечислить пользлователей и админов?
@@ -54,7 +57,7 @@ string Server::infoCmd() {          // debugging
 string Server::infoServ() {        // debugging
   string ret = "My clients                : ";
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-    ret += "[[" + it->second->nick + "] with buf [" + it->second->bufRecv + "]] ";
+    ret += "[[" + it->second->nick + "] with bufR [" + it->second->bufRecv + "]] ";
   ret += "\n";
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
     ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", users = ";
@@ -177,8 +180,10 @@ void Server::init() {
       close(fdForNewClis);
       hint->ai_next == NULL ? throw("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error"); // tested
     }
-    else
+    else {
+      // freeaddrinfo(hint); // кажется не нужно
       break ;
+    }
   }
   freeaddrinfo(listRes);
   if(listen(fdForNewClis, SOMAXCONN))
@@ -190,6 +195,7 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
+    std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
       if (it->second->bufToSend.size() > 0)
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
@@ -197,8 +203,7 @@ void Server::run() {
             poll->events = POLLOUT;
             break;
           }
-    // usleep(1000);
-    int countEvents = poll(polls.data(), polls.size(), 100); // delai?
+    int countEvents = poll(polls.data(), polls.size(), 1000); // delai ?
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
     if(countEvents > 0) {                                                                         // в сокетах есть данные
@@ -211,9 +216,13 @@ void Server::run() {
             perror("accept");
           else {
             // <hostname> has a maximum length of 63 characters !
-            // Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name.
+            // Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
             struct Cli *newCli = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));
+            printf("newCli %p\n", newCli);
+            delete newCli;
+            exit(0);
             clis[fdForMsgs] = newCli;
+            std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
             struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
             polls.push_back(pollForMsgs);
             cout << infoNewCli(fdForMsgs) << endl;
@@ -253,8 +262,11 @@ void Server::run() {
   }
   for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
     delete it->second;
-  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+  std::cout << "I will delete " << clis.size() << " clis" << std::endl;
+  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
+    std::cout << "delete cli " << &(*it) << std::endl;
     delete it->second;
+  }
   std::cout << "Terminated\n";
 }
 
@@ -382,7 +394,7 @@ int Server::execJoin() {
         prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
-      else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
+      else if(chs[*chName]->optI /*&& cli->invits.find(*chName) == cli->invits.end()*/)
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
@@ -428,7 +440,7 @@ int Server::execInvite() {
     return prepareResp(cli, "401 :" + ar[1] + " No such nick");                         // ERR_NOSUCHNICK
   if(chs[ar[2]]->clis.find(cli) != chs[ar[2]]->clis.end()) 
     return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
-  getCli(ar[1])->invits.insert(ar[2]);
+  //getCli(ar[1])->invits.insert(ar[2]);
   return prepareResp(chs[ar[2]], "341" + ar[2] + " " + ar[1]);                          // RPL_INVITING
 }
 
