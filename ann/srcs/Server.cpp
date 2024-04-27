@@ -1,11 +1,21 @@
 #include "Server.hpp"
 ////////////////////////////////////////////////////////////////////////////// UTILS
+Server::~Server() {
+  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
+    delete it->second;
+  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+    delete it->second;
+  // close all fd
+  // free clis, chs ?
+};
+
 void Server::sigHandler(int sig) {
   cout << endl << "Signal Received\n";
   sigReceived = true;
   (void)sig;
   // sendMessage("QUIT\r\n"); ?
-	// server->setStatus(0);
+	// free all memory?
+
 }
 
 string mode(Ch *ch) { // +o ? перечислить пользлователей и админов?
@@ -241,6 +251,10 @@ void Server::run() {
         }
     }
   }
+  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
+    delete it->second;
+  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+    delete it->second;
   std::cout << "Terminated\n";
 }
 

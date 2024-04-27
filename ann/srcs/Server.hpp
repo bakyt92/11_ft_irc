@@ -80,10 +80,7 @@ private:
   Cli                      *cli;  // автор команды
 public:
                            Server(string port_, string pass_) : port(port_), pass(pass_) {};
-                           ~Server() {
-                             // close all fd
-                             // free clis, chs ?
-                           };
+                           ~Server();
   static  void             sigHandler(int sig);
   void                     init();
   void                     run();
