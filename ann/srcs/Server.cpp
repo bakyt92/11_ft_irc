@@ -143,8 +143,8 @@ void Server::sendPreparedResps(Cli *to) {
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler); // catch ctrl + c
-		signal(SIGQUIT, sigHandler); // catch ctrl + '\'
-		signal(SIGTERM, sigHandler); // catch kill command
+    signal(SIGQUIT, sigHandler); // catch ctrl + '\'
+    signal(SIGTERM, sigHandler); // catch kill command
    }
   catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
