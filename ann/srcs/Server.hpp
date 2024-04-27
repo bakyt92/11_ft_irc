@@ -113,9 +113,9 @@ public:
   int                      execWhois();
   int                      execPart();
   int                      execCap();
-  void                     printNewCli(int fd);
+  string                   infoNewCli(int fd);
   void                     printCmd();
-  void                     printServState();
+  string                   infoServ();
   void                     erase(Ch *toErase) {
                              for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
                                if((it->second) == toErase)

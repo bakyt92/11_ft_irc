@@ -28,29 +28,29 @@ string without_r_n(string s) {     // debugging
   return s;
 }
 
-void Server::printNewCli(int fd) { // debugging
-  cout << "New cli (fd=" << fd << ")" << endl;
+string Server::infoNewCli(int fd) { // debugging
+  return "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fd) )).str() + ")\n";
 }
 
 void Server::printCmd() {          // debugging
-  cout << "I execute (cmd from fd=" << static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd) )).str() << ") : ";
+  cout << "I execute                 : ";
   for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
     cout << "[" << *it << "]" << " ";
   cout << endl;
 }
 
-void Server::printServState() {    // debugging
-  cout << "My clients                : ";
+string Server::infoServ() {    // debugging
+  string ret = "My clients                : ";
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-    cout << "[[" << it->second->nick << "] with buf [" + it->second->buf + "]] ";
-  cout << endl;
+    ret += "[[" + it->second->nick + "] with buf [" + it->second->buf + "]] ";
+  ret += "\n";
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    cout << "My channel                : name = " << ch->first << ", topic = " << ch->second->topic << ", pass = " << ch->second->pass << ", users = ";
+    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", users = ";
     for(set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
-      cout << (*itCli)->nick << " ";
-    cout << ", mode = " << mode(ch->second) << endl;
+      ret += (*itCli)->nick + " ";
+    ret += ", mode = " + mode(ch->second) + "\n";
   }
-  cout << endl;
+  return ret;
 }
 
 std::vector<string> split_space(string s) {
@@ -205,7 +205,7 @@ void Server::run() {
             clis[fdForMsgs] = newCli;
             struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
             polls.push_back(pollForMsgs);
-            printNewCli(fdForMsgs);
+            cout << infoNewCli(fdForMsgs) << endl;
           }
           break ;
         }
@@ -216,7 +216,7 @@ void Server::run() {
           for(size_t i = 0; i < buf0.size(); i++)
             buf0[i] = '\0';
           int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, 0); // добавить MSG_NOSIGNAL ?
-          if(bytes < 0) 
+          if(bytes < 0)
             perror("recv");
           else if(bytes == 0) // клиент пропал
             execQuit();
@@ -225,7 +225,6 @@ void Server::run() {
             buf.resize(bytes);
             cout << without_r_n("I have received buf       : [" + buf + "] -> [" + cli->buf + buf + "]") << "\n";
             buf = cli->buf + buf;
-            printServState();
             std::vector<string> cmds = split_r_n(buf);
             for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               // for(int i = 0; i < ar.size(); i++)
@@ -234,8 +233,9 @@ void Server::run() {
               ar = split_space(*cmd);
               printCmd();
               execCmd();
-              printServState();
             }
+            cout << infoServ();
+            cout << endl;
           }
         }
         else if (poll->revents & POLLOUT) {
