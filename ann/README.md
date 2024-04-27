@@ -32,6 +32,7 @@ IRC = Internet Relay Chat
   + `PRIVMSG Wiz!jto@localhost :Hello` a message to the user with nickname Wiz who is connected from the localhostand has the username "jto"
 *  most public IRC servers don't usually set a connection password
   + PASS only required if a password is required to connect to a serve
+* subject: Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
 
 ## TCP
 * гарантирует надёжность с точки зрения потока (UDP не гарантирует) 

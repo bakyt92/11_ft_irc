@@ -1,22 +1,3 @@
-## может оказаться одна команда оказаться разбитой на несколько сообщений ?
-* у Бориса если команда длинне 512 символов, от просто отрасывает лишнее
-* IRC использует транспортный протокол TCP и криптографический TLS (опционально)
-* TCP is a streaming protocol, not a message protocol
-    - The only guarantee is that you send n bytes, you will receive n bytes in the same order
-    - You might send 1 chunk of 100 bytes and receive 100 1 byte recvs, or you might receive 20 5 bytes recvs
-    - You could send 100 1 byte chunks and receive 4 25 byte messages
-    - **You must deal with message boundaries yourself**
-    - You can't rely on "getting the whole message" at once, or in any predictable size of pieces
-    - You have to build a protocol or use a library which lets you identify the beginning and end of your application specific messages
-    - You should read data coming back into a buffer and either prefix the message with a message length or use start/end message delimiters to determine when to process the data in the read buffer
-* RFC 2812: IRC messages are always lines of characters terminated with a CR-LF pair, and these messages SHALL NOT exceed 512 characters in length, counting all characters including the trailing CR-LF. Thus, there are 510 characters maximum allowed for the command and its parameters. **There is no provision for continuation of message lines**. 
-* Ахмед: `ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);`, почему минус 1?
-* littleServer из книжки: `numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)`
-* у марии тоже size - 1
-* данные в tcp-ip стеке могут появляться не все сразу, а кусками. Если клиент послал данные с помощью одной функции send(), это не значит, что данные могут быть приняты одной функцией recv(). https://forum.sources.ru/index.php?showtopic=43245
-* в проекте mariia есть "tokenize the buffer line by line"
-* Le serveurs n'a le droit qu'a **un seul send() par client pour chaque poll() ou select()** 
-
 ## сигналы
   + `com^Dman^Dd` (* use ctrl+D **to send the command in several parts**: `com`, then `man`, then `d\n`). You have to first **aggregate the received packets in order to rebuild it**
   + https://stackoverflow.com/questions/108183/how-to-prevent-sigpipes-or-handle-them-properly
