@@ -153,23 +153,23 @@ void Server::init() {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags    = AI_PASSIVE;
   if(getaddrinfo(NULL, port.c_str(), &hints, &listRes))
-    throw(std::runtime_error("getaddrinfo"));
+    throw std::runtime_error("getaddrinfo error: [" + std::string(strerror(errno)) + "]");
   int notUsed = 1;
   for(struct addrinfo* hint = listRes; hint != NULL; hint = hint->ai_next) {
     if((fdForNewClis = socket(hint->ai_family, hint->ai_socktype, hint->ai_protocol)) < 0)
-      throw(std::runtime_error("socket"));
+      throw std::runtime_error("function socket error: [" + std::string(strerror(errno)) + "]");
     else if(setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR , &notUsed, sizeof(notUsed)))
-      throw(std::runtime_error("setsockopt"));
+      throw std::runtime_error("setsockopt error: [" + std::string(strerror(errno)) + "]");
     else if(bind(fdForNewClis, hint->ai_addr, hint->ai_addrlen)) { 
       close(fdForNewClis);
-      hint->ai_next == NULL ? throw(std::runtime_error("bind failed")) : perror("bind failed"); // tested
+      hint->ai_next == NULL ? throw("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error"); // tested
     }
     else
       break ;
   }
   freeaddrinfo(listRes);
   if(listen(fdForNewClis, SOMAXCONN))
-    throw(std::runtime_error("listen"));
+    throw std::runtime_error("listen error: [" + std::string(strerror(errno)) + "]");
   struct pollfd pollForNewClis = {fdForNewClis, POLLIN, 0};
   polls.push_back(pollForNewClis);
 }
@@ -178,18 +178,16 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
-      if (it->second->cmdsToSend.size() > 0) {
-        //std::cout << "I have data to send for " << it->second->fd << "\n";
+      if (it->second->cmdsToSend.size() > 0)
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
           if (poll->fd == it->first) {
             poll->events = POLLOUT;
             break;
           }
-      }
     usleep(1000);
     int countEvents = poll(polls.data(), polls.size(), 1); // delai 1? 0? 1000 и без usleep?
     if (countEvents < 0)
-      throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]"); // везде добавить strerror(errno) ?
+      throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
     if(countEvents > 0) { // в сокетах есть данные
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // check sockets
         if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {    // новый клиент подключился к сокету fdServ
@@ -299,13 +297,11 @@ int Server::execPass() {
 }
 
 // not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED ERR_NICKCOLLISION
-// :IRCat 433  a :Nickname is already in use
-// :IRCat 432 rrrrrrrrrrrrrrrrrrrr :Erroneus nickname
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0) 
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   if(ar[1].size() > 9 || ar[1].find_first_not_of("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") != string::npos)
-    return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
+    return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname"); // levensta :IRCat 432 rrrrrrrrrrrrrrrrrrrr :Erroneus nickname                   // ERR_ERRONEUSNICKNAME
   for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
     if(ar[1].size() == itCli->second->nick.size()) {
       bool nicknameInUse = true;
@@ -313,7 +309,7 @@ int Server::execNick() {
         if(std::tolower(ar[1][i]) != std::tolower(itCli->second->nick[i]))
           nicknameInUse = false;
       if (nicknameInUse)
-        return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");     // ERR_NICKNAMEINUSE
+        return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use"); // levensta: :IRCat 433  a :Nickname is already in use    // ERR_NICKNAMEINUSE
     }
   cli->nick = ar[1];
   if(cli->uName != "" && cli->passOk && cli->capOk)
@@ -354,7 +350,7 @@ int Server::execPrivmsg() {
 
 // not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_TOOMANYTARGETS ERR_UNAVAILRESOURCE 
 // Once a user has joined a channel, he receives information about JOIN, MODE, KICK, QUIT, PRIVMSG/NOTICE
-// если второй раз JOIN #ch, то ничего не происходит
+// levensta: если второй раз JOIN #ch, то ничего не происходит
 int Server::execJoin() {
   if(ar.size() < 2)
     return prepareResp(cli, "461 JOIN :Not enough parameters"); // levensta :IRCat 461 a JOIN :Not enough parameters // ERR_NEEDMOREPARAMS 
@@ -379,8 +375,8 @@ int Server::execJoin() {
       else {
         chs[*chName]->clis.insert(cli);
         prepareResp(chs[*chName], cli->nick + " JOIN " + *chName);
-        prepareResp(cli, "332 " + *chName + " " + chs[*chName]->topic); // RPL_TOPIC ?
-        prepareResp(cli, "353 " + *chName + " " /* перечилсить все ники*/); // RPL_NAMREPLY ?
+        prepareResp(cli, "332 " + *chName + " " + chs[*chName]->topic);          // RPL_TOPIC ?
+        prepareResp(cli, "353 " + *chName + " " /* перечилсить все ники*/);      // RPL_NAMREPLY ?
       }
     }
   return 0;
@@ -411,7 +407,7 @@ int Server::execInvite() {
   if(ar.size() < 3)
     return prepareResp(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS 
   if(chs.find(ar[2]) == chs.end())
-    return prepareResp(cli, "403 " + ar[2] + " :No such channel");                      // ERR_NOSUCHCHANNEL ???
+    return prepareResp(cli, "403 " + ar[2] + " :No such channel");                      // ERR_NOSUCHCHANNEL ?
   if(chs[ar[2]]->adms.find(cli) == chs[ar[2]]->adms.end()) 
     return prepareResp(cli, "482 " + ar[2] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(chs[ar[2]]->clis.find(cli) == chs[ar[2]]->clis.end()) 
@@ -421,7 +417,7 @@ int Server::execInvite() {
   if(chs[ar[2]]->clis.find(cli) != chs[ar[2]]->clis.end()) 
     return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
   getCli(ar[1])->invits.insert(ar[2]);
-  return prepareResp(chs[ar[2]], "341" + ar[2] + " " + ar[1]);                                 // RPL_INVITING
+  return prepareResp(chs[ar[2]], "341" + ar[2] + " " + ar[1]);                          // RPL_INVITING
 }
 
 // not implemented here ERR_NOCHANMODES
