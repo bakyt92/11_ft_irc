@@ -1,12 +1,18 @@
+## мелкие вопросы
+* в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
+* точно ли нам не нужен ip-6
+* `valgrind`, закрытие сокетов
+* должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
+* из дискорда: **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
+
 ## irssi
 `/connect 0 -tls_pass 2`
 * Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify script unnotify admin echo  lastlog op scrollback unquery alias eval layout oper server unsilence away exec links part servlist upgrade ban flushbuffer list ping set uptime beep foreach load query sethost userhost bind format log quit silence ver cat hash lusers quote squery version cd help map rawlog squit voice channel hilight me recode stats wait clear ignore mircdcc  reconnect statusbar wall completion info mode redraw time wallops connect invite motd rehash toggle who ctcp      ircnet  msg reload topic whois cycle ison names resize trace whowas dcc join nctcp restart ts window dehilight kick netsplit rmreconns unalias deop kickban network rmrejoins unban devoice kill nick save unignore  
 * https://scripts.irssi.org/scripts/cap_sasl.pl
 * https://ircv3.net/specs/extensions/capability-negotiation.html
 * https://hub.docker.com/_/irssi
-
   
-## Протестировать наш сервер + выбранный клиент, настоящий сервер + выбранный клиент
+## Тесты irssi + наш сервер, irssi + настоящий сервер
 * сервер для тестов
   + https://oragono.io/
   + irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
@@ -42,7 +48,7 @@
 * `MODE #myChannel -lktt`
 * `MODE #myChannel +ltk` 5 myTopic myPass
 * неправильное имя канала
-* неправильнй пароль (по RCF 1459 и RCF 2812 не понятно!) 
+* неправильнй пароль
 * что отвечает сервер на `MODE #myChannel +l 999999999999999`
 * очень длинное собщение
 * команды QUIT, PASS, NICK, USER выполняет, даже если клиент не залогинен, а дргуие команды не выполняет в этой ситуации
@@ -86,33 +92,11 @@
 * Verify absolutely every possible error and issue (receiving partial data, low bandwidth, ...) (checklist)
 
 ## Читаю группу дискорд:
-* кто-то предлагает использовать openssl, чтобы не хранить пароль в октрытом виде
-* в 2021 г. пишут про `:WiZ!jto@tolsun.oulu.fi NICK Kilroy`
-* If a client send a CAP command, ignore it, don’t throw an error
 * To test ipv6 you can use irssi and add -6 during the /connect
-* IRC default port is 6667
-* Add **MSG_NOSIGNAL** as a 4th argument for send, it will prevent your programm from crashing under certain condition
-  + Genre le client il fait legit connect();send();exit() ducoup il est plus rapide que toi. Et tu te tape des signal sigpipe
-* **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
+* on gere ipv4 et ipv6, impossible de recup **l'addr ipv4**
 * that to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
-* on gere et ipv4 et ipv6, impossible de recup **l'addr ipv4**
-* Deja vu un segfault dans SSL_write car ce dernier essaye d'acceder à l'addr 0x30, or cette derniere n'est pas mappé (on pense ca vient de sslptr)
-  + ca arrive vraiment ULTRA rarement, genre 1 fois sur 400, et dans des conditions VRAIMENT extreme, genre en l'occurence switch h24 entre 3g/4g/wifi et tenter de se reco à chaque fois avec dans le meme temps plein d'user qui se deco reco au meme tick etc... ?
-  + l'addr mdr, 0x30, c'est l'ascii pour 0 genre on (je) pense que ca peut pas etre une coincidence quoi
-* tout les messages doivent finir par **\r\n**
 * Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
-* Operator password is not the same thing as server password
-* je me tape des residus "fantomes" de memoire..
-* Si j'ai bien compris, on doit renvoyer plusieurs réponses numériques (genre RPL_WHOISUSER RPL_WHOISCHANNELS, et RPL_WHOISSERVER par exemple) pour ensuite afficher les différentes infos sur un utilisateur de notre serveur IRC.
-Or, nos fonctions de commande (de mon groupe j'entends) renvoient seulement un int, celui correspondant à un "numeric reply". Doit-on renvoyer plusieurs numeric reply ou bien un seul ? Si c'est le dernier, comment faire dans le cas de WHOIS pour afficher toutes les infos sur un utilisateur avec un seul "numeric reply" ?
 * остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
-
-## мелкие вопросы
-* точно ли нам не нужен ip-6
-* `valgrind`, закрытие сокетов
-* в irssi то после команды `join #ch` все сообщения идут только в этот канал, нам тоже так надо?
-* что делать, если админ покинул чат?
-* должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
