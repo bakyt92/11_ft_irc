@@ -42,7 +42,7 @@ string Server::infoCmd() {          // debugging
 string Server::infoServ() {        // debugging
   string ret = "My clients                : ";
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-    ret += "[[" + it->second->nick + "] with buf [" + it->second->buf + "]] ";
+    ret += "[[" + it->second->nick + "] with buf [" + it->second->bufRecv + "]] ";
   ret += "\n";
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
     ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", users = ";
@@ -102,38 +102,31 @@ vector<string> Server::split_r_n(string s) {
     s.erase(0, pos + 2);
   }
   if(s.size() > 0)
-    cli->buf = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть по скорее всего начало следующей команды)
+    cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть по скорее всего начало следующей команды)
   else
-    cli->buf = "";
+    cli->bufRecv = "";
   return parts;
 }
 
 int Server::prepareResp(Cli *to, string msg) {
-  to->cmdsToSend.push_back(msg + "\r\n");
+  to->bufToSend += (msg + "\r\n");
   return 0;
 }
 
 int Server::prepareResp(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
     if((*to)->fd != cli->fd) // но некоторые команды надо и самому себе посылать
-      prepareResp(*to, msg);
+      (*to)->bufToSend += (msg + "\r\n");
   return 0;
 }
 
-void Server::sendResp(Cli *to, string msg) {
-  cout << "I send to fd=" << to->fd << "            : [" << without_r_n(msg) << "]\n";
-  send(to->fd, msg.c_str(), msg.size(), MSG_NOSIGNAL); // flag ?
+void Server::sendPreparedResps(Cli *to) {
+  cout << "I send to fd=" << to->fd << "            : [" << without_r_n(to->bufToSend) << "]\n";
+  send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL); // flag ?
+  to->bufToSend = "";
   for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
     if (poll->fd == to->fd)
       poll->events = POLLIN;
-}
-
-void Server::sendAccumulatedResps(Cli *to) {
-  while (to->cmdsToSend.size() > 0) {
-    string msg = *(to->cmdsToSend.begin());
-    to->cmdsToSend.erase(to->cmdsToSend.begin());
-    sendResp(to, msg);
-  }
 }
 
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
@@ -181,7 +174,7 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
-      if (it->second->cmdsToSend.size() > 0)
+      if (it->second->bufToSend.size() > 0)
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
           if (poll->fd == it->first) {
             poll->events = POLLOUT;
@@ -224,8 +217,8 @@ void Server::run() {
           else {
             string buf = string(buf0.begin(), buf0.end());
             buf.resize(bytes);
-            cout << without_r_n("I have received buf       : [" + buf + "] -> [" + cli->buf + buf + "]") << "\n";
-            buf = cli->buf + buf;
+            cout << without_r_n("I have received buf       : [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
+            buf = cli->bufRecv + buf;
             std::vector<string> cmds = split_r_n(buf);
             for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
               // for(int i = 0; i < ar.size(); i++)
@@ -239,7 +232,7 @@ void Server::run() {
           }
         }
         else if (poll->revents & POLLOUT) {
-          sendAccumulatedResps(clis.at(poll->fd));
+          sendPreparedResps(clis.at(poll->fd));
         }
     }
   }

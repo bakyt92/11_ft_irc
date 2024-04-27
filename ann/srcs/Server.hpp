@@ -27,7 +27,7 @@ using std::numeric_limits;
 bool sigReceived;
 
 struct Cli {
-  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capOk(true), nick(""), uName(""), rName(""), invits(set<string>()), cmdsToSend(vector<string>()), buf("") {};
+  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capOk(true), nick(""), uName(""), rName(""), invits(set<string>()), bufToSend(""), bufRecv("") {};
   int                      fd;
   string                   host;
   bool                     passOk;
@@ -36,8 +36,8 @@ struct Cli {
   string                   uName;
   string                   rName;
   set<string>              invits;
-  vector<string>           cmdsToSend;
-  string                   buf;
+  string                   bufToSend;
+  string                   bufRecv;
 };
 
 struct Ch {
@@ -96,7 +96,7 @@ public:
   int                      prepareResp(Cli *to, string msg);
   int                      prepareResp(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
-  void                     sendAccumulatedResps(Cli *to);
+  void                     sendPreparedResps(Cli *to);
   vector<string>           split_r_n(string s);
   int                      execCmd();
   int                      execPass();
