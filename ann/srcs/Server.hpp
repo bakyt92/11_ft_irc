@@ -114,7 +114,7 @@ public:
   int                      execPart();
   int                      execCap();
   string                   infoNewCli(int fd);
-  void                     printCmd();
+  string                   infoCmd();
   string                   infoServ();
   void                     erase(Ch *toErase) {
                              for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)

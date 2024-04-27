@@ -32,14 +32,14 @@ string Server::infoNewCli(int fd) { // debugging
   return "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fd) )).str() + ")\n";
 }
 
-void Server::printCmd() {          // debugging
-  cout << "I execute                 : ";
+string Server::infoCmd() {          // debugging
+  string ret = "I execute                 : ";
   for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
-    cout << "[" << *it << "]" << " ";
-  cout << endl;
+    ret += "[" + *it + "] ";
+  return ret + "\n";
 }
 
-string Server::infoServ() {    // debugging
+string Server::infoServ() {        // debugging
   string ret = "My clients                : ";
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
     ret += "[[" + it->second->nick + "] with buf [" + it->second->buf + "]] ";
@@ -229,11 +229,10 @@ void Server::run() {
               //   ar[i] = ""; !
               vector<string>().swap(ar);
               ar = split_space(*cmd);
-              printCmd();
+              cout << infoCmd();
               execCmd();
             }
-            cout << infoServ();
-            cout << endl;
+            cout << infoServ() << endl;
           }
         }
         else if (poll->revents & POLLOUT) {
