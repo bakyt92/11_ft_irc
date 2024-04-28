@@ -444,10 +444,11 @@ int Server::execInvite() {
     return prepareResp(cli, "442 " + ar[2] + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 :" + ar[1] + " No such nick");                         // ERR_NOSUCHNICK
-  if(chs[ar[2]]->clis.find(cli) != chs[ar[2]]->clis.end()) 
+  if(chs[ar[2]]->clis.find(getCli(ar[1])) != chs[ar[2]]->clis.end()) 
     return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
   //getCli(ar[1])->invits.insert(ar[2]);
-  return prepareResp(chs[ar[2]], "341" + ar[2] + " " + ar[1]);                          // RPL_INVITING
+  chs[ar[2]]->clis.insert(getCli(ar[1]));
+  return prepareResp(chs[ar[2]], "341 " + ar[2] + " " + ar[1]);                          // RPL_INVITING
 }
 
 // not implemented here ERR_NOCHANMODES
