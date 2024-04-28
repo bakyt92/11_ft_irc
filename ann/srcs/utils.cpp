@@ -96,7 +96,7 @@ vector<string> Server::split_r_n(string s) {
   }
   if(s.size() > 0)
     cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть это скорее всего начало следующей команды)
-  else
+git pul  else
     cli->bufRecv = "";
   return parts;
 }
