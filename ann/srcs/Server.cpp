@@ -49,10 +49,8 @@ void Server::init() {
       close(fdForNewClis);
       hint->ai_next == NULL ? throw("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error"); // tested
     }
-    else {
-      // freeaddrinfo(hint); // кажется не нужно
+    else
       break ;
-    }
   }
   freeaddrinfo(listRes);
   if(listen(fdForNewClis, SOMAXCONN))
@@ -109,7 +107,7 @@ void Server::receiveMsgAndExecCmds(int fd) {
   if(bytes < 0)
     perror("recv");                                                                       // ошибка, но не делаем execQuit(), возможно клиент ещё тут
   else if(bytes == 0)                                                                     // клиент пропал
-    erase(cli);
+    eraseCli(cli->nick);
   else {
     string buf = string(buf0.begin(), buf0.end());
     buf.resize(bytes);

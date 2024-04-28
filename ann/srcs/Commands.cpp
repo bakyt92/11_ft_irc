@@ -113,7 +113,7 @@ int Server::execPart() {
       prepareResp(chs[*chName], cli->nick + " PART :" + *chName);                       // нужно ли сообщение для автора команды?
       chs.erase(*chName);
       if(chs[*chName]->size() == 0)
-        erase(chs[*chName]);
+        eraseCh(chs[*chName]);
       else if(chs[*chName]->adms.size() == 0)
         chs[*chName]->adms.insert(*(chs[*chName]->clis.begin()));                       // сделать самого старого пользователя админом
     }
@@ -181,7 +181,7 @@ int Server::execKick() {
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
           chs[*chName]->erase(*targetCli);                                        // send_(chs[*chName], " KICK"); ?
           if(chs[*chName]->size() == 0)
-            erase(chs[*chName]);
+            eraseCh(chs[*chName]);
         }
     }
   return 0;

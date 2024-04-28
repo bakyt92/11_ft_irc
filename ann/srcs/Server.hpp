@@ -111,8 +111,8 @@ public:
   static  void             sigHandler(int sig);
   Cli*                     getCli(string &name);
   void                     eraseUnusedPolls();
-  void                     erase(Ch *toErase);
-  void                     erase(Cli *toErase);
+  void                     eraseCh(Ch *toErase);
+  void                     eraseCli(string nick);
   string                   mode(Ch *ch);
   string                   without_r_n(string s);
   string                   infoNewCli(int fd);

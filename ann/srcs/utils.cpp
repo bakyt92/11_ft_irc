@@ -154,17 +154,24 @@ void Server::markClientsToSendDtataTo() {
         }
 }
 
-void Server::erase(Ch *toErase) {
-  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
-    if((it->second) == toErase)
-      chs.erase(it);
+void Server::eraseCh(Ch *toErase) {
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
+    if((ch->second) == toErase)
+      chs.erase(ch);
 };
 
-void Server::erase(Cli *toErase) {
+void Server::eraseCli(string nick) {
+  Cli *toErase = getCli(nick);
   fdsToErase.insert(toErase->fd);
-  // стереть его изо всех каналов 
-  // стереть пустые каналы, если такие появились
-  // = commande quit ?
+  set<Ch*> emptyChs;
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) { // стереть его изо всех каналов 
+    ch->second->clis.erase(toErase);
+    ch->second->adms.erase(toErase);
+    if (ch->second->size() == 0)
+      emptyChs.insert(ch->second);
+  }
+  for(set<Ch*>::iterator epmty = emptyChs.begin(); epmty != emptyChs.end(); epmty++)
+    eraseCh(*epmty);
   std::cout << "I erase the cli (fd = " << toErase->fd << ") from my " << clis.size() << " clis ";
   for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
     if(it->first == toErase->fd) {
