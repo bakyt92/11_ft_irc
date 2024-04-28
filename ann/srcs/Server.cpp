@@ -94,7 +94,7 @@ void Server::addNewClient(pollfd poll) {
   clis[fdForMsgs] = newCli;
   struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
   polls.push_back(pollForMsgs);
-  cout << infoNewCli(fdForMsgs) << endl;
+  cout << "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n";
 }
 
 void Server::receiveMsgAndExecCmds(int fd) {

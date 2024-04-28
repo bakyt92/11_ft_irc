@@ -22,10 +22,6 @@ string Server::without_r_n(string s) {                // debugging
   return s;
 }
 
-string Server::infoNewCli(int fd) { // debugging
-  return "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fd) )).str() + ")\n";
-}
-
 string Server::infoCmd() {          // debugging
   string ret = "I execute                 : ";
   for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)

@@ -59,15 +59,15 @@ class Server {
 private:
   string                   port;
   string                   pass;
-  int                      fdForNewClis;    // один общий для всех клиентов
+  int                      fdForNewClis; // один общий для всех клиентов
   vector<struct pollfd>    polls;
   map<int, Cli*>           clis;
   map<string, Ch*>         chs;
-  vector<string>           ar;    // the command being treated at the moment, args[0] = command
-  Cli                      *cli;  // автор текущей команды
+  vector<string>           ar;           // the command being treated at the moment, args[0] = command
+  Cli                      *cli;         // автор текущей команды
   set<int>                 fdsToErase;
 public:
-                           Server(string port_, string pass_); // : port(port_), pass(pass_), pollsToErase(set<pollfd>()) {};
+                           Server(string port_, string pass_); 
                            ~Server();
   void                     init();
   void                     run();
@@ -102,7 +102,6 @@ public:
   void                     eraseCliFromCh(string nick, string chName);
   string                   mode(Ch *ch);
   string                   without_r_n(string s);
-  string                   infoNewCli(int fd);
   string                   infoCmd();
   string                   infoServ();
   vector<string>           split_r_n(string s);
