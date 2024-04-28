@@ -446,7 +446,7 @@ int Server::execInvite() {
     return prepareResp(cli, "401 :" + ar[1] + " No such nick");                         // ERR_NOSUCHNICK
   if(chs[ar[2]]->clis.find(getCli(ar[1])) != chs[ar[2]]->clis.end()) 
     return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
-  //getCli(ar[1])->invits.insert(ar[2]);
+  //getCli(ar[1])->invits.insert(ar[2]);  <== удалить???
   chs[ar[2]]->clis.insert(getCli(ar[1]));
   return prepareResp(chs[ar[2]], "341 " + ar[2] + " " + ar[1]);                          // RPL_INVITING
 }
@@ -479,7 +479,7 @@ int Server::execKick() {
     if(chs.find(*chName) == chs.end())
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end()) 
-      prepareResp(cli, "442 " + *chName + " :You're not on that channe");               // ERR_NOTONCHANNEL
+      prepareResp(cli, "442 " + *chName + " :You're not on that channel");               // ERR_NOTONCHANNEL
     else if(chs[*chName]->adms.find(cli) == chs[*chName]->adms.end()) 
       prepareResp(cli, "482 " + *chName + " :You're not channel operator");             // ERR_CHANOPRIVSNEEDED
     else {
