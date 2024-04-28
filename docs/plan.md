@@ -3,7 +3,6 @@
 * точно ли нам не нужен ip-6
 * `valgrind`, закрытие сокетов
 * должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
-* из дискорда: **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
 
 ## нерешённые проблемы
 
@@ -140,4 +139,5 @@ INVITE Bakyt1 #chan1
   + To test ipv6 you can use irssi and add -6 during the /connect
   + on gere ipv4 et ipv6, impossible de recup **l'addr ipv4**
   + Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
+  + **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
   + остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
