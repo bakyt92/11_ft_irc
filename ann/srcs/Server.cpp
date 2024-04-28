@@ -484,7 +484,7 @@ int Server::execKick() {
       prepareResp(cli, "482 " + *chName + " :You're not channel operator");             // ERR_CHANOPRIVSNEEDED
     else {
       for(vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++)
-        if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
+        if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
           prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает. 
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
           chs[*chName]->erase(*targetCli);                                        // send_(chs[*chName], " KICK"); ?
