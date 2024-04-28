@@ -16,6 +16,8 @@
 * админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
 * Once a user has joined a channel, he receives information about JOIN, MODE, KICK, QUIT, PRIVMSG
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name - нужно ли нам это?
+* Да, я думаю что так давайте и сделаем, ну то есть сервер понимает, что двоеточие это начало сообщения и можно это воспринимать как аргумент текста
+* добавить OPER
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE.
@@ -33,11 +35,6 @@
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
   + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
 * Using your reference client with your server must be **similar to using it with any official IRC server**. (subject)
-* Имя канала обязательно начинается с `#`? Я пока сделала так, но вроде бы `#` это маска хоста
-  + дискорд: можно взять названия каналов только с `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
-  + RFC: "@" is used for secret channels
-  + RFC: "*" for private channels
-  + RFC: "=" for others (public channels)
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname
   + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
@@ -135,3 +132,4 @@
   + Si la channel n'est pas créer tu peux ignorer la clé (comm quand le mode +k n'est pas activé au final)
   + **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
   + остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
+  + можно взять названия каналов только с `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890

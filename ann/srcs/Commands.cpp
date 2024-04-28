@@ -197,7 +197,7 @@ int Server::execTopic() {
     return prepareResp(cli, "461 TOPIC :Not enough parameters");                        // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
     return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
-  if (ar.size() == 3 && ar[2] == "") {
+  if (ar.size() == 3 && (ar[2] == "" || ar[2] == ":")) {
     chs[ar[1]]->topic = "";
     return prepareResp(chs[ar[1]], "331 " + ar[1] + " :No topic is set");               // RPL_NOTOPIC
   }
