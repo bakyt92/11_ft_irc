@@ -38,7 +38,7 @@
   + RFC: "*" for private channels
   + RFC: "=" for others (public channels)
 * наша упрощённая версия НЕ во всём должна работать как настощий сервер (вроде нам не нужны маски, у нас только один сервер, ...)
-*  Un channel "exclusif" à deux users cmd PRIVMSG + nickname
+* Un channel "exclusif" à deux users cmd PRIVMSG + nickname
   + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
 * если есть лишние аргументы, сервер их игнорирует?
 * есть ли какие-то ограничения на пароль?
