@@ -67,7 +67,6 @@ int Server::execPrivmsg() {
 }
 
 // not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_TOOMANYTARGETS ERR_UNAVAILRESOURCE 
-// Once a user has joined a channel, he receives information about JOIN, MODE, KICK, QUIT, PRIVMSG/NOTICE
 // levensta: если второй раз JOIN #ch, то ничего не происходит
 int Server::execJoin() {
   if(ar.size() < 2)
@@ -88,7 +87,7 @@ int Server::execJoin() {
         prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
-      else if(chs[*chName]->optI /*&& cli->invits.find(*chName) == cli->invits.end()*/)
+      else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
@@ -113,7 +112,7 @@ int Server::execPart() {
       prepareResp(chs[*chName], cli->nick + " PART :" + *chName);                       // нужно ли сообщение для автора команды?
       chs.erase(*chName);
       if(chs[*chName]->size() == 0)
-        eraseCh(chs[*chName]);
+        chs.erase(*chName);
       else if(chs[*chName]->adms.size() == 0)
         chs[*chName]->adms.insert(*(chs[*chName]->clis.begin()));                       // сделать самого старого пользователя админом
     }
@@ -179,32 +178,21 @@ int Server::execKick() {
         if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
           prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает. 
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          chs[*chName]->erase(*targetCli);                                        // send_(chs[*chName], " KICK"); ?
+          eraseCliFromCh(*targetCli, *chName);                                      // send_(chs[*chName], " KICK"); ?
           if(chs[*chName]->size() == 0)
-            eraseCh(chs[*chName]);
+            chs.erase(*chName);
         }
     }
   return 0;
 }
 
 int Server::execQuit() {
-  vector<string> chsToRm;
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    ch->second->erase(cli);
-    if(ch->second->size() == 0)
-      chsToRm.push_back(ch->first);
-  }
-  for(vector<string>::iterator ch = chsToRm.begin(); ch != chsToRm.end(); ch++)
-    chs.erase(*ch);
-  close(clis.find(cli->fd)->first);
-  //polls.erase(std::remove(polls.begin(), polls.end(), cli->fd), polls.end());
-  clis.erase(clis.find(cli->fd));
+  eraseCli(cli->nick);
+ // prepareResp(chs[ar[1]], "... " + cli->nick + " left the channel");               // нужно ли?
   return 0;
 }
 
 // not implemented here: ERR_NOCHANMODES RPL_BANLIST RPL_ENDOFBANLIST RPL_EXCEPTLIST RPL_ENDOFEXCEPTLIST RPL_INVITELIST RPL_ENDOFINVITELIST RPL_UNIQOPIS (creator of the channel)
-// `MODE` устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
-// админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
 int Server::execMode() {
   char *notUsed; // ?
   if(ar.size() < 2)

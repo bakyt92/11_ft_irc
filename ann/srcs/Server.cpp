@@ -115,7 +115,7 @@ void Server::receiveMsgAndExecCmds(int fd) {
     buf = cli->bufRecv + buf;
     std::vector<string> cmds = split_r_n(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
-      vector<string>().swap(ar);                                                          // ?
+      vector<string>().swap(ar);
       ar = split_space(*cmd);
       cout << infoCmd();
       execCmd();

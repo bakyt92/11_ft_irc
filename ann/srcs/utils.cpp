@@ -114,7 +114,7 @@ int Server::prepareResp(Cli *to, string msg) {
 
 int Server::prepareResp(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
-    if((*to)->fd != cli->fd) // некоторые команды надо и самому себе посылать?
+    if((*to)->fd != cli->fd) // некоторые команды надо и самому себе посылать
       prepareResp(*to, msg);
   return 0;
 }
@@ -154,38 +154,31 @@ void Server::markClientsToSendDtataTo() {
         }
 }
 
-void Server::eraseCh(Ch *toErase) {
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
-    if((ch->second) == toErase)
-      chs.erase(ch);
+Cli* Server::getCli(string &nick) {
+  for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
+    if(it->second->nick == nick)
+      return it->second;
+  return NULL;
 };
 
 void Server::eraseCli(string nick) {
-  Cli *toErase = getCli(nick);
-  fdsToErase.insert(toErase->fd);
-  set<Ch*> emptyChs;
+  fdsToErase.insert(getCli(nick)->fd);
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) { // стереть его изо всех каналов 
-    ch->second->clis.erase(toErase);
-    ch->second->adms.erase(toErase);
-    if (ch->second->size() == 0)
-      emptyChs.insert(ch->second);
-  }
-  for(set<Ch*>::iterator epmty = emptyChs.begin(); epmty != emptyChs.end(); epmty++)
-    eraseCh(*epmty);
-  std::cout << "I erase the cli (fd = " << toErase->fd << ") from my " << clis.size() << " clis ";
+  std::cout << "I erase the cli (fd = " << getCli(nick)->fd << ") from my " << clis.size() << " clis ";
   for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
-    if(it->first == toErase->fd) {
+    if(it->first == getCli(nick)->fd) {
       close(it->first);
       delete it->second;
       clis.erase(it->first);
       break ;
     }
   }
-};
+}
+}
 
-Cli* Server::getCli(string &name) {
-  for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
-    if(it->second->nick == name)
-      return it->second;
-  return NULL;
-};
+void Server::eraseCliFromCh(string nick, string chName) {
+  chs[chName]->clis.erase(getCli(nick));
+  chs[chName]->adms.erase(getCli(nick));
+  if (chs[chName]->size() == 0)
+    chs.erase(chName);
+}

@@ -27,7 +27,7 @@ using std::numeric_limits;
 extern bool sigReceived;
 
 struct Cli {
-  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capOk(true), nick(""), uName(""), rName(""), /*invits(set<string>()), */bufToSend(""), bufRecv("") {};
+  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capOk(true), nick(""), uName(""), rName(""), invits(set<string>()), bufToSend(""), bufRecv("") {};
   int                      fd;
   string                   host;
   bool                     passOk;
@@ -35,7 +35,7 @@ struct Cli {
   string                   nick;
   string                   uName;
   string                   rName;
-  //set<string>              invits;
+  set<string>              invits;
   string                   bufToSend;
   string                   bufRecv;
 };
@@ -53,19 +53,6 @@ struct Ch {
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
   unsigned int             size() { return clis.size(); }
-  void                     erase(string nick_) { 
-                             for(set<Cli*>::iterator it = clis.begin(); it != clis.end(); it++) 
-                               if ((*it)->nick == nick_) { 
-                                 clis.erase(*it); 
-                                 break;
-                               }
-                             for(set<Cli*>::iterator it = adms.begin(); it != adms.end(); it++)
-                               if ((*it)->nick == nick_) {
-                                 adms.erase(*it);
-                                 break;
-                               }
-                           }  
-  void                     erase(Cli *cli) { erase(cli->nick); } 
 };
 
 class Server {
@@ -111,8 +98,8 @@ public:
   static  void             sigHandler(int sig);
   Cli*                     getCli(string &name);
   void                     eraseUnusedPolls();
-  void                     eraseCh(Ch *toErase);
   void                     eraseCli(string nick);
+  void                     eraseCliFromCh(string nick, string chName);
   string                   mode(Ch *ch);
   string                   without_r_n(string s);
   string                   infoNewCli(int fd);
