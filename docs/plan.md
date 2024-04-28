@@ -5,10 +5,9 @@
 * должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
 * из дискорда: **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
 
-## irssi
-`/connect 0 -tls_pass 2`
   
 ## Тесты irssi + наш сервер, irssi + настоящий сервер
+* irssi `/connect 0 -tls_pass 2`
 * сервер для тестов
   + https://oragono.io/
   + irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
