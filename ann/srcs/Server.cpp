@@ -453,18 +453,22 @@ int Server::execInvite() {
 
 // not implemented here ERR_NOCHANMODES
 int Server::execTopic() {
-  if(ar.size() < 1)
+  if(ar.size() < 2)
     return prepareResp(cli, "461 TOPIC :Not enough parameters");                        // ERR_NEEDMOREPARAMS
   if(chs.find(ar[1]) == chs.end())
     return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
+  if (ar.size() == 3 && ar[2] == "") {
+    chs[ar[1]]->topic = "";
+    return prepareResp(chs[ar[1]], "331 " + ar[1] + " :No topic is set");               // RPL_NOTOPIC
+  }
+  if(ar.size() == 2 && chs[ar[1]]->topic == "")
+    return prepareResp(chs[ar[1]], "331 " + ar[1] + " :No topic is set");               // RPL_NOTOPIC
+  if(ar.size() == 2 && chs[ar[1]]->topic != "")
+    return prepareResp(chs[ar[1]], "332 " + ar[1] + " :" + chs[ar[1]]->topic);                 // RPL_TOPIC
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
     return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");            // ERR_NOTONCHANNEL
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end()) 
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
-  if(ar.size() == 2) {
-    chs[ar[1]]->topic = "";
-    return prepareResp(chs[ar[2]], "331 " + ar[1] + " :No topic is set");               // RPL_NOTOPIC
-  }
   chs[ar[1]]->topic = ar[2];
   return prepareResp(chs[ar[1]], "332 " + ar[1] + " :" + ar[2]);                        // RPL_TOPIC
 }
