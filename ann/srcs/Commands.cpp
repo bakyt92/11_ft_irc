@@ -9,7 +9,7 @@ int Server::execPass() {
     return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
   if(ar[1] == pass)
     cli->passOk = true;
-  if(cli->nick != "" && cli->uName != "" && cli->capOk)
+  if(cli->nick != "" && cli->uName != "" && !cli->capInProgress)
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
@@ -30,7 +30,7 @@ int Server::execNick() {
         return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");       // ERR_NICKNAMEINUSE
     }
   cli->nick = ar[1];
-  if(cli->uName != "" && cli->passOk && cli->capOk)
+  if(cli->uName != "" && cli->passOk && !cli->capInProgress)                                   // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
@@ -42,36 +42,55 @@ int Server::execUser() {
     return prepareResp(cli, "462 :You may not reregister");                            // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
-  if(cli->nick != "" && cli->passOk && cli->capOk)
+  if(cli->nick != "" && cli->passOk && !cli->capInProgress)
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
 
-// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL ERR_TOOMANYTARGETS RPL_AWAY
-int Server::execPrivmsg() {
-  if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")"); // levensta :IRCat 411 a :No recipient given (PRIVMSG)                // ERR_NORECIPIENT
-  if(ar.size() == 2)
-    return prepareResp(cli, "412 :No text to send"); // levensta :IRCat 412 a :No text to send          // ERR_NOTEXTTOSEND
-  vector<string> tos = split(ar[1], ',');
-  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    if((*to)[0] == '#' && chs.find(*to) == chs.end())
-      prepareResp(cli, "401 " + *to + " :No such nick/channel"); // levensta :IRCat 401 a #ch :No such nick/channel     // ERR_NOSUCHNICK
-    else if((*to)[0] == '#')
-      prepareResp(chs[*to], "PRIVMSG " + *to + " :" + ar[2]);
-    else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + *to + " :No such nick/channel");                        // ERR_NOSUCHNICK
-    else if((*to)[0] != '#')
-      prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);                        // ERR_NOSUCHNICK
+int Server::execCap() {
+  if(ar.size() < 2)
+    return 0;
+  if(ar[1] == "LS") {
+    cli->capInProgress = true;
+    return prepareResp(cli, "CAP * LS :");
+  }
+  if(ar[1] == "END") {
+    cli->capInProgress = false;
+    prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется.!
+  }
   return 0;
 }
 
-// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_TOOMANYTARGETS ERR_UNAVAILRESOURCE 
-// levensta: если второй раз JOIN #ch, то ничего не происходит
+// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY 
+int Server::execPrivmsg() {
+  if(ar.size() == 1) 
+    return prepareResp(cli, "411 :No recipient given (PRIVMSG)");                      // ERR_NORECIPIENT протестировать
+  if(ar.size() == 2)
+    return prepareResp(cli, "412 :No text to send");                                   // ERR_NOTEXTTOSEND протестировать
+  vector<string> tos = split(ar[1], ',');
+  set<std::string> tosSet(tos.begin(), tos.end());                                     // то же самое но без дубликатов
+  if (tosSet.size() < tos.size() || tos.size() > 10)
+    return prepareResp(cli, "407 " + ar[1] + "recipients. <abort message>");           // ERR_TOOMANYTARGETS сколько именно можно?
+  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+    if((*to)[0] == '#' && chs.find(*to) == chs.end())
+      prepareResp(cli, "401 " + *to + " :No such nick/channel");                       // ERR_NOSUCHNICK
+    else if((*to)[0] == '#')
+      prepareResp(chs[*to], "PRIVMSG " + *to + " :" + ar[2]);
+    else if((*to)[0] != '#' && !getCli(*to))
+      prepareResp(cli, "401 " + *to + " :No such nick/channel");                       // ERR_NOSUCHNICK
+    else if((*to)[0] != '#')
+      prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);
+  return 0;
+}
+
+// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_UNAVAILRESOURCE 
 int Server::execJoin() {
   if(ar.size() < 2)
-    return prepareResp(cli, "461 JOIN :Not enough parameters"); // levensta :IRCat 461 a JOIN :Not enough parameters // ERR_NEEDMOREPARAMS 
+    return prepareResp(cli, "461 JOIN :Not enough parameters");                        // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ',');
+  set<std::string> chNamesSet(chNames.begin(), chNames.end());
+  if (chNamesSet.size() < chNames.size() || chNames.size() > 10)
+    return prepareResp(cli, "407 " + ar[1] + "recipients. <abort message>");           // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes  = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos) // ^G ?
@@ -249,16 +268,4 @@ int Server::execWhois() {
     else
       prepareResp(cli, getCli(ar[1])->nick + " " + getCli(ar[1])->uName + " " + getCli(ar[1])->host + " * :" + getCli(ar[1])->rName); // RPL_WHOISUSER
   return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ?
-}
-
-int Server::execCap() {
-  if(ar.size() >= 2 && ar[1] == "LS") {
-    cli->capOk = false;
-    return prepareResp(cli, "CAP * LS :");
-  }
-  else if(ar.size() >= 2 && ar[1] == "END") {
-    cli->capOk = true;
-    prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется.!
-  }
-  return 0;
 }

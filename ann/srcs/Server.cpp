@@ -139,7 +139,7 @@ int Server::execCmd() {
     return execCap();
   if(ar[0] == "WHOIS")
     return execWhois();
-  if((!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capOk) && (ar[0] == "PRIVMSG" || ar[0] == "NOTICE" || ar[0] == "JOIN" || ar[0] == "PART" || ar[0] == "MODE" || ar[0] == "TOPIC" || ar[0] == "INVITE" || ar[0] == "KICK")) // нельзя выполнять без входа
+  if((!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capInProgress) && (ar[0] == "PRIVMSG" || ar[0] == "NOTICE" || ar[0] == "JOIN" || ar[0] == "PART" || ar[0] == "MODE" || ar[0] == "TOPIC" || ar[0] == "INVITE" || ar[0] == "KICK")) // нельзя выполнять без входа
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")
     return execPrivmsg();

@@ -27,11 +27,11 @@ using std::numeric_limits;
 extern bool sigReceived;
 
 struct Cli {
-  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capOk(true), nick(""), uName(""), rName(""), invits(set<string>()), bufToSend(""), bufRecv("") {};
+  Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capInProgress(false), nick(""), uName(""), rName(""), invits(set<string>()), bufToSend(""), bufRecv("") {};
   int                      fd;
   string                   host;
   bool                     passOk;
-  bool                     capOk;
+  bool                     capInProgress;
   string                   nick;
   string                   uName;
   string                   rName;
