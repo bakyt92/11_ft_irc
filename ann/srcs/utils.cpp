@@ -162,18 +162,17 @@ Cli* Server::getCli(string &nick) {
 };
 
 void Server::eraseCli(string nick) {
+  //std::cout << "I erase the cli (fd = " << getCli(nick)->fd << ") from my " << clis.size() << " clis ";
   fdsToErase.insert(getCli(nick)->fd);
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) { // стереть его изо всех каналов 
-  std::cout << "I erase the cli (fd = " << getCli(nick)->fd << ") from my " << clis.size() << " clis ";
-  for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) // стереть его изо всех каналов 
+    eraseCliFromCh(nick, ch->first);
+  for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
     if(it->first == getCli(nick)->fd) {
       close(it->first);
       delete it->second;
       clis.erase(it->first);
       break ;
     }
-  }
-}
 }
 
 void Server::eraseCliFromCh(string nick, string chName) {
