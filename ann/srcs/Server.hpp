@@ -24,7 +24,7 @@ using std::cout;
 using std::endl;
 using std::numeric_limits;
 
-bool sigReceived;
+extern bool sigReceived;
 
 struct Cli {
   Cli(int fd_, string host_) : fd(fd_), host(host_), passOk(false), capOk(true), nick(""), uName(""), rName(""), /*invits(set<string>()), */bufToSend(""), bufRecv("") {};
@@ -80,22 +80,18 @@ private:
   Cli                      *cli;  // автор текущей команды
   set<int>                 fdsToErase;
 public:
-                           Server(string port_, string pass_) : port(port_), pass(pass_), fdsToErase(set<int>()) {};
+                           Server(string port_, string pass_); // : port(port_), pass(pass_), pollsToErase(set<pollfd>()) {};
                            ~Server();
-  static  void             sigHandler(int sig);
   void                     init();
   void                     run();
-  Cli*                     getCli(string &name) {
-                             for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
-                               if(it->second->nick == name)
-                                 return it->second;
-                             return NULL;
-                           };
   int                      prepareResp(Cli *to, string msg);
   int                      prepareResp(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
   void                     sendPreparedResps(Cli *to);
-  vector<string>           split_r_n(string s);
+  void                     markClientsToSendDtataTo();
+  void                     addNewClient(pollfd poll);
+  void                     receiveMsgAndExecCmds(int fd);
+// commands:
   int                      execCmd();
   int                      execPass();
   int                      execNick();
@@ -111,40 +107,19 @@ public:
   int                      execWhois();
   int                      execPart();
   int                      execCap();
+// utils:
+  static  void             sigHandler(int sig);
+  Cli*                     getCli(string &name);
+  void                     eraseUnusedPolls();
+  void                     erase(Ch *toErase);
+  void                     erase(Cli *toErase);
+  string                   mode(Ch *ch);
+  string                   without_r_n(string s);
   string                   infoNewCli(int fd);
   string                   infoCmd();
   string                   infoServ();
-  void                     eraseUnusedFds();
-  void                     markClientsToSendDtataTo();
-  void                     erase(Ch *toErase) {
-                             for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
-                               if((it->second) == toErase)
-                                 chs.erase(it);
-                           };
-  void                     erase(Cli *toErase) {
-                              int fdToErase = toErase->fd;
-                              // стереть его изо всех каналов 
-                              // стереть пустые каналы, если такие появились
-                              // = commande quit ?
-                              std::cout << "I erase the cli (fd = " << toErase->fd << ") from my " << clis.size() << " clis ";
-                              for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
-                                if(it->first == toErase->fd) {
-                                  close(it->first);
-                                  delete it->second;
-                                  clis.erase(it->first);
-                                  break ;
-                                }
-                              }
-                              //std::cout << "I erase 1 poll (fd = " << fdToErase << ") from " << polls.size() << " polls (f. erase)" << std::endl;
-                              //for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
-                              for(size_t i = 0; i < polls.size(); i++) {
-                                //std::cout << "  erase poll fd = " << poll->fd << " ? (seek " << fdToErase << "\n";
-                                if(polls[i].fd == fdToErase) {
-                                  std::cout << "  erase poll fd = " << polls[i].fd << "\n";
-                                  //  polls.erase(polls.begin() + 1);
-                                  //polls.erase(poll);
-                                  break ;
-                                }
-                              }
-                            };};
+  vector<string>           split_r_n(string s);
+  vector<string>           split_space(string s);
+  vector<string>           split(string s, char delim);
+};
 #endif
