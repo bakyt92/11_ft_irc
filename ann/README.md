@@ -45,8 +45,3 @@ IRC = Internet Relay Chat
   + обрабатывать потенциальные ошибки разъединения при каждом вызове
   + отключить оповещения при recv(), чтобы обрабатывать ошибку подключения линейно, не регистрировать для этого обработчик сигналов
 
-## Читаю группу дискорд:
-* To test ipv6 you can use irssi and add -6 during the /connect
-* on gere ipv4 et ipv6, impossible de recup **l'addr ipv4**
-* Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
-* остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
