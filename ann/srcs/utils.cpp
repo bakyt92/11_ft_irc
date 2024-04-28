@@ -144,7 +144,7 @@ void Server::eraseUnusedPolls() {
   fdsToErase.clear();
 }
 
-void Server::markClientsToSendDtataTo() {
+void Server::markClienToSendMsgsTo() {
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
     if (it->second->bufToSend.size() > 0)
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)

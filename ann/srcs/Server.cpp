@@ -63,7 +63,7 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
     eraseUnusedPolls();
-    markClientsToSendDtataTo();
+    markClienToSendMsgsTo();
     int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");

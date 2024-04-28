@@ -75,7 +75,7 @@ public:
   int                      prepareResp(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
   void                     sendPreparedResps(Cli *to);
-  void                     markClientsToSendDtataTo();
+  void                     markClienToSendMsgsTo();
   void                     addNewClient(pollfd poll);
   void                     receiveMsgAndExecCmds(int fd);
 // commands:
