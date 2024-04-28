@@ -75,14 +75,10 @@ void Server::run() {
           addNewClient(*poll);
           break;
         }
-        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis) {              // клиент прислал нам сообщение через свой fdForMsgs
+        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)              // клиент прислал нам сообщение через свой fdForMsgs
           receiveMsgAndExecCmds(poll->fd);
-          break; 
-        }
-        else if (poll->revents & POLLOUT) {                                           // есть сообщение для отпраки какому-то клиенту
+        else if (poll->revents & POLLOUT)                                           // есть сообщение для отпраки какому-то клиенту
           sendPreparedResps(clis.at(poll->fd));
-          break ;
-        }
     }
   }
   std::cout << "Terminated\n";
@@ -104,7 +100,6 @@ void Server::addNewClient(pollfd poll) {
 }
 
 void Server::receiveMsgAndExecCmds(int fd) {
-  std::cout << "receiveMsgAndExecCmds fd = " << fd << "\n";
   if(!(cli = clis.at(fd)))
     return ;
   vector<unsigned char> buf0(513);
@@ -129,7 +124,6 @@ void Server::receiveMsgAndExecCmds(int fd) {
     }
     cout << infoServ() << endl;
   }
-  std::cout << "receiveMsgAndExecCmds fd = " << fd << " end\n";
 }
 
 int Server::execCmd() {
