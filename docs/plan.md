@@ -5,9 +5,8 @@
 * должна ли наша PRIVMSG понимать маски и особые формы записи? например `PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions`
 * из дискорда: **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
 
-## Описание проблем на проекте 
-- при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE. (исправлено)
-- если вводится неправильное количество аргументов (например для команды MODE #channel +l 20 необходимо 4 аргумента) - нет уведомления об ошибке, что количество аргументов неправильное. (исправлено)
+## нерешённые проблемы
+
 - когда делаем с канала KICK, а потом делаем INVITE того же пользователя - выходит сообщение 
 `INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя по идее этого человека уже исключили из канала, и например после INVITE и отправки сообщений в канал - этот клиент сообщения не получает
 - для пароля нам нужен ответ - если пароль не введен, то мы должны ответ направлять ERR_NEEDMOREPARAMS, пока что ответа нет
@@ -26,6 +25,10 @@ INVITE Bakyt1 #chan1
 - в команде KICK должен быть также либо комментарий либо сообщение о том кто сделал KICK. Я думаю что это сообщение тоже должно быть разослано на всех участников канала (пока что не реализовано)
 - добавить, что делать, если send вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 - что делать, если send вернула 0? это значит клиент пропал или нет?
+
+## решённые проблемы
+- при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE.
+- если вводится неправильное количество аргументов (например для команды MODE #channel +l 20 необходимо 4 аргумента) - нет уведомления об ошибке, что количество аргументов неправильное.
 
 ## Тесты irssi + наш сервер, irssi + настоящий сервер
 * irssi `/connect 0 -tls_pass 2`
@@ -133,3 +136,8 @@ INVITE Bakyt1 #chan1
 * https://ircgod.com/ (!)
 * https://stackoverflow.com/questions/27705753/should-i-use-pass-before-nick-user/27708209#27708209
 * [заметки Ани](https://github.com/bakyt92/11_ft_irc/edit/master/ann/README.md) 
+* из группы дискорд:
+  + To test ipv6 you can use irssi and add -6 during the /connect
+  + on gere ipv4 et ipv6, impossible de recup **l'addr ipv4**
+  + Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
+  + остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
