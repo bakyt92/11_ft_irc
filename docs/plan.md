@@ -7,10 +7,6 @@
 
 ## irssi
 `/connect 0 -tls_pass 2`
-* Irssi commands: accept die knock notice sconnect unload action disconnect knockout notify script unnotify admin echo  lastlog op scrollback unquery alias eval layout oper server unsilence away exec links part servlist upgrade ban flushbuffer list ping set uptime beep foreach load query sethost userhost bind format log quit silence ver cat hash lusers quote squery version cd help map rawlog squit voice channel hilight me recode stats wait clear ignore mircdcc  reconnect statusbar wall completion info mode redraw time wallops connect invite motd rehash toggle who ctcp      ircnet  msg reload topic whois cycle ison names resize trace whowas dcc join nctcp restart ts window dehilight kick netsplit rmreconns unalias deop kickban network rmrejoins unban devoice kill nick save unignore  
-* https://scripts.irssi.org/scripts/cap_sasl.pl
-* https://ircv3.net/specs/extensions/capability-negotiation.html
-* https://hub.docker.com/_/irssi
   
 ## Тесты irssi + наш сервер, irssi + настоящий сервер
 * сервер для тестов
