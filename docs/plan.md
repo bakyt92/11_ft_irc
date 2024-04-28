@@ -134,10 +134,10 @@ INVITE Bakyt1 #chan1
 * https://www.irchelp.org/
 * https://ircgod.com/ (!)
 * https://stackoverflow.com/questions/27705753/should-i-use-pass-before-nick-user/27708209#27708209
-* [заметки Ани](https://github.com/bakyt92/11_ft_irc/edit/master/ann/README.md) 
+* [заметки Ани](https://github.com/akostrik/CPP_modules_42)
 * из группы дискорд:
   + To test ipv6 you can use irssi and add -6 during the /connect
   + on gere ipv4 et ipv6, impossible de recup **l'addr ipv4**
-  + Si la channel n'est pas créer tu peux ignorer la clé (comme quand le mode +k n'est pas activé au final)
+  + Si la channel n'est pas créer tu peux ignorer la clé (comm quand le mode +k n'est pas activé au final)
   + **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
   + остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
