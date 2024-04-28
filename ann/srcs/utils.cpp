@@ -22,6 +22,13 @@ string Server::without_r_n(string s) {                // debugging
   return s;
 }
 
+string Server::toLower(string s) {
+  for(size_t i = 0; i < s.size(); i++)
+    if(s[i] >= 'A' && s[i] <= 'Z')
+      s[i] = std::tolower(s[i]);
+  return s;
+}
+
 string Server::infoCmd() {          // debugging
   string ret = "I execute                 : ";
   for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)

@@ -1,34 +1,66 @@
 #include "Server.hpp"
 class Server;
 
+int Server::execCmd() {
+  if(ar.size() == 0)
+    return 0; //
+  if(ar[0] == "PASS")
+    return execPass();
+  if(ar[0] == "NICK")
+    return execNick();
+  if(ar[0] == "USER")
+    return execUser();
+  if(ar[0] == "QUIT")
+    return execQuit();
+  if(ar[0] == "PING")
+    return execPing();
+  if(ar[0] == "CAP")
+    return execCap();
+  if(ar[0] == "WHOIS")
+    return execWhois();
+  if((cli->passOk && cli->nick != "" && cli->uName != "" && !cli->capInProgress)) {
+    if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")                                         // проверить NOTICE
+      return execPrivmsg();
+    if(ar[0] == "JOIN")
+      return execJoin();
+    if(ar[0] == "PART")
+      return execPart();
+    if(ar[0] == "MODE")
+      return execMode();
+    if(ar[0] == "TOPIC")
+      return execTopic();
+    if(ar[0] == "INVITE")
+      return execInvite();
+    if(ar[0] == "KICK")
+      return execKick();
+    return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");     // ERR_UNKNOWNCOMMAND
+  }
+  else
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
+}
+
 // если неправильный пароль никакого сообщения?
 int Server::execPass() {
-  if(ar.size() < 2 || ar[1] == "")
-    return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(cli->passOk)
     return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
-  if(ar[1] == pass)
+  if(ar.size() < 2 || ar[1] == "")
+    return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
+  if(ar[1] == pass && cli->nick != "" && cli->uName != "" && !cli->capInProgress) {
     cli->passOk = true;
-  if(cli->nick != "" && cli->uName != "" && !cli->capInProgress)
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+  }
   return 0;
 }
 
 // not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED ERR_NICKCOLLISION
 int Server::execNick() {
-  if(ar.size() < 2 || ar[1].size() == 0) 
+  if(ar.size() < 2 || ar[1].size() == 0)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   if(ar[1].size() > 9 || ar[1].find_first_not_of("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") != string::npos)
     return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
   for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
-    if(ar[1].size() == itCli->second->nick.size()) {
-      bool nicknameInUse = true;
-      for(size_t i = 0; i < ar[1].size(); i++)
-        if(std::tolower(ar[1][i]) != std::tolower(itCli->second->nick[i]))
-          nicknameInUse = false;
-      if (nicknameInUse)
-        return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");       // ERR_NICKNAMEINUSE
-    }
+    if(toLower(ar[1]) == toLower(itCli->second->nick))
+      return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");       // ERR_NICKNAMEINUSE
   cli->nick = ar[1];
   if(cli->uName != "" && cli->passOk && !cli->capInProgress)                                   // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
@@ -68,9 +100,11 @@ int Server::execPrivmsg() {
   if(ar.size() == 2)
     return prepareResp(cli, "412 :No text to send");                                   // ERR_NOTEXTTOSEND протестировать
   vector<string> tos = split(ar[1], ',');
+  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+    *to = toLower(*to);
   set<std::string> tosSet(tos.begin(), tos.end());                                     // то же самое но без дубликатов
-  if (tosSet.size() < tos.size() || tos.size() > 10)
-    return prepareResp(cli, "407 " + ar[1] + "recipients. <abort message>");           // ERR_TOOMANYTARGETS сколько именно можно?
+  if(tosSet.size() < tos.size() || tos.size() > 10)
+    return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                 // ERR_TOOMANYTARGETS сколько именно можно? проверить
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(*to) == chs.end())
       prepareResp(cli, "401 " + *to + " :No such nick/channel");                       // ERR_NOSUCHNICK

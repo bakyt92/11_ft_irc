@@ -102,6 +102,7 @@ public:
   void                     eraseCliFromCh(string nick, string chName);
   string                   mode(Ch *ch);
   string                   without_r_n(string s);
+  string                   toLower(string s);
   string                   infoCmd();
   string                   infoServ();
   vector<string>           split_r_n(string s);

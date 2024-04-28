@@ -121,39 +121,3 @@ void Server::receiveMsgAndExecCmds(int fd) {
     cout << infoServ() << endl;
   }
 }
-
-int Server::execCmd() {
-  if(ar.size() == 0)
-    return 0; //
-  if(ar[0] == "PASS")
-    return execPass();
-  if(ar[0] == "NICK")
-    return execNick();
-  if(ar[0] == "USER")
-    return execUser();
-  if(ar[0] == "QUIT")
-    return execQuit();
-  if(ar[0] == "PING")
-    return execPing();
-  if(ar[0] == "CAP")
-    return execCap();
-  if(ar[0] == "WHOIS")
-    return execWhois();
-  if((!cli->passOk || cli->nick == "" || cli->uName == "" || !cli->capInProgress) && (ar[0] == "PRIVMSG" || ar[0] == "NOTICE" || ar[0] == "JOIN" || ar[0] == "PART" || ar[0] == "MODE" || ar[0] == "TOPIC" || ar[0] == "INVITE" || ar[0] == "KICK")) // нельзя выполнять без входа
-    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
-  if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")
-    return execPrivmsg();
-  if(ar[0] == "JOIN")
-    return execJoin();
-  if(ar[0] == "PART")
-    return execPart();
-  if(ar[0] == "MODE")
-    return execMode();
-  if(ar[0] == "TOPIC")
-    return execTopic();
-  if(ar[0] == "INVITE")
-    return execInvite();
-  if(ar[0] == "KICK")
-    return execKick();
-  return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");       // ERR_UNKNOWNCOMMAND
-}
