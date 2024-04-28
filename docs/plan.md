@@ -16,6 +16,7 @@
 * админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
 * Once a user has joined a channel, he receives information about JOIN, MODE, KICK, QUIT, PRIVMSG
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name - нужно ли нам это?
+* Да, я думаю что так давайте и сделаем, ну то есть сервер понимает, что двоеточие это начало сообщения и можно это воспринимать как аргумент текста
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE.
