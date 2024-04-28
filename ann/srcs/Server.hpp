@@ -77,7 +77,7 @@ private:
   map<int, Cli*>           clis;
   map<string, Ch*>         chs;
   vector<string>           ar;    // the command being treated at the moment, args[0] = command
-  Cli                      *cli;  // автор команды
+  Cli                      *cli;  // автор текущей команды
 public:
                            Server(string port_, string pass_) : port(port_), pass(pass_) {};
                            ~Server();
@@ -119,9 +119,35 @@ public:
                                  chs.erase(it);
                            };
   void                     erase(Cli *toErase) {
-                             for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-                               if((it->second) == toErase)
-                                 clis.erase(it);
+                             std::cout << "erase  cli " << toErase->fd;
+                             printf(" %p\n", toErase);
+                             std::cout << "iter on " << polls.size() << " polls:\n";
+                             for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
+                               std::cout << "  erase poll fd = " << poll->fd << " ? (seek fd " << toErase->fd << ")\n";
+                               if(poll->fd == toErase->fd) {
+                                 polls.erase(poll);
+                                 std::cout << "    oui erase\n";
+                                 break ;
+                               }
+                             }
+                             std::cout << "  new polls.size =" << polls.size() << "\n";
+                             std::cout << "iter on " << polls.size() << " polls:\n";
+                             for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
+                               std::cout << "  erase poll fd = " << poll->fd << " ? (seek fd " << fdForNewClis << ")\n";
+                               if(poll->fd == fdForNewClis) {
+                                 std::cout << "    oui erase\n";
+                                 polls.erase(poll);
+                                 break ;
+                               }
+                             }
+                             std::cout << "  new polls.size =" << polls.size() << "\n";
+                             polls.clear();
+                            //  std::cout << "iter on " << clis.size() << " clis:\n";
+                            //  for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
+                            //    if((it->second) == toErase) {
+                            //      delete it->second;
+                            //      clis.erase(it);
+                            //    }
                            };
 };
 #endif

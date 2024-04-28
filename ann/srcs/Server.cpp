@@ -4,13 +4,20 @@ Server::~Server() {
   for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++) {
     delete it->second;
   }
-  std::cout << "destructor I will delete " << clis.size() << " clis (destr)" << std::endl;
-  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
-    std::cout << "delete cli " << &(*it) << std::endl;
-    delete it->second;
+  std::cout << "destructor I will delete " << clis.size() << " clis (destr) *" << std::endl;
+  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+    erase(it->second);
+  std::cout << "iter on polls: *\n";
+  for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
+    std::cout << "erase poll fdForNewClis ? " << poll->fd << " == " << fdForNewClis << " ? *\n";
+    if(poll->fd == fdForNewClis) {
+      std::cout << "  oui erase *\n";
+      polls.erase(poll);
+      break ;
+    }
   }
-  // close all fd
-  // free clis, chs ?
+  polls.clear(); 
+  // close all fd-s
 };
 
 void Server::sigHandler(int sig) {
@@ -18,7 +25,7 @@ void Server::sigHandler(int sig) {
   sigReceived = true;
   (void)sig;
   // sendMessage("QUIT\r\n"); ?
-	// free all memory?
+	// server destructor is called
 }
 
 string mode(Ch *ch) { // +o ? перечислить пользлователей и админов?
@@ -195,7 +202,7 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
-    std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
+    // std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
     for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
       if (it->second->bufToSend.size() > 0)
         for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
@@ -218,11 +225,12 @@ void Server::run() {
             // <hostname> has a maximum length of 63 characters !
             // Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
             struct Cli *newCli = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));
-            printf("newCli %p\n", newCli);
-            delete newCli;
-            exit(0);
+            //printf("create cli %d %p\n", newCli->fd, newCli);
+            //erase(newCli);
+            //delete newCli;
+            //exit(0);
             clis[fdForMsgs] = newCli;
-            std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
+            //std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
             struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
             polls.push_back(pollForMsgs);
             cout << infoNewCli(fdForMsgs) << endl;
@@ -263,10 +271,8 @@ void Server::run() {
   for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
     delete it->second;
   std::cout << "I will delete " << clis.size() << " clis" << std::endl;
-  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
-    std::cout << "delete cli " << &(*it) << std::endl;
-    delete it->second;
-  }
+  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+    erase(it->second);
   std::cout << "Terminated\n";
 }
 
