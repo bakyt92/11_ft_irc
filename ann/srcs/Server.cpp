@@ -458,7 +458,7 @@ int Server::execTopic() {
   if(chs.find(ar[1]) == chs.end())
     return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if(chs[ar[1]]->clis.empty() || chs[ar[1]]->clis.find(cli) == chs[ar[1]]->clis.end()) 
-    return prepareResp(cli, "442 " + ar[1] + " :You're not on that channe");            // ERR_NOTONCHANNEL
+    return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");            // ERR_NOTONCHANNEL
   if(chs[ar[1]]->adms.find(cli) == chs[ar[1]]->adms.end()) 
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2) {
