@@ -144,3 +144,9 @@
   + **Oper name** is not the same thing as your nickname / username etc, oper is like using sudo -u
   + остановилась на сообщении c'est a dire "tu geres bien les users que tu as envoye a ton client lors du join" ?
   + можно взять названия каналов только с `#` https://discord.com/channels/774300457157918772/785407578972225579/922447406606458890
+
+
+### Список важных задач
+- Notice уже есть, но надо выдавать сообщение с каким-нибудь цветом
+- допроверить команду QUIT
+- проверка утечек памяти.
