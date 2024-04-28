@@ -87,6 +87,7 @@
 * receiving partial data (checklist)
 * low bandwidth (checklist)
 * может ли быть uName и rName пустым?
+  + levensta регистрирует пользлвтаеля даже если rName = ""
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n`
 * IRC channels
   + [netsplit.de Search](https://netsplit.de/channels/ ) - Searches 563 different networks.
