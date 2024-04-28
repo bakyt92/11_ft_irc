@@ -64,6 +64,8 @@ vector<string> Server::split_space(string s) {
     parts.push_back(s);
   if(afterColon.size() > 0)
     parts.push_back(afterColon);
+  if(parts.size() > 16)
+    parts.resize(16);
   return parts;
 }
 
@@ -96,7 +98,7 @@ vector<string> Server::split_r_n(string s) {
   }
   if(s.size() > 0)
     cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть это скорее всего начало следующей команды)
-git pul  else
+  else
     cli->bufRecv = "";
   return parts;
 }
