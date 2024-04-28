@@ -1,24 +1,17 @@
 #include "Server.hpp"
 ////////////////////////////////////////////////////////////////////////////// UTILS
 Server::~Server() {
-  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++) {
+  std::cout << "Destructor S" << std::endl;
+  for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
+    delete it->second;
+  for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
+    close(it->first);
     delete it->second;
   }
-  std::cout << "destructor I will delete " << clis.size() << " clis (destr) *" << std::endl;
-  for( map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
-    erase(it->second);
-  std::cout << "iter on polls: *\n";
-  for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
-    std::cout << "erase poll fdForNewClis ? " << poll->fd << " == " << fdForNewClis << " ? *\n";
-    if(poll->fd == fdForNewClis) {
-      std::cout << "  oui erase *\n";
-      polls.erase(poll);
-      break ;
-    }
-  }
-  polls.clear(); 
-  // close all fd-s
-};
+  clis.clear();
+  polls.clear();
+  close(fdForNewClis);
+}
 
 void Server::sigHandler(int sig) {
   cout << endl << "Signal Received\n";
@@ -159,6 +152,25 @@ void Server::sendPreparedResps(Cli *to) {
   }
 }
 
+void Server::eraseUnusedFds() {
+  for(set<int>::iterator fdToErase = fdsToErase.begin(); fdToErase != fdsToErase.end(); fdToErase++)
+    for(size_t i = 0; i < polls.size(); i++)
+      if(polls[i].fd == *fdToErase) {
+        polls.erase(polls.begin() + i);
+        break ;
+      }
+}
+
+void Server::markClientsToSendDtataTo() {
+  for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
+    if (it->second->bufToSend.size() > 0)
+      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+        if (poll->fd == it->first) {
+          poll->events = POLLOUT;
+          break;
+        }
+}
+
 /////////////////////////////////////////////////////////////////////// PRINCIPAL LOOP
 void Server::init() {
   try {
@@ -202,15 +214,9 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
-    // std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
-    for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
-      if (it->second->bufToSend.size() > 0)
-        for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
-          if (poll->fd == it->first) {
-            poll->events = POLLOUT;
-            break;
-          }
-    int countEvents = poll(polls.data(), polls.size(), 1000); // delai ?
+    eraseUnusedFds();
+    markClientsToSendDtataTo();
+    int countEvents = poll(polls.data(), polls.size(), 1000);
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
     if(countEvents > 0) {                                                                         // в сокетах есть данные
@@ -225,12 +231,8 @@ void Server::run() {
             // <hostname> has a maximum length of 63 characters !
             // Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
             struct Cli *newCli = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));
-            //printf("create cli %d %p\n", newCli->fd, newCli);
             //erase(newCli);
-            //delete newCli;
-            //exit(0);
             clis[fdForMsgs] = newCli;
-            //std::cout << "I have " << clis.size() << " clis (1)" << std::endl;
             struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
             polls.push_back(pollForMsgs);
             cout << infoNewCli(fdForMsgs) << endl;
@@ -247,7 +249,7 @@ void Server::run() {
           if(bytes < 0)
             perror("recv");                                                                       // ошибка, но не делаем execQuit(), возможно клиент ещё тут
           else if(bytes == 0)                                                                     // клиент пропал
-            execQuit();
+            erase(cli);
           else {
             string buf = string(buf0.begin(), buf0.end());
             buf.resize(bytes);

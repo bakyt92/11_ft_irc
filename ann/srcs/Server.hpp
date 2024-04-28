@@ -78,8 +78,9 @@ private:
   map<string, Ch*>         chs;
   vector<string>           ar;    // the command being treated at the moment, args[0] = command
   Cli                      *cli;  // автор текущей команды
+  set<int>                 fdsToErase;
 public:
-                           Server(string port_, string pass_) : port(port_), pass(pass_) {};
+                           Server(string port_, string pass_) : port(port_), pass(pass_), fdsToErase(set<int>()) {};
                            ~Server();
   static  void             sigHandler(int sig);
   void                     init();
@@ -113,41 +114,37 @@ public:
   string                   infoNewCli(int fd);
   string                   infoCmd();
   string                   infoServ();
+  void                     eraseUnusedFds();
+  void                     markClientsToSendDtataTo();
   void                     erase(Ch *toErase) {
                              for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
                                if((it->second) == toErase)
                                  chs.erase(it);
                            };
   void                     erase(Cli *toErase) {
-                             std::cout << "erase  cli " << toErase->fd;
-                             printf(" %p\n", toErase);
-                             std::cout << "iter on " << polls.size() << " polls:\n";
-                             for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
-                               std::cout << "  erase poll fd = " << poll->fd << " ? (seek fd " << toErase->fd << ")\n";
-                               if(poll->fd == toErase->fd) {
-                                 polls.erase(poll);
-                                 std::cout << "    oui erase\n";
-                                 break ;
-                               }
-                             }
-                             std::cout << "  new polls.size =" << polls.size() << "\n";
-                             std::cout << "iter on " << polls.size() << " polls:\n";
-                             for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
-                               std::cout << "  erase poll fd = " << poll->fd << " ? (seek fd " << fdForNewClis << ")\n";
-                               if(poll->fd == fdForNewClis) {
-                                 std::cout << "    oui erase\n";
-                                 polls.erase(poll);
-                                 break ;
-                               }
-                             }
-                             std::cout << "  new polls.size =" << polls.size() << "\n";
-                             polls.clear();
-                            //  std::cout << "iter on " << clis.size() << " clis:\n";
-                            //  for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-                            //    if((it->second) == toErase) {
-                            //      delete it->second;
-                            //      clis.erase(it);
-                            //    }
-                           };
-};
+                              int fdToErase = toErase->fd;
+                              // стереть его изо всех каналов 
+                              // стереть пустые каналы, если такие появились
+                              // = commande quit ?
+                              std::cout << "I erase the cli (fd = " << toErase->fd << ") from my " << clis.size() << " clis ";
+                              for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++) {
+                                if(it->first == toErase->fd) {
+                                  close(it->first);
+                                  delete it->second;
+                                  clis.erase(it->first);
+                                  break ;
+                                }
+                              }
+                              //std::cout << "I erase 1 poll (fd = " << fdToErase << ") from " << polls.size() << " polls (f. erase)" << std::endl;
+                              //for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
+                              for(size_t i = 0; i < polls.size(); i++) {
+                                //std::cout << "  erase poll fd = " << poll->fd << " ? (seek " << fdToErase << "\n";
+                                if(polls[i].fd == fdToErase) {
+                                  std::cout << "  erase poll fd = " << polls[i].fd << "\n";
+                                  //  polls.erase(polls.begin() + 1);
+                                  //polls.erase(poll);
+                                  break ;
+                                }
+                              }
+                            };};
 #endif
