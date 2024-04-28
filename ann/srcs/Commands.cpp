@@ -19,7 +19,7 @@ int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0) 
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   if(ar[1].size() > 9 || ar[1].find_first_not_of("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") != string::npos)
-    return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname"); // levensta :IRCat 432 rrrrrrrrrrrrrrrrrrrr :Erroneus nickname                   // ERR_ERRONEUSNICKNAME
+    return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
   for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
     if(ar[1].size() == itCli->second->nick.size()) {
       bool nicknameInUse = true;
@@ -27,7 +27,7 @@ int Server::execNick() {
         if(std::tolower(ar[1][i]) != std::tolower(itCli->second->nick[i]))
           nicknameInUse = false;
       if (nicknameInUse)
-        return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use"); // levensta: :IRCat 433  a :Nickname is already in use    // ERR_NICKNAMEINUSE
+        return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");       // ERR_NICKNAMEINUSE
     }
   cli->nick = ar[1];
   if(cli->uName != "" && cli->passOk && cli->capOk)
@@ -37,9 +37,9 @@ int Server::execNick() {
 
 int Server::execUser() {
   if(ar.size() < 5)
-    return prepareResp(cli, "461 USER :Not enough parameters"); // levensta :IRCat 461  USER :Not enough parameters                        // ERR_NEEDMOREPARAMS 
-  if(cli->uName != "")
-    return prepareResp(cli, "462 :You may not reregister"); // levensta регистрирует пользлвтаеля даже если rName = ""       // ERR_ALREADYREGISTRED
+    return prepareResp(cli, "461 USER :Not enough parameters");                        // ERR_NEEDMOREPARAMS 
+  if(cli->uName != "")                                                                 // cli->rName != "" ?
+    return prepareResp(cli, "462 :You may not reregister");                            // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && cli->capOk)

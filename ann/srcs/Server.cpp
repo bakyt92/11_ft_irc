@@ -67,15 +67,15 @@ void Server::run() {
     int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
-    if(countEvents > 0) {                                                           // в каких=то сокетах есть данные
+    if(countEvents > 0) {                                                            // в каких=то сокетах есть данные
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)  // новый клиент подключился к сокету fdServ
         if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {
           addNewClient(*poll);
           break;
         }
-        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)              // клиент прислал нам сообщение через свой fdForMsgs
+        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)                // клиент прислал нам сообщение через свой fdForMsgs
           receiveMsgAndExecCmds(poll->fd);
-        else if (poll->revents & POLLOUT)                                           // есть сообщение для отпраки какому-то клиенту
+        else if (poll->revents & POLLOUT)                                            // есть сообщение для отпраки какому-то клиенту
           sendPreparedResps(clis.at(poll->fd));
     }
   }
@@ -85,11 +85,9 @@ void Server::run() {
 void Server::addNewClient(pollfd poll) {
   struct sockaddr sa;
   socklen_t       saLen = sizeof(sa);
-  int fdForMsgs = accept(poll.fd, &sa, &saLen);  // у каждого клиента свой fd для сообщений
+  int fdForMsgs = accept(poll.fd, &sa, &saLen);                                       // у каждого клиента свой fd для сообщений
   if(fdForMsgs == -1)
     return perror("accept");
-  // <hostname> has a maximum length of 63 characters !
-  // Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
   struct Cli *newCli = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));
   clis[fdForMsgs] = newCli;
   struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
