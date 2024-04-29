@@ -41,6 +41,7 @@
 * проверка утечек памяти, особено в случае нестандартных ситуаций
 * PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname - должно рабоать как переписка между ними (?)
+* оновременна два сервера не запускаются
 
 ## проблемы второй срочности
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
