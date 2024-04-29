@@ -47,7 +47,7 @@ void Server::init() {
       throw std::runtime_error("setsockopt error: [" + std::string(strerror(errno)) + "]");
     else if(bind(fdForNewClis, hint->ai_addr, hint->ai_addrlen)) { 
       close(fdForNewClis);
-      hint->ai_next == NULL ? throw("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error"); // tested
+      hint->ai_next == NULL ? throw std::runtime_error("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error"); // tested
     }
     else
       break ;
@@ -60,7 +60,7 @@ void Server::init() {
 }
 
 void Server::run() {
-  std::cout << "Server is running. Waiting clients to connect >>>\n";
+  std::cout << "Server is running. Waiting clients to connect >\n";
   while (sigReceived == false) {
     eraseUnusedClis();
     markClisToSendMsgsTo();
