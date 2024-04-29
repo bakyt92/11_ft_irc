@@ -7,7 +7,7 @@
   + JOIN #channel, JOIN #channel
   + MODE #ch
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
-* PRIVMSG : The <target> parameter may also be a host mask (#<mask>)
+  + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
   + The server will only send the PRIVMSG to those who have a host matching the mask
   + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
   + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
