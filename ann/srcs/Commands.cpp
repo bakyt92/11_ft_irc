@@ -265,12 +265,12 @@ int Server::execTopic() {
     return prepareResp(cli, "403 " + chName + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if (ar.size() == 3 && (ar[2] == "" || ar[2] == ":")) {
     chs[chName]->topic = "";
-    return prepareRespAuthorIncluding(chs[chName], "331 " + chName + " :No topic is set");               // RPL_NOTOPIC
+    return prepareResp(cli, "331 " + chName + " :No topic is set");               // RPL_NOTOPIC
   }
   if(ar.size() == 2 && chs[chName]->topic == "")
-    return prepareRespAuthorIncluding(chs[chName], "331 " + chName + " :No topic is set");               // RPL_NOTOPIC
+    return prepareResp(cli, "331 " + chName + " :No topic is set");               // RPL_NOTOPIC
   if(ar.size() == 2 && chs[chName]->topic != "")
-    return prepareRespAuthorIncluding(chs[chName], "332 " + chName + " :" + chs[chName]->topic);          // RPL_TOPIC
+    return prepareResp(cli, "332 " + chName + " :" + chs[chName]->topic);          // RPL_TOPIC
   if(chs[chName]->clis.empty() || chs[chName]->clis.find(cli) == chs[chName]->clis.end()) 
     return prepareResp(cli, "442 " + chName + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(chs[chName]->adms.find(cli) == chs[chName]->adms.end()) 
