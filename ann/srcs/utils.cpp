@@ -139,17 +139,7 @@ void Server::sendPreparedResps(Cli *to) {
   }
 }
 
-void Server::eraseUnusedPolls() {
-  for(set<int>::iterator fdToErase = fdsToErase.begin(); fdToErase != fdsToErase.end(); fdToErase++)
-    for(vector<pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
-      if(poll->fd == *fdToErase) {
-        polls.erase(poll);
-        break ;
-      }
-  fdsToErase.clear();
-}
-
-void Server::markClienToSendMsgsTo() {
+void Server::markClisToSendMsgsTo() {
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
     if (it->second->bufToSend.size() > 0)
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
@@ -166,23 +156,42 @@ Cli* Server::getCli(string &nick) {
   return NULL;
 };
 
-void Server::eraseCli(string nick) {
-  //std::cout << "I erase the cli (fd = " << getCli(nick)->fd << ") from my " << clis.size() << " clis ";
-  fdsToErase.insert(getCli(nick)->fd);
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) // стереть его изо всех каналов 
-    eraseCliFromCh(nick, ch->first);
-  for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
-    if(it->first == getCli(nick)->fd) {
-      close(it->first);
-      delete it->second;
-      clis.erase(it->first);
-      break ;
-    }
-}
-
 void Server::eraseCliFromCh(string nick, string chName) {
   chs[chName]->clis.erase(getCli(nick));
   chs[chName]->adms.erase(getCli(nick));
   if (chs[chName]->size() == 0)
     chs.erase(chName);
+}
+
+void Server::eraseUnusedClis() {             // только перед вызовом poll
+  set<int> reallyRemouved;
+  for(set<int>::iterator fdToErase = fdsToEraseNextIteration.begin(); fdToErase != fdsToEraseNextIteration.end(); fdToErase++) {
+    if(clis.find(*fdToErase) != clis.end() && clis[*fdToErase]->bufToSend == "") {
+      for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) // стереть его изо всех каналов
+        eraseCliFromCh(clis[*fdToErase]->nick, ch->first);
+      for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
+        if(it->first == *fdToErase) {
+          close(it->first);
+          delete it->second;
+          clis.erase(it->first);
+          break ;
+        }
+      for(vector<pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+        if(poll->fd == *fdToErase) {
+          polls.erase(poll);
+          break ;
+      }
+      reallyRemouved.insert(*fdToErase);
+    }
+    else if(clis.find(*fdToErase) == clis.end()) {
+      for(vector<pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
+        if(poll->fd == *fdToErase) {
+          polls.erase(poll);
+          break ;
+      }
+      reallyRemouved.insert(*fdToErase);
+    }
+  }
+  for(set<int>::iterator it = reallyRemouved.begin(); it != reallyRemouved.end(); it++)
+    fdsToEraseNextIteration.erase(*it);
 }

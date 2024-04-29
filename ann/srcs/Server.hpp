@@ -65,7 +65,7 @@ private:
   map<string, Ch*>         chs;
   vector<string>           ar;           // the command being treated at the moment, args[0] = command
   Cli                      *cli;         // автор текущей команды
-  set<int>                 fdsToErase;
+  set<int>                 fdsToEraseNextIteration;
 public:
                            Server(string port_, string pass_); 
                            ~Server();
@@ -75,7 +75,7 @@ public:
   int                      prepareResp(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
   void                     sendPreparedResps(Cli *to);
-  void                     markClienToSendMsgsTo();
+  void                     markClisToSendMsgsTo();
   void                     addNewClient(pollfd poll);
   void                     receiveMsgAndExecCmds(int fd);
 // commands:
@@ -97,9 +97,8 @@ public:
 // utils:
   static  void             sigHandler(int sig);
   Cli*                     getCli(string &name);
-  void                     eraseUnusedPolls();
-  void                     eraseCli(string nick);
   void                     eraseCliFromCh(string nick, string chName);
+  void                     eraseUnusedClis();
   string                   mode(Ch *ch);
   string                   without_r_n(string s);
   string                   toLower(string s);

@@ -2,7 +2,7 @@
 
 bool sigReceived;
 
-Server::Server(string port_, string pass_) : port(port_), pass(pass_), fdsToErase(set<int>()) {}
+Server::Server(string port_, string pass_) : port(port_), pass(pass_), fdsToEraseNextIteration(set<int>()) {}
 
 Server::~Server() {
   for(map<string, Ch*>::iterator it = chs.begin(); it != chs.end(); it++)
@@ -62,8 +62,8 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >>>\n";
   while (sigReceived == false) {
-    eraseUnusedPolls();
-    markClienToSendMsgsTo();
+    eraseUnusedClis();
+    markClisToSendMsgsTo();
     int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
@@ -105,7 +105,7 @@ void Server::receiveMsgAndExecCmds(int fd) {
   if(bytes < 0)
     perror("recv");                                                                       // ошибка, но не делаем execQuit(), возможно клиент ещё тут
   else if(bytes == 0)                                                                     // клиент пропал
-    eraseCli(cli->nick);
+    fdsToEraseNextIteration.insert(cli->fd);
   else {
     string buf = string(buf0.begin(), buf0.end());
     buf.resize(bytes);
