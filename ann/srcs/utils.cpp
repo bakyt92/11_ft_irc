@@ -190,8 +190,12 @@ int Server::nbChannels(Cli *c) {
 }
 
 void Server::eraseCliFromCh(string nick, string chName) {
-  chs[chName]->clis.erase(getCli(nick));
-  chs[chName]->adms.erase(getCli(nick));
+  if(chs[chName]->clis.count(getCli(nick)) > 0)
+    chs[chName]->clis.erase(getCli(nick));
+  if(chs[chName]->adms.count(getCli(nick)) > 0)
+    chs[chName]->adms.erase(getCli(nick));
+  (void)nick;
+  getCli(nick);
   if(chs[chName]->size() == 0)
     chs.erase(chName);
   else if(chs[chName]->adms.size() == 0)
