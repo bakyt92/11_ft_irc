@@ -3,7 +3,9 @@
 * USER a 0 * a, USER a 0 * a - правильно ли работает
 * PRIVMSG alice,alice hello - правильно ли работает
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
+* PRIVMSG : The <target> parameter may also be a host mask (#<mask>). The server will only send the PRIVMSG to those who have a server or host matching the mask. The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".".  This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users.  Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
 * NOTICE: verify that is **fully functional with different parameters** (checklist)
+* NOTICE The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message. This rule applies to servers too - they MUST NOT send any error reply back to the client on receipt of a notice. The object of this rule is to avoid loops between clients automatically sending something in response to    something it received.
 * JOIN напечатать всех участников канала
 * JOIN #сhannel,#сhannel
 * JOIN when a user joins a server you have to greed him with a welcome message
@@ -48,8 +50,8 @@
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
 * PASS если неправильный пароль никакого сообщения?
 * NOTICE выдавать сообщение с каким-нибудь цветом
-* Возможно нужна команда чтобы посмотреть кто является оператором канала?
-* Возможно нужна команда чтобы посмотреть кто есть на канале?
+* команда чтобы посмотреть кто является оператором канала - вроде это MODE
+* команда чтобы посмотреть кто есть на канале - вроде это MODE
 * OPER регистрации клиента самого себя в качестве оператора канала
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
