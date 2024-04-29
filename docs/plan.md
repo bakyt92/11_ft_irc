@@ -1,33 +1,32 @@
 ## нерешённые проблемы: давайте ориентироваться только на сабжект + irssi, иначе мы не успеем
 * USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
-* USER a 0 * a, USER a 0 * a - правильно ли работает
-* PRIVMSG alice,alice hello - правильно ли работает
+* правильно ли работают:
+  + USER a 0 * a, USER a 0 * a
+  + PRIVMSG alice,alice hello
+  + JOIN #сhannel,#сhannel
+  + JOIN #channel, JOIN #channel
+  + MODE #ch
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
 * PRIVMSG : The <target> parameter may also be a host mask (#<mask>)
   + The server will only send the PRIVMSG to those who have a host matching the mask
   + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
   + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
-* JOIN #сhannel,#сhannel
 * JOIN when a user joins a server you have to greed him with a welcome message
-* JOIN #channel, JOIN #channel
 * JOIN 0 = PART со всех каналов
-* JOIN #channel в irssi после этого все сообщения идут только в этот канал 
-* PART #channel1,#channel2
-* PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
+* JOIN #channel в irssi после этого все сообщения идут только в этот канал ?
 * PART #channel1,#channel2
 * PART прощальные сообщения
+* PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет, что приглашенный пользователь уже есть на сервере INVITE Bakyt1 #chan1, 443 Bakyt1 #chan1 :is already on channel
 * MODE #myChannel +l 999999999999999`
 * MODE +l -1
-* MODE #channel -lktt
-* MODE #channel +ltk 5 myTopic myPass
-* MODE #ch правльный ли
 * MODE устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
 * MODE: админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
 * QUIT допроверить 
 * QUIT, WHOIS выполняет, даже если клиент не залогинен
-* PRIVMSG, KICK, PART: сообщение пользователю начинается с двоеточия,Первый символ (двоеточие) у получателя не отображается (видимо на сервере надо удалить его)
+* PRIVMSG, KICK, PART: сообщение пользователю начинается с двоеточия, Первый символ (двоеточие) у получателя не отображается (видимо на сервере надо удалить его)
+  + у получателя не отображается в irssi или в nc? если в irssi, то скорее всего это irssi его удаляет, но сервер должен посылать с двлоеточием
 * JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
@@ -83,7 +82,6 @@
 * NOTICE: verify that is **fully functional with different parameters** (checklist). The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message
 * одновременно два сервера не запускались
 * JOIN напечатать всех участников канала
-* очень длинное собщение вроде работает
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
