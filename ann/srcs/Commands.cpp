@@ -72,7 +72,7 @@ int Server::execNick() {
     if(cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
       prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   }
-  else 
+  else
     cli->nick = ar[1];
   return 0;
 }
