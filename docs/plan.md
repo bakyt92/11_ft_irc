@@ -1,6 +1,6 @@
 ## нерешённые проблемы: давайте ориентироваться только на сабжект + irssi, иначе мы не успеем
 * USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
-* USER a 0 * a, USER a 0 * a
+* USER a 0 * a, USER a 0 * a - правильно ли работает
 * PRIVMSG alice,alice hello
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
 * NOTICE: verify that is **fully functional with different parameters** (checklist)
