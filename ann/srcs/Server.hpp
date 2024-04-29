@@ -72,7 +72,8 @@ public:
   void                     init();
   void                     run();
   int                      prepareResp(Cli *to, string msg);
-  int                      prepareResp(Ch *ch, string msg);
+  int                      prepareRespAuthorIncluding(Ch *ch, string msg);
+  int                      prepareRespAuthorExcluding(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
   void                     sendPreparedResps(Cli *to);
   void                     markClisToSendMsgsTo();

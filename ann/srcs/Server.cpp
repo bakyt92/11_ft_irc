@@ -103,8 +103,8 @@ void Server::receiveMsgAndExecCmds(int fd) {
     buf0[i] = '\0';
   int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL);
   if(bytes < 0)
-    perror("recv");                                                                       // ошибка, но не делаем execQuit(), возможно клиент ещё тут
-  else if(bytes == 0)                                                                     // клиент пропал
+    perror("recv");                                                                  // ошибка, но не делаем execQuit(), возможно клиент ещё тут
+  else if(bytes == 0)                                                                // клиент пропал
     fdsToEraseNextIteration.insert(cli->fd);
   else {
     string buf = string(buf0.begin(), buf0.end());

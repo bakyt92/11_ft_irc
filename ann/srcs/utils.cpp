@@ -117,10 +117,16 @@ int Server::prepareResp(Cli *to, string msg) {
   return 0;
 }
 
-int Server::prepareResp(Ch *ch, string msg) {
+int Server::prepareRespAuthorIncluding(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
-    if((*to)->fd != cli->fd) // некоторые команды надо и самому себе посылать
+    if((*to)->fd != cli->fd)
       prepareResp(*to, msg);
+  return 0;
+}
+
+int Server::prepareRespAuthorExcluding(Ch *ch, string msg) {
+  for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
+    prepareResp(*to, msg);
   return 0;
 }
 
@@ -159,8 +165,10 @@ Cli* Server::getCli(string &nick) {
 void Server::eraseCliFromCh(string nick, string chName) {
   chs[chName]->clis.erase(getCli(nick));
   chs[chName]->adms.erase(getCli(nick));
-  if (chs[chName]->size() == 0)
+  if(chs[chName]->size() == 0)
     chs.erase(chName);
+  else if(chs[chName]->adms.size() == 0)
+    chs[chName]->adms.insert(*(chs[chName]->clis.begin()));                       // сделать самого старого пользователя админом
 }
 
 void Server::eraseUnusedClis() {             // только перед вызовом poll
