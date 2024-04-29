@@ -62,9 +62,17 @@ int Server::execNick() {
       return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
     }
   }
+  if (cli->nick != "")
+  {
   cli->nick = ar[1];
   if(cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+  }
+  else
+  {
+    cli->nick = ar[1];
+    
+  }
   return 0;
 }
 
@@ -172,7 +180,7 @@ int Server::execJoin() {
     *chName = toLower(*chName);                                                         // проверить toLower
   set<std::string> tosSet(chNames.begin(), chNames.end());
   if (tosSet.size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + " not valid hannel names");                // ERR_TOOMANYTARGETS сколько именно можно?
+    return prepareResp(cli, "407 " + ar[1] + " not valid channel names");                // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
