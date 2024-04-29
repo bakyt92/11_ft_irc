@@ -41,6 +41,8 @@
 * проверка утечек памяти, особено в случае нестандартных ситуаций
 * PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname - должно рабоать как переписка между ними (?)
+* проблема valgrind: PASS NICK USER JOIN QUIT
+* Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * segfault когда прерываем nc
 
 ## проблемы второй срочности
