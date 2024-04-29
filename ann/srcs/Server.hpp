@@ -43,7 +43,7 @@ struct Cli {
 };
 
 struct Ch {
-  Ch(Cli* adm) : topic(""), pass(""), optI(false), limit(std::numeric_limits<unsigned int>::max()) {
+  Ch(Cli* adm) : topic(""), pass(""), optI(false), optT(false), limit(std::numeric_limits<unsigned int>::max()) {
     clis.insert(adm);
     adms.insert(adm);
   };

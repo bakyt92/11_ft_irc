@@ -2,6 +2,8 @@
 class Server;
 
 string Server::users(Ch *ch) { // возможно это надо будет переделать в команду NAMES, RPL_NAMREPLY
+  if (ch == NULL)
+    return "ch is NULL\n";
   if (ch->size() == 0)
     return "no users";
   string ret = "users: ";
@@ -13,7 +15,9 @@ string Server::users(Ch *ch) { // возможно это надо будет п
   return ret;
 }
 
-string Server::mode(Ch *ch) { // перечислить пользлователей и админов
+string Server::mode(Ch *ch) {
+  if (ch == NULL)
+    return "ch is NULL\n";
   string mode = "+";
   if(ch->optT == true)
     mode += "t";
