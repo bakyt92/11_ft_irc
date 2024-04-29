@@ -73,7 +73,7 @@ public:
   void                     run();
   int                      prepareResp(Cli *to, string msg);
   int                      prepareRespAuthorIncluding(Ch *ch, string msg);
-  int                      prepareRespAuthorExcluding(Ch *ch, string msg);
+  int                      prepareRespExceptAuthor(Ch *ch, string msg);
   void                     sendResp(Cli *to, string msg);
   void                     sendPreparedResps(Cli *to);
   void                     markClisToSendMsgsTo();
@@ -89,6 +89,7 @@ public:
   int                      execKick();
   int                      execInvite();
   int                      execPrivmsg();
+  int                      execNotice();
   int                      execTopic();
   int                      execMode();
   int                      execPing();

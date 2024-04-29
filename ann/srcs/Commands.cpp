@@ -19,8 +19,10 @@ int Server::execCmd() {
   if(ar[0] == "WHOIS")
     return execWhois();
   if((cli->passOk && cli->nick != "" && cli->uName != "" && !cli->capInProgress)) {
-    if(ar[0] == "PRIVMSG" || ar[0] == "NOTICE")                                         // проверить NOTICE
+    if(ar[0] == "PRIVMSG")
       return execPrivmsg();
+    if(ar[0] == "NOTICE")
+      return execNotice();
     if(ar[0] == "JOIN")
       return execJoin();
     if(ar[0] == "PART")
@@ -115,6 +117,24 @@ int Server::execPrivmsg() {
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");                        // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
+      prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);
+  return 0;
+}
+
+// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY 
+int Server::execNotice() {
+  if(ar.size() < 3)
+    return 0;
+  vector<string> tos = split(ar[1], ',');
+  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+    *to = toLower(*to);
+  set<std::string> tosSet(tos.begin(), tos.end());
+  if(tosSet.size() < tos.size() || tos.size() > 10)
+    return 0;
+  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+    if((*to)[0] == '#' && chs.find(toLower(*to)) != chs.end())
+      prepareRespExceptAuthor(chs[*to], "PRIVMSG " + toLower(*to) + " :" + ar[2]);
+    else if((*to)[0] != '#' && getCli(*to))
       prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);
   return 0;
 }
