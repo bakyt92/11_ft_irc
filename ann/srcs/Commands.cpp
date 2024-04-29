@@ -80,7 +80,7 @@ int Server::execNick() {
 int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
-  if(cli->uName != "")                                                                  // cli->rName != "" ?
+  if(cli->uName != "")                              // cli->rName != "" ? т.к. uName и rName у нас всегда устанавлиается одной командой, то достаточно только один из них проверить
     return prepareResp(cli, "462 :Unauthorized command (already registered)");                             // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
