@@ -11,6 +11,12 @@
   + The server will only send the PRIVMSG to those who have a host matching the mask
   + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
   + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
+* По PRIVMSG 
+  + Исправить ошибку с верхним регистром, никнеймы могут быть и в верхнем регистре
+  + У получателя paul24 высвечивается 
+* PRIVMSG paul24 ::Gello gow
+  + Убрать двойное двоеточие
+  + У получателя должен высвечиваться не ник получателя, а ник отправителя (от кого сообщение пришло)
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN 0 = PART со всех каналов
 * JOIN #channel в irssi после этого все сообщения идут только в этот канал ?
