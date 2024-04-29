@@ -149,28 +149,28 @@ int Server::execJoin() {
   set<std::string> tosSet(chNames.begin(), chNames.end());
   if (tosSet.size() < chNames.size() || chNames.size() > 5)
     return prepareResp(cli, "407 " + ar[1] + " not valid hannel names");                // ERR_TOOMANYTARGETS сколько именно можно?
-  vector<string> passes  = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
-  for(vector<string>::iterator to = chNames.begin(); to != chNames.end(); to++)
-    if(to->size() > 200 || (*to)[0] != '#' || to->find_first_of("\0") != string::npos)  // ^G ?
-      prepareResp(cli, "403 " + *to + " :No such channel");                             // ERR_NOSUCHCHANNEL сообщение точно такое?
+  vector<string> passes = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
+  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
+    if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)  // ^G ?
+      prepareResp(cli, "403 " + *chName + " :No such channel");                             // ERR_NOSUCHCHANNEL сообщение точно такое?
     else {
-      chs[*to] = (chs.find(*to) == chs.end()) ? new Ch(cli) : chs[*to];
+      chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
       string pass = "";
       if (passes.size() > 1) {
         string pass = *(passes.begin());
         passes.erase(passes.begin());
       }
-      if(chs[*to]->pass != "" && pass != chs[*to]->pass)
-        prepareResp(cli, "475 :" + *to + " Cannot join channel (+k)");                  // ERR_BADCHANNELKEY
-      if(chs[*to]->size() >= chs[*to]->limit)
-        prepareResp(cli, "471 " + *to + " :Cannot join channel (+l)");                  // ERR_CHANNELISFULL
-      else if(chs[*to]->optI && cli->invits.find(*to) == cli->invits.end())
-        prepareResp(cli, "473 " + *to + " :Cannot join channel (+i)");                  // ERR_INVITEONLYCHAN
+      if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
+        prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");              // ERR_BADCHANNELKEY
+      if(chs[*chName]->size() >= chs[*chName]->limit)
+        prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
+      else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
+        prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
-        chs[*to]->clis.insert(cli);
-        prepareRespAuthorIncluding(chs[*to], cli->nick + " JOIN " + *to);
-        prepareResp(cli, "332 " + *to + " " + chs[*to]->topic);                         // RPL_TOPIC ?
-        prepareResp(cli, "353 " + *to + " " /* перечилсить все ники*/);                 // RPL_NAMREPLY ?
+        chs[*chName]->clis.insert(cli);
+        prepareRespAuthorIncluding(chs[*chName], cli->nick + " JOIN " + *chName);
+        prepareResp(cli, "332 " + *chName + " :" + chs[*chName]->topic);                 // RPL_TOPIC
+        prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не точно RPL_NAMREPLY
       }
     }
   return 0;
@@ -187,7 +187,7 @@ int Server::execPart() {
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      prepareRespAuthorIncluding(chs[*chName], cli->nick + " PART :" + *chName);                       // нужно ли сообщение для автора команды?
+      prepareRespAuthorIncluding(chs[*chName], cli->nick + " PART :" + *chName);        // нужно ли сообщение для автора команды?
       eraseCliFromCh(cli->nick, *chName);
     }
   }

@@ -102,6 +102,7 @@ public:
   void                     eraseCliFromCh(string nick, string chName);
   void                     eraseUnusedClis();
   string                   mode(Ch *ch);
+  string                   users(Ch *ch);
   string                   without_r_n(string s);
   string                   toLower(string s);
   string                   infoCmd();

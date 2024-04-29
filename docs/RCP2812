@@ -2611,8 +2611,7 @@ RFC 2812          Internet Relay Chat: Client Protocol        April 2000
            the item.
 
        353    RPL_NAMREPLY
-              "( "=" / "*" / "@" ) <channel>
-               :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
+              "( "=" / "*" / "@" ) <channel> :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
          - "@" is used for secret channels, "*" for private
            channels, and "=" for others (public channels).
 

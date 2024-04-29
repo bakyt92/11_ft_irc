@@ -1,7 +1,17 @@
 #include "Server.hpp"
 class Server;
 
-string Server::mode(Ch *ch) { // +o ? перечислить пользлователей и админов?
+string Server::users(Ch *ch) { // возможно это надо будет переделать в команду NAMES, RPL_NAMREPLY
+  string ret = "users: ";
+  for(set<Cli*>::iterator it = ch->clis.begin(); it != ch->clis.end(); it++)
+    if (ch->adms.find(*it) == ch->adms.end())
+      ret += (*it)->nick + " ";
+    else
+      ret += "@" + (*it)->nick + " ";
+  return ret.size() > 0 ? ret : " no users";
+}
+
+string Server::mode(Ch *ch) { // перечислить пользлователей и админов
   string mode = "+";
   if(ch->optT == true)
     mode += "t";
@@ -11,7 +21,10 @@ string Server::mode(Ch *ch) { // +o ? перечислить пользлова�
     mode += "k";
   if(ch->limit < std::numeric_limits<unsigned int>::max())
     mode += "l";
-  return mode == "+" ? "default" : mode;
+  if (mode == "+")
+    mode = "";
+  mode += users(ch);
+  return mode;
 }
 
 string Server::without_r_n(string s) {                // debugging
