@@ -46,6 +46,7 @@
 
 ## проблемы второй срочности
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
+* PASS если неправильный пароль никакого сообщения?
 * NOTICE выдавать сообщение с каким-нибудь цветом
 * Возможно нужна команда чтобы посмотреть кто является оператором канала?
 * Возможно нужна команда чтобы посмотреть кто есть на канале?
