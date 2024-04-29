@@ -31,8 +31,6 @@
 * JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
-* очень длинное собщение
-* пустая строка
 * to send partial commands, ensure that other connections still run fine (checklist)
 * kill a client, check that the server is still operational for the other connections and for any new incoming client (checklist)
 * kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
@@ -84,6 +82,7 @@
 * NOTICE: verify that is **fully functional with different parameters** (checklist). The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message
 * одновременно два сервера не запускались
 * JOIN напечатать всех участников канала
+* очень длинное собщение вроде работает
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
