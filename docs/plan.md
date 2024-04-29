@@ -46,7 +46,6 @@
 * PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname - должно рабоать как переписка между ними (?)
 * Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
-* segfault когда прерываем nc
 
 ## проблемы второй срочности
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
@@ -88,6 +87,7 @@
 * NOTICE: verify that is **fully functional with different parameters** (checklist). The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message
 * одновременно два сервера не запускались
 * JOIN напечатать всех участников канала
+* segfault PASS NICK USER JOIN - kill nc - SIGINT server
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
