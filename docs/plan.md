@@ -7,7 +7,6 @@
   + The server will only send the PRIVMSG to those who have a host matching the mask
   + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
   + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
-* JOIN напечатать всех участников канала
 * JOIN #сhannel,#сhannel
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN #channel, JOIN #channel
@@ -45,7 +44,6 @@
 * проверка утечек памяти, особено в случае нестандартных ситуаций
 * PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname - должно рабоать как переписка между ними (?)
-* оновременна два сервера не запускаются
 
 ## проблемы второй срочности
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
@@ -84,6 +82,8 @@
 * двоеточие это начало сообщения и можно это воспринимать как аргумент текста
 * если ошибка в нике, то он не имеет права попробовать с другим ником, мы его сразу отключаем
 * NOTICE: verify that is **fully functional with different parameters** (checklist). The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message
+* одновременно два сервера не запускались
+* JOIN напечатать всех участников канала
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
