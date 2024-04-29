@@ -24,7 +24,6 @@
 * MODE устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
 * MODE: админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
 * QUIT допроверить 
-* QUIT, WHOIS выполняет, даже если клиент не залогинен
 * PRIVMSG, KICK, PART: сообщение пользователю начинается с двоеточия, Первый символ (двоеточие) у получателя не отображается (видимо на сервере надо удалить его)
   + у получателя не отображается в irssi или в nc? если в irssi, то скорее всего это irssi его удаляет, но сервер должен посылать с двлоеточием
 * JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
@@ -41,7 +40,6 @@
 * проверка утечек памяти, особено в случае нестандартных ситуаций
 * PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname - должно рабоать как переписка между ними (?)
-* проблема valgrind: PASS NICK USER JOIN QUIT
 * Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * segfault когда прерываем nc
 
@@ -68,6 +66,7 @@
   + irc.ircgod.com:6667/6697
   + Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
 * если есть лишние аргументы, сервер их игнорирует?
+* проблема valgrind: PASS NICK USER JOIN QUIT
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
