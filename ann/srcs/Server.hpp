@@ -103,6 +103,7 @@ public:
   Cli*                     getCli(string &name);
   int                      nbChannels(Cli *c);
   void                     eraseCliFromCh(string nick, string chName);
+  void                     eraseEmptyChs();
   void                     eraseUnusedClis();
   string                   mode(Ch *ch);
   string                   users(Ch *ch);

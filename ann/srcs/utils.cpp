@@ -194,12 +194,16 @@ void Server::eraseCliFromCh(string nick, string chName) {
     chs[chName]->clis.erase(getCli(nick));
   if(chs[chName]->adms.count(getCli(nick)) > 0)
     chs[chName]->adms.erase(getCli(nick));
-  (void)nick;
-  getCli(nick);
-  if(chs[chName]->size() == 0)
-    chs.erase(chName);
-  else if(chs[chName]->adms.size() == 0)
-    chs[chName]->adms.insert(*(chs[chName]->clis.begin()));                       // сделать самого старого пользователя админом
+  if(chs[chName]->adms.size() == 0 && chs[chName]->clis.size() > 0)
+    chs[chName]->adms.insert(*(chs[chName]->clis.begin()));          // сделать самого старого пользователя админом
+}
+
+void Server::eraseEmptyChs() {
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
+    if(ch->second->size() == 0) {
+      chs.erase(ch);
+      ch = chs.begin();
+    }
 }
 
 void Server::eraseUnusedClis() {             // только перед вызовом poll
@@ -208,6 +212,7 @@ void Server::eraseUnusedClis() {             // только перед вызо
     if(clis.find(*fdToErase) != clis.end() && clis[*fdToErase]->bufToSend == "") {
       for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) // стереть его изо всех каналов
         eraseCliFromCh(clis[*fdToErase]->nick, ch->first);
+      //eraseEmptyChs();
       for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
         if(it->first == *fdToErase) {
           close(it->first);
