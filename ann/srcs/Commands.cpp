@@ -161,7 +161,7 @@ int Server::execNotice() {
   return 0;
 }
 
-// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_UNAVAILRESOURCE 
+// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_UNAVAILRESOURCE 
 int Server::execJoin() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
@@ -175,8 +175,10 @@ int Server::execJoin() {
     return prepareResp(cli, "407 " + ar[1] + " not valid hannel names");                // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
-    if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)  // ^G ?
-      prepareResp(cli, "403 " + *chName + " :No such channel");                             // ERR_NOSUCHCHANNEL сообщение точно такое?
+    if (nbChannels(cli) > 5 - 1)
+      return prepareResp(cli, "405 " + ar[1] + "  :You have joined too many channels"); // ERR_TOOMANYCHANNELS сколько именно можно?
+    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)  // ^G ?
+      prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL сообщение точно правильное?
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
       string pass = "";

@@ -159,7 +159,7 @@ void Server::sendPreparedResps(Cli *to) {
 }
 
 void Server::markClisToSendMsgsTo() {
-  for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it) 
+  for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it)
     if (it->second->bufToSend.size() > 0)
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
         if (poll->fd == it->first) {
@@ -174,6 +174,14 @@ Cli* Server::getCli(string &nick) {
       return it->second;
   return NULL;
 };
+
+int Server::nbChannels(Cli *c) {
+  int nbChannels = 0;
+  for(map<string, Ch* >::iterator ch = chs.begin(); ch != chs.end(); ch++)
+    if(ch->second->clis.find(c) != ch->second->clis.end())
+      nbChannels++;
+  return nbChannels;
+}
 
 void Server::eraseCliFromCh(string nick, string chName) {
   chs[chName]->clis.erase(getCli(nick));

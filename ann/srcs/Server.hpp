@@ -99,6 +99,7 @@ public:
 // utils:
   static  void             sigHandler(int sig);
   Cli*                     getCli(string &name);
+  int                      nbChannels(Cli *c);
   void                     eraseCliFromCh(string nick, string chName);
   void                     eraseUnusedClis();
   string                   mode(Ch *ch);
