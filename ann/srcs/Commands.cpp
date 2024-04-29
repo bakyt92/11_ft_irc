@@ -40,7 +40,7 @@ int Server::execCmd() {
 // комманды, необхожимых для регистрации: PASS NICK USER CAP PING WHOIS
 int Server::execPass() {
   if(cli->passOk)
-    return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
+    return prepareResp(cli, "462 :Unauthorized command (already registered)");                             // ERR_ALREADYREGISTRED
   if(ar.size() < 2 || ar[1] == "")
     return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar[1] == pass)
@@ -72,7 +72,7 @@ int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
   if(cli->uName != "")                                                                  // cli->rName != "" ?
-    return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED тут надо протестировать!
+    return prepareResp(cli, "462 :Unauthorized command (already registered)");                             // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && !cli->capInProgress)
