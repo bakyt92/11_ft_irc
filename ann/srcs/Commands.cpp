@@ -18,29 +18,26 @@ int Server::execCmd() {
     return execCap();
   if(ar[0] == "WHOIS")
     return execWhois();
-  if((cli->passOk && cli->nick != "" && cli->uName != "" && !cli->capInProgress)) {
-    if(ar[0] == "PRIVMSG")
-      return execPrivmsg();
-    if(ar[0] == "NOTICE")
-      return execNotice();
-    if(ar[0] == "JOIN")
-      return execJoin();
-    if(ar[0] == "PART")
-      return execPart();
-    if(ar[0] == "MODE")
-      return execMode();
-    if(ar[0] == "TOPIC")
-      return execTopic();
-    if(ar[0] == "INVITE")
-      return execInvite();
-    if(ar[0] == "KICK")
-      return execKick();
-    return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");     // ERR_UNKNOWNCOMMAND
-  }
-  else
-    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
+  if(ar[0] == "PRIVMSG")
+    return execPrivmsg();
+  if(ar[0] == "NOTICE")
+    return execNotice();
+  if(ar[0] == "JOIN")
+    return execJoin();
+  if(ar[0] == "PART")
+    return execPart();
+  if(ar[0] == "MODE")
+    return execMode();
+  if(ar[0] == "TOPIC")
+    return execTopic();
+  if(ar[0] == "INVITE")
+    return execInvite();
+  if(ar[0] == "KICK")
+    return execKick();
+  return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");     // ERR_UNKNOWNCOMMAND
 }
 
+// комманды, необхожимых для регистрации: PASS NICK USER CAP PING WHOIS
 int Server::execPass() {
   if(cli->passOk)
     return prepareResp(cli, "462 :You may not reregister");                             // ERR_ALREADYREGISTRED
@@ -97,8 +94,31 @@ int Server::execCap() {
   return 0;
 }
 
+int Server::execPing() {
+  return prepareResp(cli, "PONG");
+}
+
+// not implemented here: RPL_WHOISCHANNELS RPL_WHOISOPERATOR RPL_AWAY RPL_WHOISIDLE
+int Server::execWhois() {
+  // if(!cli->passOk || cli->nick== "" || cli->uName == "")
+  //   return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED ?
+  if(ar.size() < 2)
+    return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
+  std::vector<string> nicks = split(ar[1], ',');
+  for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++) {
+    *nick = toLower(*nick);
+    if(getCli(*nick) == NULL)
+      prepareResp(cli, "401 :" + *nick + " No such nick");                              // ERR_NOSUCHNICK
+    else
+      prepareResp(cli, getCli(*nick)->nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
+  }
+  return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
+}
+
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY 
 int Server::execPrivmsg() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() == 1) 
     return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")");                 // ERR_NORECIPIENT протестировать
   if(ar.size() == 2)
@@ -123,6 +143,8 @@ int Server::execPrivmsg() {
 
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY 
 int Server::execNotice() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
     return 0;
   vector<string> tos = split(ar[1], ',');
@@ -141,6 +163,8 @@ int Server::execNotice() {
 
 // not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_TOOMANYCHANNELS ERR_UNAVAILRESOURCE 
 int Server::execJoin() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
     return prepareResp(cli, "461 JOIN :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
   vector<string> chNames = split(ar[1], ',');
@@ -169,7 +193,7 @@ int Server::execJoin() {
       else {
         chs[*chName]->clis.insert(cli);
         prepareRespAuthorIncluding(chs[*chName], cli->nick + " JOIN " + *chName);
-        prepareResp(cli, "332 " + *chName + " :" + chs[*chName]->topic);                 // RPL_TOPIC
+        prepareResp(cli, "332 " + *chName + " :" + chs[*chName]->topic);                // RPL_TOPIC
         prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не точно RPL_NAMREPLY
       }
     }
@@ -177,6 +201,8 @@ int Server::execJoin() {
 }
 
 int Server::execPart() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
     return prepareResp(cli, "461 PART :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   vector<string> chNames = split(ar[1], ',');
@@ -196,6 +222,8 @@ int Server::execPart() {
 
 // not implemented here RPL_AWAY
 int Server::execInvite() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
     return prepareResp(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS 
   string chName = toLower(ar[2]);
@@ -216,6 +244,8 @@ int Server::execInvite() {
 
 // not implemented here ERR_NOCHANMODES
 int Server::execTopic() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
     return prepareResp(cli, "461 TOPIC :Not enough parameters");                        // ERR_NEEDMOREPARAMS
   string chName = toLower(ar[1]);                                                       // проверить toLower
@@ -239,6 +269,8 @@ int Server::execTopic() {
 
 // not implemented here ERR_BADCHANMASK
 int Server::execKick() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
     return prepareResp(cli, "461 KICK :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   std::vector<string> chNames    = split(ar[1], ',');
@@ -276,6 +308,8 @@ int Server::execQuit() {
 
 // not implemented here: ERR_NOCHANMODES RPL_BANLIST RPL_ENDOFBANLIST RPL_EXCEPTLIST RPL_ENDOFEXCEPTLIST RPL_INVITELIST RPL_ENDOFINVITELIST RPL_UNIQOPIS (creator of the channel)
 int Server::execMode() {
+  if(!cli->passOk || cli->nick== "" || cli->uName == "")
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   char *notUsed; // ?
   string chName = toLower(ar[1]);
   if(ar.size() < 2)
@@ -315,23 +349,4 @@ int Server::execMode() {
   if(ar[2] == "-o")
     return chs[chName]->adms.erase(getCli(ar[3]));
   return prepareResp(cli, "472 " + ar[0] + " " + chName + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
-}
-
-int Server::execPing() {
-  return prepareResp(cli, "PONG");
-}
-
-// not implemented here: RPL_WHOISCHANNELS RPL_WHOISOPERATOR RPL_AWAY RPL_WHOISIDLE
-int Server::execWhois() {
-  if(ar.size() < 2)
-    return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
-  std::vector<string> nicks = split(ar[1], ',');
-  for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++) {
-    *nick = toLower(*nick);
-    if(getCli(*nick) == NULL)
-      prepareResp(cli, "401 :" + *nick + " No such nick");                              // ERR_NOSUCHNICK
-    else
-      prepareResp(cli, getCli(*nick)->nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
-  }
-  return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
 }
