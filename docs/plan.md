@@ -3,9 +3,10 @@
 * USER a 0 * a, USER a 0 * a - правильно ли работает
 * PRIVMSG alice,alice hello - правильно ли работает
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
-* PRIVMSG : The <target> parameter may also be a host mask (#<mask>). The server will only send the PRIVMSG to those who have a server or host matching the mask. The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".".  This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users.  Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
-* NOTICE: verify that is **fully functional with different parameters** (checklist)
-* NOTICE The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message. This rule applies to servers too - they MUST NOT send any error reply back to the client on receipt of a notice. The object of this rule is to avoid loops between clients automatically sending something in response to    something it received.
+* PRIVMSG : The <target> parameter may also be a host mask (#<mask>)
+  + The server will only send the PRIVMSG to those who have a host matching the mask
+  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
+  + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
 * JOIN напечатать всех участников канала
 * JOIN #сhannel,#сhannel
 * JOIN when a user joins a server you have to greed him with a welcome message
@@ -82,6 +83,7 @@
 * KICK прощальные сообщения
 * двоеточие это начало сообщения и можно это воспринимать как аргумент текста
 * если ошибка в нике, то он не имеет права попробовать с другим ником, мы его сразу отключаем
+* NOTICE: verify that is **fully functional with different parameters** (checklist). The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
