@@ -66,9 +66,14 @@ int Server::execNick() {
       return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");         // ERR_NICKNAMEINUSE
     }
   }
-  cli->nick = ar[1];
-  if(cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
-    prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+  if (cli->nick == "")
+  {
+    cli->nick = ar[1];
+    if(cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
+      prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+  }
+  else 
+    cli->nick = ar[1];
   return 0;
 }
 
