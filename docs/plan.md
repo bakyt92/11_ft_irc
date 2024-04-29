@@ -1,34 +1,31 @@
-## нерешённые проблемы
-* **пожалуйста давайте ориентироваться только на сабжект + irssi(не на протокол) (иначе мы не точно успеем)**
-* когда делаем с канала KICK, а потом делаем INVITE того же пользователя - выходит сообщение 
-`INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
-* INVITE с только что созданного канала - пишет, что приглашенный пользователь уже есть на сервере INVITE Bakyt1 #chan1, 443 Bakyt1 #chan1 :is already on channel
+## нерешённые проблемы: давайте ориентироваться только на сабжект + irssi, иначе мы не успеем
+* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
+* PRIVMSG alice,alice hello
+* PRIVMSG: verify that is **fully functional with different parameters** (checklist)
+* NOTICE: verify that is **fully functional with different parameters** (checklist)
+* JOIN напечатать всех участников канала
+* JOIN #сhannel,#сhannel
+* JOIN when a user joins a server you have to greed him with a welcome message
+* JOIN #channel, JOIN #channel
 * JOIN 0 = PART со всех каналов
-* JOIN #ch в irssi после этого все сообщения идут только в этот канал 
+* JOIN #channel в irssi после этого все сообщения идут только в этот канал 
+* JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
 * PART #channel1,#channel2
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
-* QUIT erreur de segmentation
-* MODE устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
-* админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
-* JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
-* в PRIVMSG, KICK, PART: сообщение пользователю начинается с двоеточия,Первый символ (двоеточие) у получателя не отображается (видимо на сервере надо удалить его)
-* JOIN напечатать всех участников канала
-* JOIN #myChannel,#myChannel
-* JOIN when a user joins a server you have to greed him with a welcome message
-* JOIN #ch, JOIN #ch
-* QUIT допроверить 
 * PART #channel1,#channel2
 * PART прощальные сообщения
+* KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
+* INVITE с только что созданного канала - пишет, что приглашенный пользователь уже есть на сервере INVITE Bakyt1 #chan1, 443 Bakyt1 #chan1 :is already on channel
 * MODE #myChannel +l 999999999999999`
 * MODE +l -1
 * MODE #channel -lktt
 * MODE #channel +ltk 5 myTopic myPass
-* QUIT, WHOIS выполняет, даже если клиент не залогинен
-* PRIVMSG alice,alice hello
 * MODE #ch правльный ли
-* PRIVMSG: verify that is **fully functional with different parameters** (checklist)
-* NOTICE: verify that is **fully functional with different parameters** (checklist)
-* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
+* MODE устанвливает один параметр за раз, например `MODE -t` должна работать, а `MODE -tpk` нет, нормально ли это?
+* MODE: админа обознгачать "nick@" всякий раз, когда он ассоциируется с каналом
+* QUIT допроверить 
+* QUIT, WHOIS выполняет, даже если клиент не залогинен
+* PRIVMSG, KICK, PART: сообщение пользователю начинается с двоеточия,Первый символ (двоеточие) у получателя не отображается (видимо на сервере надо удалить его)
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
 * очень длинное собщение
