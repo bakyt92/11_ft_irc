@@ -275,6 +275,8 @@ int Server::execTopic() {
     return prepareResp(cli, "442 " + chName + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(chs[chName]->adms.find(cli) == chs[chName]->adms.end()) 
     return prepareResp(cli, "482 " + chName + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
+  if (chs[chName]->optT == true)
+    return prepareResp(cli, "477 " + ar[1] + " :Channel doesn't support modes");
   chs[chName]->topic = ar[2];
   return prepareRespAuthorIncluding(chs[chName], "332 " + chName + " :" + ar[2]);                        // RPL_TOPIC
 }
