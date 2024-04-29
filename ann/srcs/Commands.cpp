@@ -58,7 +58,7 @@ int Server::execNick() {
     return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
   for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if(toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick != "") {
-      fdsToEraseNextIteration.insert(cli->fd);
+//      fdsToEraseNextIteration.insert(cli->fd); <== Не нужно удалять пользователя, т.к. он текущий.
       return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
     }
     else if (toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick == "") {
