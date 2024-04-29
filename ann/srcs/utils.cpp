@@ -2,13 +2,15 @@
 class Server;
 
 string Server::users(Ch *ch) { // возможно это надо будет переделать в команду NAMES, RPL_NAMREPLY
+  if (ch->size() == 0)
+    return "no users";
   string ret = "users: ";
   for(set<Cli*>::iterator it = ch->clis.begin(); it != ch->clis.end(); it++)
     if (ch->adms.find(*it) == ch->adms.end())
       ret += (*it)->nick + " ";
     else
       ret += "@" + (*it)->nick + " ";
-  return ret.size() > 0 ? ret : " no users";
+  return ret;
 }
 
 string Server::mode(Ch *ch) { // перечислить пользлователей и админов
