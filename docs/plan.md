@@ -1,4 +1,8 @@
-## нерешённые проблемы: давайте ориентироваться только на сабжект + irssi, иначе мы не успеем
+## нерешённые проблемы
+* **давайте ориентироваться только на сабжект + irssi, иначе мы не успеем**
+* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
+* sned() вернула 0? это значит клиент пропал или нет?
+* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
 * USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
 * правильно ли работают:
   + USER a 0 * a, USER a 0 * a
@@ -7,16 +11,15 @@
   + JOIN #channel, JOIN #channel
   + MODE #ch
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
+  + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
   + The server will only send the PRIVMSG to those who have a host matching the mask
   + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
   + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
-* По PRIVMSG 
-  + Исправить ошибку с верхним регистром, никнеймы могут быть и в верхнем регистре
-  + У получателя paul24 высвечивается 
-* PRIVMSG paul24 ::Gello gow
-  + Убрать двойное двоеточие
-  + У получателя должен высвечиваться не ник получателя, а ник отправителя (от кого сообщение пришло)
+* PRIVMSG: Un channel "exclusif" à deux users : cmd PRIVMSG + nickname = переписка между ними (?)
+* PRIVMSG: никнеймы могут быть и в верхнем регистре
+* PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, убрать двойное двоеточие
+* PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, у получателя должен высвечиваться не ник получателя, а ник отправителя (от кого сообщение пришло), также  KICK, PART
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN 0 = PART со всех каналов
 * JOIN #channel в irssi после этого все сообщения идут только в этот канал ?
@@ -27,25 +30,19 @@
 * INVITE с только что созданного канала - пишет, что приглашенный пользователь уже есть на сервере INVITE Bakyt1 #chan1, 443 Bakyt1 #chan1 :is already on channel
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
-* MODE +t роаботает, а MODE +tp не работает
+* MODE +tp
+* MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
+* MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * QUIT
-* PRIVMSG, KICK, PART: сообщение пользователю начинается с двоеточия, Первый символ (двоеточие) у получателя не отображается (видимо на сервере надо удалить его)
-  + у получателя не отображается в irssi или в nc? если в irssi, то скорее всего это irssi его удаляет, но сервер должен посылать с двлоеточием
 * JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
-* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
-* sned() вернула 0? это значит клиент пропал или нет?
 * to send partial commands, ensure that other connections still run fine (checklist)
 * kill a client, check that the server is still operational for the other connections and for any new incoming client (checklist)
 * kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
 * some test with the IRC client and nc at the same time (checklist)
 * receiving partial data (checklist)
 * low bandwidth (checklist)
-* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Also, check for **memory leaks** during this operation. (checklist)
-* Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * проверка утечек памяти, особено в случае нестандартных ситуаций
-* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
-* Un channel "exclusif" à deux users cmd PRIVMSG + nickname - должно рабоать как переписка между ними (?)
-* Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
+* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Also, check for **memory leaks** during this operation. (checklist)
 
 ## проблемы второй срочности
 * to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
