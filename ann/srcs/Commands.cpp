@@ -224,7 +224,7 @@ int Server::execPart() {
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      prepareRespAuthorIncluding(chs[*chName], cli->nick + " PART :" + *chName + ar[2]); // нужно ли сообщение для автора команды?
+      prepareRespAuthorIncluding(chs[*chName], cli->nick + " PART " + *chName + ar[2]); // нужно ли сообщение для автора команды?
       eraseCliFromCh(cli->nick, *chName);
       eraseEmptyChs();
     }
