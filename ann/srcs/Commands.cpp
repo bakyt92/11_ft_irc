@@ -127,7 +127,7 @@ int Server::execPrivmsg() {
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     *to = toLower(*to);
   set<std::string> tosSet(tos.begin(), tos.end());                                      // то же самое но без дубликатов
-  if(tosSet.size() < tos.size() || tos.size() > 5)
+  if(tosSet.size() < tos.size() || tos.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
@@ -171,11 +171,11 @@ int Server::execJoin() {
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     *chName = toLower(*chName);                                                         // проверить toLower
   set<std::string> tosSet(chNames.begin(), chNames.end());
-  if (tosSet.size() < chNames.size() || chNames.size() > 5)
+  if (tosSet.size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid hannel names");                // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes = ar.size() >= 3 ? split(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
-    if (nbChannels(cli) > 5 - 1)
+    if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
       return prepareResp(cli, "405 " + ar[1] + "  :You have joined too many channels"); // ERR_TOOMANYCHANNELS сколько именно можно?
     else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)  // ^G ?
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL сообщение точно правильное?

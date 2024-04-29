@@ -23,6 +23,8 @@ using std::string;
 using std::cout;
 using std::endl;
 using std::numeric_limits;
+#define MAX_CHS_PER_USER 5 // to treat ERR_TOOMANYCHANNELS
+#define MAX_NB_TARGETS 5   // to treat ERR_TOOMANYTARGETS
 
 extern bool sigReceived;
 
