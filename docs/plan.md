@@ -29,9 +29,9 @@
 * При успешном JOIN надо напечатать всех участников канала.
 * Возможно нужна команда чтобы посмотреть кто является оператором канала?
 * Возможно нужна команда чтобы посмотреть кто есть на канале?
-- Notice уже есть, но надо выдавать сообщение с каким-нибудь цветом
-- допроверить команду QUIT
-- проверка утечек памяти.
+* Notice уже есть, но надо выдавать сообщение с каким-нибудь цветом
+* допроверить команду QUIT
+* проверка утечек памяти.
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE.
@@ -53,12 +53,10 @@
 * Un channel "exclusif" à deux users cmd PRIVMSG + nickname
   + то есть для каналов из двух пользователей отправлять не по имени канала, а по имени пользователя?
 * если есть лишние аргументы, сервер их игнорирует?
-* есть ли какие-то ограничения на пароль?
 * Как выглядит параметр `mode`, когда сервер его показывает ?
   + https://stackoverflow.com/questions/12886573/implementing-irc-rfc-how-to-respond-to-mode
 * `MODE #myChannel -lktt`
 * `MODE #myChannel +ltk` 5 myTopic myPass
-* неправильное имя канала
 * что отвечает сервер на `MODE #myChannel +l 999999999999999`
 * очень длинное собщение
 * команды QUIT, PASS, NICK, USER выполняет, даже если клиент не залогинен, а дргуие команды не выполняет в этой ситуации
@@ -84,13 +82,8 @@
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. The server should not hang. When the client is live again, all stored commands should be processed normally. Also, check for memory leaks during this operation. (checklist)
 * Verify that private messages (PRIVMSG) and notices (NOTICE) are **fully functional with different parameters**. (checklist)
 * Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
-* канал `news` уже существует, а ты создаёшь ещё один канал `news`
-* можно ли иметь однорвеменно пользователя с ником `Alice`и канал `Alice`
 * `PASS JOIN` `NICK JOIN` `USER JOIN 0 * JOIN` `JOIN #JOIN` etc
-* более 15 параметров
-* с двоеточием кажется много особых случаев, я пока это вообще не учитывала
 * в целом, **многое не понятно именно с поведением сервера** (какие точно сообщения в каком случае отправлять, как реагировать на нестандартные ситуации), надо сделать очень много тестов, по документу rfc1459 далеко не всё понятно
-* сигналы
 * что делать, если единственный админ канала покидает его? канал остаётся без админа?
 * https://github.com/markveligod/ft_irc
 * when a user joins a server you have to greed him with a welcome message
