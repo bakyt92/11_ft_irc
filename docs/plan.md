@@ -83,7 +83,6 @@
 * NOTICE: verify that is **fully functional with different parameters** (checklist). The difference between NOTICE and PRIVMSG is that automatic replies MUST NEVER be sent in response to a NOTICE message
 * одновременно два сервера не запускались
 * JOIN напечатать всех участников канала
-* очень длинное собщение вроде работает
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
