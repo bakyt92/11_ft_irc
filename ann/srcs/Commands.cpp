@@ -50,7 +50,7 @@ int Server::execPass() {
   return 0;
 }
 
-// not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED ERR_NICKCOLLISION
+// not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
