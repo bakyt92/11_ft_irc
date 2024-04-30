@@ -176,7 +176,7 @@ Cli* Server::getCli(string &nick) {
     if(it->second->nick == nick)
       return it->second;
   return NULL;
-};
+}
 
 int Server::nbChannels(Cli *c) {
   int nbChannels = 0;
@@ -200,12 +200,10 @@ void Server::eraseEmptyChs() {
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
     if(ch->second->size() == 0)
       toErases.insert(ch->first);
-  // cout << "chs to erase : ";
-  // for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++)
-  //   cout << *toErase + " ";
-  // cout << endl;
-  for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++)
+  for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++) {
+    delete chs[*toErase];
     chs.erase(*toErase);
+  }
 }
 
 void Server::eraseUnusedClis() {                                              // вызывать только перед вызовом poll
