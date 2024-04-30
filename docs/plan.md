@@ -1,21 +1,21 @@
 ## нерешённые проблемы
 * **давайте ориентироваться только на сабжект + irssi, иначе мы не успеем**
-* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
-* sned() вернула 0? это значит клиент пропал или нет?
-* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
-* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
 * правильно ли работают:
   + USER a 0 * a, USER a 0 * a
   + PRIVMSG alice,alice hello
   + JOIN #сhannel,#сhannel
   + JOIN #channel, JOIN #channel
   + MODE #ch
+* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
+* sned() вернула 0? это значит клиент пропал или нет?
+* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment https://ircgod.com/docs/irc/to_know/
+* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
   + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
   + The server will only send the PRIVMSG to those who have a host matching the mask
-  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
-  + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
+  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
+  + Wildcards are the '*' and '?'  characters. It is only available to operators.
 * PRIVMSG: Un channel "exclusif" à deux users : cmd PRIVMSG + nickname = переписка между ними (?)
 * PRIVMSG: никнеймы могут быть и в верхнем регистре
 * PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, убрать двойное двоеточие
@@ -27,14 +27,13 @@
 * PART прощальные сообщения
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
-* INVITE с только что созданного канала - пишет, что приглашенный пользователь уже есть на сервере INVITE Bakyt1 #chan1, 443 Bakyt1 #chan1 :is already on channel
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
 * MODE +tp
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
-* QUIT
-* JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
+* JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала
 * to send partial commands, ensure that other connections still run fine (checklist)
 * kill a client, check that the server is still operational for the other connections and for any new incoming client (checklist)
 * kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
@@ -85,6 +84,7 @@
 * одновременно два сервера не запускались
 * JOIN напечатать всех участников канала
 * segfault PASS NICK USER JOIN - kill nc - SIGINT server
+* QUIT
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
