@@ -12,39 +12,36 @@
   + MODE #channel +l 999999999999999`
   + MODE #channel +l -1
   + PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
+  + PRIVMSG если между двумя пользователями есть канал на двоих, то все личные сообщения попадают туда ?
+  + PRIVMSG без параметров, а также все команды без параметров
   + WHOIS alice (до регистрации)
   + сначала NICK, потом PASS
-* PRIVMSG: verify that is **fully functional with different parameters** (checklist)
-  + **есть ли всё ещё в чеклисте это фраза?**
-  + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
-  + The server will only send the PRIVMSG to those who have a host matching the mask
-  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
-  + Wildcards are the '*' and '?'  characters. It is only available to operators.
-* PRIVMSG: Un channel "exclusif" à deux users : cmd PRIVMSG + nickname = переписка между ними (?)
 * PRIVMSG: никнеймы могут быть и в верхнем регистре
-* PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, убрать двойное двоеточие
-* PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, у получателя должен высвечиваться не ник получателя, а ник отправителя (от кого сообщение пришло), также  KICK, PART
 * JOIN when a user joins a server you have to greed him with a welcome message
-* JOIN 0 = PART со всех каналов
-* JOIN #channel в irssi после этого все сообщения идут только в этот канал ?
+* JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
-* MODE +tp
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
-* JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала
+* JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала ?
 * test with the IRC client and nc at the same time (checklist)
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
 * удалять пустые каналы и пустые poll
-* прдстроиться к **irssi**
+* подстроиться к **irssi**
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
 * NOTICE выдавать сообщение с каким-нибудь цветом
 * OPER регистрация клиентом самого себя в качестве оператора канала
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
+* PRIVMSG: verify that is **fully functional with different parameters** (checklist)
+  + **есть ли всё ещё в чеклисте это фраза?**
+  + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
+  + The server will only send the PRIVMSG to those who have a host matching the mask
+  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
+  + Wildcards are the '*' and '?'  characters. It is only available to operators.
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
   + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
 * IRC channels
@@ -87,6 +84,9 @@
 * PART прощальные сообщения
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, PART #ch
+* JOIN 0 = PART со всех каналов
+* PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, у получателя должен высвечиваться не ник получателя, а ник отправителя (от кого сообщение пришло), также  KICK, PART
+* PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, убрать двойное двоеточие
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
