@@ -187,7 +187,7 @@ int Server::execJoin() {
     *chName = toLower(*chName);                                                         // проверить toLower
   set<std::string> tosSet(chNames.begin(), chNames.end());
   if (tosSet.size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + " not valid channel names");                // ERR_TOOMANYTARGETS сколько именно можно?
+    return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");                // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2], ',') : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
@@ -202,7 +202,7 @@ int Server::execJoin() {
         passes.erase(passes.begin());
       }
       if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
-        prepareResp(cli, "475 :" + *chName + " Cannot join channel (+k)");              // ERR_BADCHANNELKEY
+        prepareResp(cli, "475 " + *chName + " :Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       if(chs[*chName]->size() >= chs[*chName]->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
       else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
@@ -226,7 +226,7 @@ int Server::execPart() {
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     *chName = toLower(*chName);                                                         // проверить toLower
     if(chs.find(*chName) == chs.end())
-      prepareResp(cli, "403 :" + *chName + " :No such channel");                        // ERR_NOSUCHCHANNEL
+      prepareResp(cli, "403 " + *chName + " :No such channel");                        // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
