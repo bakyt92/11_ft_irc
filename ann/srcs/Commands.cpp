@@ -34,13 +34,13 @@ int Server::execCmd() {
     return execInvite();
   if(ar[0] == "KICK")
     return execKick();
-  return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");     // ERR_UNKNOWNCOMMAND
+  return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");      // ERR_UNKNOWNCOMMAND
 }
 
-// комманды, необхожимых для регистрации: PASS NICK USER CAP PING WHOIS
+// комманды, необходимые для регистрации: PASS NICK USER CAP PING WHOIS
 int Server::execPass() {
   if(cli->passOk)
-    return prepareResp(cli, "462 :Unauthorized command (already registered)");                             // ERR_ALREADYREGISTRED
+    return prepareResp(cli, "462 :Unauthorized command (already registered)");          // ERR_ALREADYREGISTRED
   if(ar.size() < 2 || ar[1] == "")
     return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar[1] == pass)
@@ -58,16 +58,16 @@ int Server::execNick() {
     return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
   for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
     if(toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick != "") {
-//      fdsToEraseNextIteration.insert(cli->fd); <== Не нужно удалять пользователя, т.к. он текущий.
+      // fdsToEraseNextIteration.insert(cli->fd); <== Не нужно удалять пользователя, т.к. он текущий.
+      // он удаляется не сразу, а только в начале следующей итерации главного цикла, тут мы его просто пометили для удаления
       return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
     }
     else if (toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick == "") {
       fdsToEraseNextIteration.insert(cli->fd);
-      return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");         // ERR_NICKNAMEINUSE
+      return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");            // ERR_NICKNAMEINUSE
     }
   }
-  if (cli->nick == "")
-  {
+  if (cli->nick == "") {
     cli->nick = ar[1];
     if(cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
       prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
@@ -80,8 +80,8 @@ int Server::execNick() {
 int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
-  if(cli->uName != "")                              // cli->rName != "" ? т.к. uName и rName у нас всегда устанавлиается одной командой, то достаточно только один из них проверить
-    return prepareResp(cli, "462 :Unauthorized command (already registered)");                             // ERR_ALREADYREGISTRED тут надо протестировать!
+  if(cli->uName != "")  // cli->rName != "" ? т.к. uName и rName у нас всегда устанавлиается одной командой, то достаточно только один из них проверить
+    return prepareResp(cli, "462 :Unauthorized command (already registered)");           // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && !cli->capInProgress)
@@ -96,9 +96,12 @@ int Server::execCap() {
     cli->capInProgress = true;
     return prepareResp(cli, "CAP * LS :");
   }
-  if(ar[1] == "END") {
+  if(ar[1] == "END" && cli->passOk && cli->nick != "" && cli->uName != "") {
     cli->capInProgress = false;
-    prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется.!
+    return prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется, но для irssi это кажется не проблема
+  }
+  if(ar[1] == "END") {
+    // return perpareResp(cli, "вы не прошли идентификацию"); ?
   }
   return 0;
 }
@@ -110,7 +113,7 @@ int Server::execPing() {
 // not implemented here: RPL_WHOISCHANNELS RPL_WHOISOPERATOR RPL_AWAY RPL_WHOISIDLE
 int Server::execWhois() {
   // if(!cli->passOk || cli->nick== "" || cli->uName == "")
-  //   return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED ?
+  //   return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );           // ERR_NOTREGISTERED ?
   if(ar.size() < 2)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   std::vector<string> nicks = splitArgToSubargs(ar[1], ',');
@@ -124,7 +127,7 @@ int Server::execWhois() {
   return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
 }
 
-// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY 
+// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY
 int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
@@ -144,13 +147,13 @@ int Server::execPrivmsg() {
     else if((*to)[0] == '#')
       prepareRespAuthorIncluding(chs[*to], "PRIVMSG " + toLower(*to) + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");                        // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");                // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
       prepareResp(getCli(*to), "PRIVMSG " + *to + " :" + ar[2]);
   return 0;
 }
 
-// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY 
+// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY
 int Server::execNotice() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
@@ -170,7 +173,7 @@ int Server::execNotice() {
   return 0;
 }
 
-// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_UNAVAILRESOURCE 
+// not implemented here: ERR_BANNEDFROMCHAN ERR_BADCHANMASK ERR_NOSUCHCHANNEL ERR_UNAVAILRESOURCE
 int Server::execJoin() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
@@ -251,34 +254,33 @@ int Server::execInvite() {
     return prepareResp(cli, "443 " + ar[1] + " " + chName + " :is already on channel");  // ERR_USERONCHANNEL
   //getCli(ar[1])->invits.insert(chName);  <== удалить???
   chs[chName]->clis.insert(getCli(ar[1]));
-  return prepareRespAuthorIncluding(chs[chName], "341 " + chName + " " + ar[1]);                        // RPL_INVITING
+  return prepareRespAuthorIncluding(chs[chName], "341 " + chName + " " + ar[1]);         // RPL_INVITING
 }
 
-// not implemented here ERR_NOCHANMODES
 int Server::execTopic() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
-    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );               // ERR_NOTREGISTERED
   if(ar.size() < 2)
-    return prepareResp(cli, "461 TOPIC :Not enough parameters");                        // ERR_NEEDMOREPARAMS
-  string chName = toLower(ar[1]);                                                       // проверить toLower
+    return prepareResp(cli, "461 TOPIC :Not enough parameters");                         // ERR_NEEDMOREPARAMS
+  string chName = toLower(ar[1]);                                                        // проверить toLower
   if(chs.find(chName) == chs.end())
     return prepareResp(cli, "403 " + chName + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if (ar.size() == 3 && (ar[2] == "" || ar[2] == ":")) {
     chs[chName]->topic = "";
-    return prepareResp(cli, "331 " + chName + " :No topic is set");               // RPL_NOTOPIC
+    return prepareResp(cli, "331 " + chName + " :No topic is set");                      // RPL_NOTOPIC
   }
   if(ar.size() == 2 && chs[chName]->topic == "")
-    return prepareResp(cli, "331 " + chName + " :No topic is set");               // RPL_NOTOPIC
+    return prepareResp(cli, "331 " + chName + " :No topic is set");                      // RPL_NOTOPIC
   if(ar.size() == 2 && chs[chName]->topic != "")
-    return prepareResp(cli, "332 " + chName + " :" + chs[chName]->topic);          // RPL_TOPIC
+    return prepareResp(cli, "332 " + chName + " :" + chs[chName]->topic);                // RPL_TOPIC
   if(chs[chName]->clis.empty() || chs[chName]->clis.find(cli) == chs[chName]->clis.end()) 
     return prepareResp(cli, "442 " + chName + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(chs[chName]->adms.find(cli) == chs[chName]->adms.end()) 
     return prepareResp(cli, "482 " + chName + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if (chs[chName]->optT == true)
-    return prepareResp(cli, "477 " + ar[1] + " :Channel doesn't support modes");
+    return prepareResp(cli, "477 " + ar[1] + " :Channel doesn't support modes");         // ERR_NOCHANMODES
   chs[chName]->topic = ar[2];
-  return prepareRespAuthorIncluding(chs[chName], "332 " + chName + " :" + ar[2]);                        // RPL_TOPIC
+  return prepareRespAuthorIncluding(chs[chName], "332 " + chName + " :" + ar[2]);        // RPL_TOPIC
 }
 
 // not implemented here ERR_BADCHANMASK
@@ -300,7 +302,7 @@ int Server::execKick() {
     else {
       for(vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++)
         if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
-          prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает. 
+          prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else if(ar.size() == 3 && chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
           prepareRespAuthorIncluding(chs[*chName], "KICK :" + *targetCli + " from " + *chName); // текст сообщения не проверен
           eraseCliFromCh(*targetCli, *chName);
@@ -318,7 +320,7 @@ int Server::execKick() {
 
 int Server::execQuit() {
   fdsToEraseNextIteration.insert(cli->fd);
-  // prepareResp(chs[ar[1]], "... " + cli->nick + " left the channel");                 // нужно ли?
+  // prepareResp(chs[ar[1]], "... " + cli->nick + " left the channel");                 // нужно ли сообщение?
   return 0;
 }
 
@@ -333,11 +335,11 @@ int Server::execMode() {
   if(chs.find(chName) == chs.end())
     return prepareResp(cli, "403 " + chName + " :No such channel"); // levensta :IRCat 403 a #ch :No such channel // ERR_NOSUCHCHANNEL ???
   if(chs[chName]->clis.empty() || chs[chName]->clis.find(cli) == chs[chName]->clis.end()) 
-    return prepareResp(cli, "442 " + chName + " :You're not on that channel");           // ERR_NOTONCHANNEL ???
+    return prepareResp(cli, "442 " + chName + " :You're not on that channel");          // ERR_NOTONCHANNEL ???
   if(chs[chName]->adms.find(cli) == chs[chName]->adms.end())
-    return prepareResp(cli, "482 " + chName + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
+    return prepareResp(cli, "482 " + chName + " :You're not channel operator");         // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
-    return prepareResp(cli, "324 " + chName + " mode = " + mode(chs[chName]));                     // RPL_CHANNELMODEIS
+    return prepareResp(cli, "324 " + chName + " mode = " + mode(chs[chName]));          // RPL_CHANNELMODEIS
   if(ar.size() == 3 && ar[2] == "+i")
     return (chs[chName]->optI = true);
   if(ar.size() == 3 && ar[2] == "-i")
@@ -355,13 +357,13 @@ int Server::execMode() {
   if(ar.size() == 3)
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar[2] == "+k" && chs[chName]->pass != "")
-    return prepareResp(cli, "467 " + chName + " :Channel key already set");                       // ERR_KEYSET
+    return prepareResp(cli, "467 " + chName + " :Channel key already set");             // ERR_KEYSET
   if(ar[2] == "+k")
-    return (chs[chName]->pass = ar[3], 0); // levensta :a!a@127.0.0.1 MODE #ch +k
+    return (chs[chName]->pass = ar[3], 0);                                              // числовой ответ?
   if(ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
     return (chs[chName]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10)), 0);
   if(ar[2] == "+o")
-    return prepareResp(cli, "441 " + ar[3] + " " + chName + " :They aren't on that channel");     // ERR_USERNOTINCHANNEL
+    return prepareResp(cli, "441 " + ar[3] + " " + chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
   if(ar[2] == "-o")
     return chs[chName]->adms.erase(getCli(ar[3]));
   return prepareResp(cli, "472 " + ar[0] + " " + chName + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE

@@ -56,17 +56,17 @@ string Server::infoCmd() {          // debugging
 }
 
 string Server::infoServ() {        // debugging
-  string ret = "My clients                : ";
+  string ret;
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-    ret += "[[" + it->second->nick + "] with bufR = [" + it->second->bufRecv + "] with rName = "+it->second->rName + "] ";
-  ret += "\nMy polls                  : ";
+    ret += "My client                 : [[" + it->second->nick + "] with bufR = [" + it->second->bufRecv + "] with rName = "+it->second->rName + "]\n";
+  ret += "My polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
   ret += "\n";
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
     ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", users = ";
-    for(set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
-      ret += (*itCli)->nick + " ";
+    // for(set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
+    //   ret += (*itCli)->nick + " ";
     ret += ", mode = " + mode(ch->second) + "\n";
   }
   return ret;
@@ -162,6 +162,7 @@ void Server::sendPreparedResps(Cli *to) {
       if (poll->fd == to->fd)
         poll->events = POLLIN;
   }
+  cout << "\n";
 }
 
 void Server::markClisToSendMsgsTo() {

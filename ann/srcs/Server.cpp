@@ -75,8 +75,9 @@ void Server::run() {
         }
         else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)                // клиент прислал нам сообщение через свой fdForMsgs
           receiveMsgAndExecCmds(poll->fd);
-        else if (poll->revents & POLLOUT)                                            // есть сообщение для отпраки какому-то клиенту
+        else if (poll->revents & POLLOUT) {                                           // есть сообщения для отпраки клиентам
           sendPreparedResps(clis.at(poll->fd));
+        }
     }
   }
   std::cout << "Terminated\n";
@@ -109,7 +110,7 @@ void Server::receiveMsgAndExecCmds(int fd) {
   else {
     string buf = string(buf0.begin(), buf0.end());
     buf.resize(bytes);
-    cout << without_r_n("I have received buf       : [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
+    cout << without_r_n("I have received from " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd))).str() + " buf: [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
     buf = cli->bufRecv + buf;
     std::vector<string> cmds = splitBufToCmds(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
