@@ -14,8 +14,6 @@
   + PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
   + WHOIS alice (до регистрации)
   + сначала NICK, потом PASS
-* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
-* sned() вернула 0? это значит клиент пропал или нет?
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
   + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
@@ -29,8 +27,6 @@
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN 0 = PART со всех каналов
 * JOIN #channel в irssi после этого все сообщения идут только в этот канал ?
-* PART прощальные сообщения
-* PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE +tp
@@ -38,10 +34,16 @@
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала
 * test with the IRC client and nc at the same time (checklist)
-* low bandwidth (checklist) - **я не поняла, как**
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
+* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
+* sned() вернула 0? это значит клиент пропал или нет?
+* удалять пустые каналы и пустые poll
+* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, JOIN 0
+* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, PART #ch
+* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, клиент отключается
 
 ## проблемы второй срочности
+* low bandwidth (checklist) - **я не поняла, как**
 * NOTICE выдавать сообщение с каким-нибудь цветом
 * OPER регистрация клиентом самого себя в качестве оператора канала
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
@@ -84,6 +86,8 @@
 * receiving partial data (checklist)
 * проверка утечек памяти, особено в случае нестандартных ситуаций
 * PART #channel1,#channel2
+* PART прощальные сообщения
+* PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
