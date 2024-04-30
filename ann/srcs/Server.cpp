@@ -63,6 +63,7 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >\n";
   while (sigReceived == false) {
     eraseUnusedClis();
+    eraseEmptyChs();
     markClisToSendMsgsTo();
     int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)

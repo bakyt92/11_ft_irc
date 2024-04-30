@@ -196,11 +196,12 @@ void Server::eraseCliFromCh(string nick, string chName) {
 }
 
 void Server::eraseEmptyChs() {
+  set<string> toErases;
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
-    if(ch->second->size() == 0) {
-      chs.erase(ch);
-      ch = chs.begin();
-    }
+    if(ch->second->size() == 0)
+      toErases.insert(ch->first);
+  for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++)
+    chs.erase(*toErase);
 }
 
 void Server::eraseUnusedClis() {                                              // вызывать только перед вызовом poll
