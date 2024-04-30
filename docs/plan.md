@@ -29,7 +29,6 @@
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN 0 = PART со всех каналов
 * JOIN #channel в irssi после этого все сообщения идут только в этот канал ?
-* PART #channel1,#channel2
 * PART прощальные сообщения
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
@@ -84,6 +83,7 @@
 * kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
 * receiving partial data (checklist)
 * проверка утечек памяти, особено в случае нестандартных ситуаций
+* PART #channel1,#channel2
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
