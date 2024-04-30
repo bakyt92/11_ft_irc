@@ -103,7 +103,7 @@ void Server::receiveBufAndExecCmds(int fd) {
   vector<unsigned char> buf0(BUFSIZE);
   for(size_t i = 0; i < buf0.size(); i++)
     buf0[i] = '\0';
-  int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL);
+  int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL | MSG_DONTWAIT);
   if(bytes < 0)
     perror("recv");                                                                  // ошибка, но не делаем execQuit(), возможно клиент ещё тут
   else if(bytes == 0)                                                                // клиент пропал

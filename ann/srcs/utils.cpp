@@ -147,10 +147,10 @@ int Server::prepareRespExceptAuthor(Ch *ch, string msg) {
 
 void Server::sendPreparedResps(Cli *to) {
   cout << "I send buf to fd=" << to->fd << "        : [" << without_r_n(to->bufToSend) << "]";
-  int bytes = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL); // не посылать SIGPIPE, если другая сторона обрывает соединение, signal(SIGPIPE, SIG_IGN) не нужно
-  if (bytes == -1)
-    std::cerr << "send() faild" << std::endl;
-  else if (bytes == 0)
+  int bytes = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL | MSG_DONTWAIT); // не посылать SIGPIPE, если другая сторона обрывает соединение, signal(SIGPIPE, SIG_IGN) не нужно
+  // if (bytes == -1)
+  //   std::cerr << "send() faild" << std::endl;
+  if (bytes == 0)
     std::cerr << "send() faild" << std::endl; // распрощаться с этим клиентом ?
   else { 
     to->bufToSend = "";
