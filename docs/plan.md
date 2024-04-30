@@ -1,21 +1,23 @@
 ## нерешённые проблемы
 * **давайте ориентироваться только на сабжект + irssi, иначе мы не успеем**
-* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
-* sned() вернула 0? это значит клиент пропал или нет?
-* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment (you can do it on bad PASS directly if you wish) https://ircgod.com/docs/irc/to_know/
-* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
 * правильно ли работают:
   + USER a 0 * a, USER a 0 * a
+  + PASS c неправильным паролем
   + PRIVMSG alice,alice hello
   + JOIN #сhannel,#сhannel
   + JOIN #channel, JOIN #channel
   + MODE #ch
+  + PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
+* send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
+* sned() вернула 0? это значит клиент пропал или нет?
+* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment https://ircgod.com/docs/irc/to_know/
+* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
   + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
   + The server will only send the PRIVMSG to those who have a host matching the mask
-  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last ".". This requirement exists to prevent people sending messages to "#*" or "$*", which would broadcast to all users
-  + Wildcards are the '*' and '?'  characters.  This extension to the PRIVMSG command is only available to operators.
+  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
+  + Wildcards are the '*' and '?'  characters. It is only available to operators.
 * PRIVMSG: Un channel "exclusif" à deux users : cmd PRIVMSG + nickname = переписка между ними (?)
 * PRIVMSG: никнеймы могут быть и в верхнем регистре
 * PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, убрать двойное двоеточие
@@ -27,30 +29,20 @@
 * PART прощальные сообщения
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
-* INVITE с только что созданного канала - пишет, что приглашенный пользователь уже есть на сервере INVITE Bakyt1 #chan1, 443 Bakyt1 #chan1 :is already on channel
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
 * MODE +tp
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
-* QUIT
-* JOIN, MODE, KICK, QUIT, PRIVMSG: отправляются всем пользователям канала
-* to send partial commands, ensure that other connections still run fine (checklist)
-* kill a client, check that the server is still operational for the other connections and for any new incoming client (checklist)
-* kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
-* some test with the IRC client and nc at the same time (checklist)
-* receiving partial data (checklist)
-* low bandwidth (checklist)
-* проверка утечек памяти, особено в случае нестандартных ситуаций
-* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Also, check for **memory leaks** during this operation. (checklist)
+* JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала
+* test with the IRC client and nc at the same time (checklist)
+* low bandwidth (checklist) - **я не поняла, как**
+* Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 
 ## проблемы второй срочности
-* to anwser a client for status update (nick change, mode, etc…), the packet must be formed like this: `:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n` нужно ли?
-* PASS если неправильный пароль никакого сообщения?
 * NOTICE выдавать сообщение с каким-нибудь цветом
-* команда чтобы посмотреть кто является оператором канала - вроде это MODE
-* команда чтобы посмотреть кто есть на канале - вроде это MODE
-* OPER регистрации клиента самого себя в качестве оператора канала
+* OPER регистрация клиентом самого себя в качестве оператора канала
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
   + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
@@ -66,8 +58,6 @@
   + des serveurs qui étaient déjà installés sur l’application Hexchat
   + irc.ircgod.com:6667/6697
   + Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
-* если есть лишние аргументы, сервер их игнорирует?
-* проблема valgrind: PASS NICK USER JOIN QUIT
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
@@ -85,6 +75,13 @@
 * одновременно два сервера не запускались
 * JOIN напечатать всех участников канала
 * segfault PASS NICK USER JOIN - kill nc - SIGINT server
+* QUIT
+* проблема valgrind: PASS NICK USER JOIN QUIT
+* to send partial commands, ensure that other connections still run fine (checklist)
+* kill a client, check that the server is still operational for the other connections and for any new incoming client (checklist)
+* kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked. (checklist)
+* receiving partial data (checklist)
+* проверка утечек памяти, особено в случае нестандартных ситуаций
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
