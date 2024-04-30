@@ -144,7 +144,7 @@ int Server::execPrivmsg() {
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");               // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
-      prepareResp(getCli(*to), cli->nick + ": " + ar[2]);
+      prepareResp(getCli(*to), ":" + cli->nick + ": " + ar[2]);
   return 0;
 }
 
@@ -258,7 +258,7 @@ int Server::execKick() {
         if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
           prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          prepareRespAuthorIncluding(chs[*chName], ":" + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked form " + *chName + " by " + cli->nick);
+          prepareRespAuthorIncluding(chs[*chName], ":" + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*targetCli, *chName);
         }
       }
