@@ -132,7 +132,7 @@ int Server::execPrivmsg() {
     return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
   vector<string> tos = splitArgToSubargs(ar[1], ',');
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    *to = toLower(*to);
+    *to = *to;
   set<std::string> tosSet(tos.begin(), tos.end());                                      // то же самое но без дубликатов
   if(tosSet.size() < tos.size() || tos.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
@@ -144,7 +144,7 @@ int Server::execPrivmsg() {
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");               // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
-      prepareResp(getCli(*to), ":" + cli->nick + ": " + ar[2]);
+      prepareResp(getCli(*to), cli->nick + ": " + ar[2]);
   return 0;
 }
 
