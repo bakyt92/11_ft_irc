@@ -130,8 +130,8 @@ vector<string> Server::splitBufToCmds(string s) {
 }
 
 int Server::prepareResp(Cli *to, string msg) {
-  if(msg.size() > 510)
-    msg.resize(510);
+  if(msg.size() > MAX_CMD_LEN - 2)
+    msg.resize(MAX_CMD_LEN - 2);
   to->bufToSend += (msg + "\r\n");
   return 0;
 }
