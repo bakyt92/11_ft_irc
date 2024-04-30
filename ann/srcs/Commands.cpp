@@ -227,9 +227,8 @@ int Server::execPart() {
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      prepareRespAuthorIncluding(chs[*chName], cli->nick + " PART " + *chName);         // нужно ли сообщение для автора команды?
+      prepareRespAuthorIncluding(chs[*chName], "PART "  + *chName + " " + cli->nick + " :" + (ar.size() >= 3 ? ar[2] : ""));
       eraseCliFromCh(cli->nick, *chName);
-      //eraseEmptyChs();
     }
   }
   return 0;
@@ -306,12 +305,10 @@ int Server::execKick() {
         else if(ar.size() == 3 && chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
           prepareRespAuthorIncluding(chs[*chName], "KICK :" + *targetCli + " from " + *chName); // текст сообщения не проверен
           eraseCliFromCh(*targetCli, *chName);
-          //eraseEmptyChs();
         }
         else if(ar.size() > 3 && chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
           prepareRespAuthorIncluding(chs[*chName], ar[3] + " :KICK " + *targetCli + " from " + *chName); // текст сообщения не проверен
           eraseCliFromCh(*targetCli, *chName);
-          //eraseEmptyChs();
         }
       }
     }
