@@ -40,6 +40,7 @@
 * удалять пустые каналы и пустые poll
 * memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, JOIN 0
 * memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, PART #ch
+* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, клиент отключается
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
