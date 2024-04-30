@@ -16,10 +16,10 @@
 # include <sys/socket.h>
 # include <vector>
 # include <unistd.h>
-# define MAX_CHS_PER_USER 5 // to treat ERR_TOOMANYCHANNELS
-# define MAX_NB_TARGETS 5   // to treat ERR_TOOMANYTARGETS
-# define BUFSIZE 513
-# define MAX_CMD_LEN 512    // should be more than 3
+# define MAX_CHS_PER_USER   5 // to treat ERR_TOOMANYCHANNELS
+# define MAX_NB_TARGETS     5 // to treat ERR_TOOMANYTARGETS
+# define BUFSIZE          513
+# define MAX_CMD_LEN      512
 using std::map;
 using std::set;
 using std::vector;
@@ -83,7 +83,7 @@ public:
   void                     sendPreparedResps(Cli *to);
   void                     markClisToSendMsgsTo();
   void                     addNewClient(pollfd poll);
-  void                     receiveMsgAndExecCmds(int fd);
+  void                     receiveBufAndExecCmds(int fd);
 // commands:
   int                      execCmd();
   int                      execPass();

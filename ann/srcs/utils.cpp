@@ -63,12 +63,8 @@ string Server::infoServ() {        // debugging
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
   ret += "\n";
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
-    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", users = ";
-    // for(set<Cli*>::iterator itCli = ch->second->clis.begin(); itCli != ch->second->clis.end(); itCli++)
-    //   ret += (*itCli)->nick + " ";
-    ret += ", mode = " + mode(ch->second) + "\n";
-  }
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
+    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", mode = " + mode(ch->second) + "\n";
   return ret;
 }
 
@@ -150,7 +146,7 @@ int Server::prepareRespExceptAuthor(Ch *ch, string msg) {
 }
 
 void Server::sendPreparedResps(Cli *to) {
-  cout << "I send to fd=" << to->fd << "            : [" << without_r_n(to->bufToSend) << "]\n";
+  cout << "I send buf to fd=" << to->fd << "        : [" << without_r_n(to->bufToSend) << "]";
   int bytes = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL); // не посылать SIGPIPE, если другая сторона обрывает соединение, signal(SIGPIPE, SIG_IGN) не нужно
   if (bytes == -1)
     std::cerr << "send() faild" << std::endl;
@@ -196,7 +192,7 @@ void Server::eraseCliFromCh(string nick, string chName) {
   if(chs[chName]->adms.count(getCli(nick)) > 0)
     chs[chName]->adms.erase(getCli(nick));
   if(chs[chName]->adms.size() == 0 && chs[chName]->clis.size() > 0)
-    chs[chName]->adms.insert(*(chs[chName]->clis.begin()));          // сделать самого старого пользователя админом
+    chs[chName]->adms.insert(*(chs[chName]->clis.begin()));                   // сделать самого старого пользователя админом
 }
 
 void Server::eraseEmptyChs() {
@@ -207,13 +203,12 @@ void Server::eraseEmptyChs() {
     }
 }
 
-void Server::eraseUnusedClis() {             // только перед вызовом poll
+void Server::eraseUnusedClis() {                                              // вызывать только перед вызовом poll
   set<int> reallyRemouved;
   for(set<int>::iterator fdToErase = fdsToEraseNextIteration.begin(); fdToErase != fdsToEraseNextIteration.end(); fdToErase++) {
     if(clis.find(*fdToErase) != clis.end() && clis[*fdToErase]->bufToSend == "") {
       for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) // стереть его изо всех каналов
         eraseCliFromCh(clis[*fdToErase]->nick, ch->first);
-      //eraseEmptyChs();
       for(map<int, Cli*> ::iterator it = clis.begin(); it != clis.end(); it++)
         if(it->first == *fdToErase) {
           close(it->first);

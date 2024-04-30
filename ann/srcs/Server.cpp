@@ -74,7 +74,7 @@ void Server::run() {
           break;
         }
         else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)                // клиент прислал нам сообщение через свой fdForMsgs
-          receiveMsgAndExecCmds(poll->fd);
+          receiveBufAndExecCmds(poll->fd);
         else if (poll->revents & POLLOUT) {                                           // есть сообщения для отпраки клиентам
           sendPreparedResps(clis.at(poll->fd));
         }
@@ -96,10 +96,10 @@ void Server::addNewClient(pollfd poll) {
   cout << "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n\n";
 }
 
-void Server::receiveMsgAndExecCmds(int fd) {
+void Server::receiveBufAndExecCmds(int fd) {
   if(!(cli = clis.at(fd)))
     return ;
-  vector<unsigned char> buf0(513);
+  vector<unsigned char> buf0(BUFSIZE);
   for(size_t i = 0; i < buf0.size(); i++)
     buf0[i] = '\0';
   int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL);
