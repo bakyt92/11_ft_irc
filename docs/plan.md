@@ -1,5 +1,4 @@
 ## нерешённые проблемы
-* **давайте ориентироваться только на сабжект + irssi, иначе мы не успеем**
 * правильно ли работают:
   + USER a 0 * a, USER a 0 * a
   + PASS c неправильным паролем
@@ -7,6 +6,8 @@
   + JOIN #сhannel,#сhannel
   + JOIN #channel, JOIN #channel
   + MODE #ch
+  + MODE #channel +l 999999999999999`
+  + MODE #channel +l -1
   + PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
@@ -30,8 +31,6 @@
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
-* MODE #channel +l 999999999999999`
-* MODE #channel +l -1
 * MODE +tp
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
