@@ -144,7 +144,7 @@ int Server::execPrivmsg() {
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");               // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
-      prepareResp(getCli(*to), ":" + cli->nick + ": " + ar[2]);
+      prepareResp(getCli(*to), ": " + cli->nick + ": " + ar[2]);
   return 0;
 }
 
@@ -162,9 +162,9 @@ int Server::execNotice() {
     return 0;
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) != chs.end())
-      prepareRespExceptAuthor(chs[*to], ":" + cli->nick + ": " + ar[2]);
+      prepareRespExceptAuthor(chs[*to], ": " + cli->nick + ": " + ar[2]);
     else if((*to)[0] != '#' && getCli(*to))
-      prepareResp(getCli(*to), ":" + cli->nick + ": " + ar[2]);
+      prepareResp(getCli(*to), ": " + cli->nick + ": " + ar[2]);
   return 0;
 }
 
@@ -209,7 +209,7 @@ int Server::execJoin() {
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        prepareRespAuthorIncluding(chs[*chName], ":" + cli->nick + " joined " + *chName);
+        prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " joined " + *chName);
         prepareResp(cli, "332 " + *chName + " :" + chs[*chName]->topic);                // RPL_TOPIC
         prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не в точности RPL_NAMREPLY
       }
@@ -230,7 +230,7 @@ int Server::execPart() {
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      prepareRespAuthorIncluding(chs[*chName], ":" + cli->nick + " quits " + *chName + (ar.size() >= 3 ? " : " + ar[2] : ""));
+      prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " quits " + *chName + (ar.size() >= 3 ? " : " + ar[2] : ""));
       eraseCliFromCh(cli->nick, *chName);
     }
   }
@@ -258,7 +258,7 @@ int Server::execKick() {
         if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
           prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          prepareRespAuthorIncluding(chs[*chName], ":" + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick);
+          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*targetCli, *chName);
         }
       }
