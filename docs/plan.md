@@ -2,6 +2,8 @@
 * правильно ли работают:
   + USER a 0 * a, USER a 0 * a
   + PASS c неправильным паролем
+  + USER a 0 * ""
+  + USER "" 0 * ""
   + PRIVMSG alice,alice hello
   + JOIN #сhannel,#сhannel
   + JOIN #channel, JOIN #channel
@@ -9,10 +11,10 @@
   + MODE #channel +l 999999999999999`
   + MODE #channel +l -1
   + PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
+  + WHOIS alice (до регистрации)
+  + сначала NICK, потом PASS
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
-* PASS must be send before any other paquet, yell a message only if the user is registered (nick and password was successfuly completed) and refuse the connection at this moment https://ircgod.com/docs/irc/to_know/
-* USER: может ли быть uName и rName пустым? (levensta регистрирует пользлвтаеля даже если rName = "")
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
   + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
