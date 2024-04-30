@@ -61,7 +61,7 @@ string Server::infoServ() {        // debugging
     ret += "[[" + it->second->nick + "] with bufR = [" + it->second->bufRecv + "] with rName = "+it->second->rName + "] ";
   ret += "\nMy polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
-    ret += "[" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + "] ";
+    ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
   ret += "\n";
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
     ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", users = ";
@@ -72,14 +72,14 @@ string Server::infoServ() {        // debugging
   return ret;
 }
 
-vector<string> Server::split_space(string s) {
+vector<string> Server::splitCmdToArgs(string s) {
   if (s.size() == 0)
     return vector<string>();
   std::vector<string> parts;
   size_t pos;
   string afterColon = "";
   if((pos = s.find(':')) < s.size())
-    afterColon = s.substr(pos, s.size() - pos);
+    afterColon = s.substr(pos + 1, s.size() - pos);
   s = s.substr(0, pos);
   for(size_t pos = s.find(' '); pos != string::npos; pos = s.find(' ')) {
     if(pos > 0)
@@ -95,7 +95,7 @@ vector<string> Server::split_space(string s) {
   return parts;
 }
 
-vector<string> Server::split(string s, char delim) {
+vector<string> Server::splitArgToSubargs(string s, char delim) {
   if (s.size() == 0)
     return vector<string>();
   vector<string> parts;
@@ -109,7 +109,7 @@ vector<string> Server::split(string s, char delim) {
   return parts;
 }
 
-vector<string> Server::split_r_n(string s) {
+vector<string> Server::splitBufToCmds(string s) {
   if (s.size() == 0)
     return vector<string>();
   if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r' && s.find("\r\n") == string::npos) { // в конце \n и в буфере одна команда, т.е. почти наерняка это пришло через nc

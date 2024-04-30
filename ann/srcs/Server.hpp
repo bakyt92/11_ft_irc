@@ -111,8 +111,8 @@ public:
   string                   toLower(string s);
   string                   infoCmd();
   string                   infoServ();
-  vector<string>           split_r_n(string s);
-  vector<string>           split_space(string s);
-  vector<string>           split(string s, char delim);
+  vector<string>           splitBufToCmds(string s);
+  vector<string>           splitCmdToArgs(string s);
+  vector<string>           splitArgToSubargs(string s, char delim);
 };
 #endif

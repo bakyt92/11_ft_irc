@@ -111,10 +111,10 @@ void Server::receiveMsgAndExecCmds(int fd) {
     buf.resize(bytes);
     cout << without_r_n("I have received buf       : [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
     buf = cli->bufRecv + buf;
-    std::vector<string> cmds = split_r_n(buf);
+    std::vector<string> cmds = splitBufToCmds(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
       vector<string>().swap(ar); // попробовать убрать
-      ar = split_space(*cmd);
+      ar = splitCmdToArgs(*cmd);
       cout << infoCmd();
       execCmd();
     }
