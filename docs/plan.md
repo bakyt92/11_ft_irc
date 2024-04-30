@@ -5,6 +5,7 @@
   + USER a 0 * ""
   + USER "" 0 * ""
   + PRIVMSG alice,alice hello
+  + JOIN channel (без решётки)
   + JOIN #сhannel,#сhannel
   + JOIN #channel, JOIN #channel
   + MODE #ch
