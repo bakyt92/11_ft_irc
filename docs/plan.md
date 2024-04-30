@@ -39,6 +39,7 @@
 * sned() вернула 0? это значит клиент пропал или нет?
 * удалять пустые каналы и пустые poll
 * memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, JOIN #ch2, PART 0, JOIN 0
+* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, JOIN 0
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
