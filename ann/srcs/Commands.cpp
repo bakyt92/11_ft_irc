@@ -179,6 +179,15 @@ int Server::execJoin() {
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
     return prepareResp(cli, "461 JOIN :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
+  if(ar.size() == 2 && ar[1] == "0") {
+    ar[1] = "";
+    for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++) {
+      ar[1] += ch->first + ",";
+    if(ar[1].size() > 0)
+      ar[1].resize(ar[1].size() - 1);
+    return execPart();
+    }
+  }
   vector<string> chNames = splitArgToSubargs(ar[1], ',');
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     *chName = toLower(*chName);                                                         // проверить toLower

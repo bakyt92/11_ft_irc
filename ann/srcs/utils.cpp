@@ -200,6 +200,10 @@ void Server::eraseEmptyChs() {
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
     if(ch->second->size() == 0)
       toErases.insert(ch->first);
+  // cout << "chs to erase : ";
+  // for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++)
+  //   cout << *toErase + " ";
+  // cout << endl;
   for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++)
     chs.erase(*toErase);
 }
