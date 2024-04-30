@@ -38,9 +38,7 @@
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
 * sned() вернула 0? это значит клиент пропал или нет?
 * удалять пустые каналы и пустые poll
-* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, JOIN 0
-* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, PART #ch
-* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, клиент отключается
+* прдстроиться к **irssi**
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
@@ -88,6 +86,7 @@
 * PART #channel1,#channel2
 * PART прощальные сообщения
 * PART если прощального сообщения нет, то уведомление об отключении с канала (всем посылать и отключившемуся и текущим пользователям)
+* memory leak: PASS 2, NICK a, USER a 0 * a, JOIN #ch, PART #ch
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
