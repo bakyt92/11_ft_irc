@@ -65,6 +65,7 @@ void Server::init() {
   polls.push_back(pollForNewClis);
 }
 
+// poll allows waiting for status updates on more than one socket in a single synchronous call
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >\n";
   while (sigReceived == false) {
@@ -109,14 +110,14 @@ void Server::receiveBufAndExecCmds(int fd) {
   vector<unsigned char> buf0(BUFSIZE); // std::vector is the recommended way of implementing a variable-length buffer in C++
   for(size_t i = 0; i < buf0.size(); i++)
     buf0[i] = '\0';
-  int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL | MSG_DONTWAIT);
-  if(bytes < 0)
+  int nbBytesReallyReceived = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL | MSG_DONTWAIT);
+  if(nbBytesReallyReceived < 0)
     perror("recv");                                                                  // ошибка, но не делаем execQuit(), возможно клиент ещё тут
-  else if(bytes == 0)                                                                // клиент пропал
+  else if(nbBytesReallyReceived == 0)                                                                // клиент пропал
     fdsToEraseNextIteration.insert(cli->fd);
   else {
     string buf = string(buf0.begin(), buf0.end());
-    buf.resize(bytes);
+    buf.resize(nbBytesReallyReceived);
     cout << without_r_n("I have received from " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd))).str() + " buf: [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
     buf = cli->bufRecv + buf;
     std::vector<string> cmds = splitBufToCmds(buf);

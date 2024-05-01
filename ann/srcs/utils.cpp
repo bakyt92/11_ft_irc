@@ -150,18 +150,28 @@ int Server::prepareRespExceptAuthor(Ch *ch, string msg) {
 }
 
 // MSG_NOSIGNAL = не посылать SIGPIPE, если другая сторона обрывает соединение (signal(SIGPIPE, SIG_IGN) тогда не нужен)
+// send returns as soon as the user buffer has been copied into kernel buffer
+// send returns -1: 
+//   this is not an error
+//   send couldn't possibly return an error, since it has already returned by the time this is detected
+//   the msg is silently resent until acknowledged (or until TCP gives up)
+//   in case the other end closes the connection or someone pulls out the ethernet cable, you will (should, and not necessarily immediately) see POLLHUP, POLLRDHUP, or POLLERR
+//   When that happens, you know that nobody is listening at the other end any more
+// Events like routers going down and cables being pulled :
+//   do not necessarily break a TCP connection, at least not immediately
+//   This can only be detected when a send is attempted, and the destination isn't reachable
+//   That could happen only after minutes or hours (or someone could in the mean time plug the cable back in, and you never know!)
 void Server::sendPreparedResps(Cli *to) {
-  cout << "I send buf to fd=" << to->fd << "        : [" << without_r_n(to->bufToSend) << "]";
-  int bytes = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL | MSG_DONTWAIT);
-  if (bytes == -1)
-    std::cerr << "send() faild" << std::endl; ////
-  else { 
+  cout << "I send buf to fd=" << to->fd << "        : [" << without_r_n(to->bufToSend) << "]\n";
+  ssize_t nbBytesReallySent = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL | MSG_DONTWAIT);
+  if (nbBytesReallySent == (ssize_t)to->bufToSend.size()) {
     to->bufToSend = "";
     for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
       if (poll->fd == to->fd)
         poll->events = POLLIN;
   }
-  cout << "\n";
+  else
+    to->bufToSend.erase(0, nbBytesReallySent);
 }
 
 void Server::markClisToSendMsgsTo() {
