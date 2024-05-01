@@ -25,7 +25,7 @@ void Server::sigHandler(int sig) {
 // SOL_SOCKET = установка параметров на уровне сокета
 // 1 настройка = (optname, optval, optlen)
 // SO_KEEPALIVE отслеживаниe на серверной стороне клиентских соединений и их принудительного отключения
-
+// create the socket in non-blocking mode https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler); // catch ctrl + c
@@ -45,9 +45,11 @@ void Server::init() {
     throw std::runtime_error("getaddrinfo error: [" + std::string(strerror(errno)) + "]");
   int optVal = 1;
   for(struct addrinfo* hint = listRes; hint != NULL; hint = hint->ai_next)
-    if((fdForNewClis = socket(hint->ai_family, hint->ai_socktype, hint->ai_protocol)) < 0)
+    if((fdForNewClis = socket(hint->ai_family, hint->ai_socktype | SOCK_NONBLOCK | SOCK_CLOEXEC| SOCK_NONBLOCK | SOCK_CLOEXEC, hint->ai_protocol)) < 0)
       throw std::runtime_error("function socket error: [" + std::string(strerror(errno)) + "]");
-    else if(setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &optVal, sizeof(optVal)))
+    else if(setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal)))
+      throw std::runtime_error("setsockopt error: [" + std::string(strerror(errno)) + "]");
+    else if(setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEPORT, &optVal, sizeof(optVal)))
       throw std::runtime_error("setsockopt error: [" + std::string(strerror(errno)) + "]");
     else if(bind(fdForNewClis, hint->ai_addr, hint->ai_addrlen)) {
       close(fdForNewClis);
