@@ -6,7 +6,6 @@
 * QUIT отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG alice,alice hello
-* JOIN #сhannel,#сhannel
 * JOIN #channel, JOIN #channel
 * JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально?
 * MODE #ch
@@ -23,12 +22,18 @@
 * NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
 * сначала NICK, потом PASS
-* USER a 0 * a, USER a 0 * a
-* PASS c неправильным паролем
-* USER a 0 * ""
-* USER "" 0 * ""
+
+
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
+
+
+## ПРОТЕСТИРОВАНО на IRSSI 
+ * JOIN #сhannel,#сhannel
+* USER a 0 * ""  - no command USER on IRSSI
+* USER "" 0 * ""  - no command USER on IRSSI
+* USER a 0 * a, USER a 0 * a  - no command USER on IRSSI
+* PASS c неправильным паролем
 
 ## Другие проблемы
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
