@@ -18,7 +18,6 @@
 * test with irssi and nc at the same time (checklist)
 * протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 
-
 ## ПРОТЕСТИРОВАНО на IRSSI 
  * JOIN #сhannel,#сhannel
 * USER a 0 * ""  - no command USER on IRSSI
