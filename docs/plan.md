@@ -11,15 +11,15 @@
 * MODE #ch
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
-* PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
-* PRIVMSG если между двумя пользователями есть канал на двоих, то все личные сообщения попадают туда ?
-* PRIVMSG без параметров, а также все команды без параметров
-* PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
-* PRIVMSG alice,alice,alice,alice,alice,alice
-* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
+* **B** PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
+* **B** PRIVMSG если между двумя пользователями есть канал на двоих, то все личные сообщения попадают туда ?
+* **B** PRIVMSG без параметров, а также все команды без параметров
+* **B** PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
+* **B** PRIVMSG alice,alice,alice,alice,alice,alice
+* **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
   + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
-* INVITE на несуществующий канал
-* NOTICE alice,alice Hello
+* **B** INVITE на несуществующий канал
+* **B** NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
