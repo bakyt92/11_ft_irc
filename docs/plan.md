@@ -86,6 +86,7 @@
 * OPER регистрация клиентом самого себя в качестве оператора канала
 * MODE +ti
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
+* Если сразу две проблемы, он какое из сообщений об ошибке отправляется клиенту?
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
   + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
