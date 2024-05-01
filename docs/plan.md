@@ -2,7 +2,6 @@
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit  
 * JOIN отправляется всем пользователям канала - что именно им отправляется?  
   + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
-* MODE отправляется всем пользователям канала - что именно им отправляется?
 * KICK отправляется всем пользователям канала - что именно им отправляется?
 * QUIT отправляется всем пользователям канала - что именно им отправляется?
   + :dan-!d@localhost QUIT :Quit: Bye for now!
