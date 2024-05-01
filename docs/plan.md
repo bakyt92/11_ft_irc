@@ -2,7 +2,7 @@
 * JOIN отправляется всем пользователям канала - что именно им отправляется?
 * MODE отправляется всем пользователям канала - что именно им отправляется?
 * KICK отправляется всем пользователям канала - что именно им отправляется?
-* QUIT рассылаются ли кому-то сообщения?
+* QUIT отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG alice,alice hello
 * JOIN #сhannel,#сhannel
@@ -28,6 +28,12 @@
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
   + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?**
+
+## сравнить с irssi 
+* USER a 0 * a, USER a 0 * a
+* PASS c неправильным паролем
+* USER a 0 * ""
+* USER "" 0 * ""
 
 ## решённые проблемы
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала - РАБОТАЕТ (БАКЫТ)
