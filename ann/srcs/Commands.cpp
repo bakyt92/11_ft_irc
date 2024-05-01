@@ -208,7 +208,7 @@ int Server::execJoin() {
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        //prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " joined " + *chName); // надо что-то разослать всему каналу
+        prepareRespAuthorIncluding(chs[*chName], cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + cli->nick + " is joining " + *chName);
         prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + chs[*chName]->topic); // RPL_TOPIC
         prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не в точности RPL_NAMREPLY
       }
@@ -257,8 +257,7 @@ int Server::execKick() {
         if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
           prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick); // что разослать всему каналу?
-
+          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*targetCli, *chName);
         }
       }
