@@ -185,11 +185,24 @@ void Server::markClisToSendMsgsTo() {
 }
 
 Cli* Server::getCli(string &nick) {
-  //nick = toLower(nick);
   for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
-    if(it->second->nick == nick)
+    if(toLower(it->second->nick) == toLower(nick))
       return it->second;
   return NULL;
+}
+
+bool Server::isOnServ(string &nick) {
+  for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
+    if(toLower(it->second->nick) == toLower(nick))
+      return true
+  return false;
+}
+
+bool Server::isOnCh(string &nick, string chName) {
+  for(map<string, Ch* >::iterator it = chs[chName]->clis.begin(); it != chs[chName]->.end(); it++)
+    if(toLower(it->first) == toLower(nick))
+      return true
+  return false;
 }
 
 int Server::nbChannels(Cli *c) {

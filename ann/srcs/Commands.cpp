@@ -44,7 +44,7 @@ int Server::execPass() {
   if(ar.size() < 2 || ar[1] == "")
     return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar[1] == pass)
-     cli->passOk = true;
+    cli->passOk = true;
   if(cli->passOk && cli->nick != "" && cli->uName != "" && !cli->capInProgress)
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
@@ -121,9 +121,9 @@ int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (PRIVMSG)");                 // ERR_NORECIPIENT протестировать
+    return prepareResp(cli, "411 :No recipient given (PRIVMSG)");                       // ERR_NORECIPIENT
   if(ar.size() == 2)
-    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
+    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND
   if(ar[1][0] == '#' && chs.find(toLower(ar[1])) == chs.end())
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
   if(ar[1][0] != '#' && !getCli(ar[1]))
