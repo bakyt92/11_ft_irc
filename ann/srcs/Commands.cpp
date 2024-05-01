@@ -87,7 +87,8 @@ int Server::execCap() {
     return 0;
   if(ar[1] == "LS") {
     cli->capInProgress = true;
-    return prepareResp(cli, "CAP * LS :");
+    prepareResp(cli, "CAP * LS :");
+    return prepareResp(cli, "001");
   }
   if(ar[1] == "END" && cli->passOk && cli->nick != "" && cli->uName != "") {
     cli->capInProgress = false;
