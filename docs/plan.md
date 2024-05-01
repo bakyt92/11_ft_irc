@@ -27,7 +27,6 @@
 * test with the IRC client and nc at the same time (checklist)
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер (у Марии это есть)
-* sned() вернула 0? это значит клиент пропал или нет?
 * удалять пустые каналы и пустые poll
 * подстроиться к **irssi**
 * Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И для этих клиентских сокетов в проектах пиров не вызывается setsockopt.
@@ -58,6 +57,7 @@
   + des serveurs qui étaient déjà installés sur l’application Hexchat
   + irc.ircgod.com:6667/6697
   + Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
+* sned() вернула 0, это не значит, что клиент пропал
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
