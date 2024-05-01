@@ -1,4 +1,4 @@
-## нерешённые проблемы связынне с irssi
+## нерешённые проблемы, связанные с irssi
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
 * Сравнить с irssi:
   + USER a 0 * a, USER a 0 * a
@@ -24,7 +24,7 @@
 * JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
 * test with irssi and nc at the same time (checklist)
 
-## нерешённые проблемы, не связынне с irssi
+## нерешённые проблемы, не связнные с irssi
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
@@ -33,33 +33,6 @@
 * удалять пустые каналы и пустые poll
 * Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И д
 * для этих клиентских сокетов в проектах пиров не вызывается setsockopt
-
-## проблемы второй срочности
-* low bandwidth (checklist) - **я не поняла, как**
-* NOTICE выдавать сообщение с каким-нибудь цветом
-* OPER регистрация клиентом самого себя в качестве оператора канала
-* MODE +ti
-* Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
-* PRIVMSG: verify that is **fully functional with different parameters** (checklist)
-  + **есть ли всё ещё в чеклисте это фраза?**
-  + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
-  + The server will only send the PRIVMSG to those who have a host matching the mask
-  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
-  + Wildcards are the '*' and '?'  characters. It is only available to operators.
-* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
-  + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
-* IRC channels
-  + [netsplit.de Search](https://netsplit.de/channels/ ) - Searches 563 different networks.
-  + [mibbit Search](https://search.mibbit.com) - Searches networks listed [here](https://search.mibbit.com/networks).
-  + [KiwiIRC Search](https://kiwiirc.com/search) - Searches 318 different networks.
-  + [#ubuntu](https://wiki.ubuntu.com/IRC/ChannelList)@Libera.Chat - Official Ubuntu support channel. ([rules](https://wiki.ubuntu.com/IRC/Guidelines))
-* сервер для тестов
-  + https://oragono.io/
-  + irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
-  + freenode
-  + des serveurs qui étaient déjà installés sur l’application Hexchat
-  + irc.ircgod.com:6667/6697
-  + Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
@@ -99,6 +72,33 @@
 * JOIN с паролем
 * в каналах сообщения из NC в IRSSI не поступают
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
+
+## проблемы второй срочности
+* low bandwidth (checklist) - **я не поняла, как**
+* NOTICE выдавать сообщение с каким-нибудь цветом
+* OPER регистрация клиентом самого себя в качестве оператора канала
+* MODE +ti
+* Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
+* PRIVMSG: verify that is **fully functional with different parameters** (checklist)
+  + **есть ли всё ещё в чеклисте это фраза?**
+  + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
+  + The server will only send the PRIVMSG to those who have a host matching the mask
+  + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
+  + Wildcards are the '*' and '?'  characters. It is only available to operators.
+* **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
+  + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
+* IRC channels
+  + [netsplit.de Search](https://netsplit.de/channels/ ) - Searches 563 different networks.
+  + [mibbit Search](https://search.mibbit.com) - Searches networks listed [here](https://search.mibbit.com/networks).
+  + [KiwiIRC Search](https://kiwiirc.com/search) - Searches 318 different networks.
+  + [#ubuntu](https://wiki.ubuntu.com/IRC/ChannelList)@Libera.Chat - Official Ubuntu support channel. ([rules](https://wiki.ubuntu.com/IRC/Guidelines))
+* сервер для тестов
+  + https://oragono.io/
+  + irssi: `/connect irc.freenode.net`, `/join #ubuntu,#ubuntuforums,#ubuntu+1`
+  + freenode
+  + des serveurs qui étaient déjà installés sur l’application Hexchat
+  + irc.ircgod.com:6667/6697
+  + Don’t use libera.chat as a testing server, it use a lot of ircv3.0 features
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
