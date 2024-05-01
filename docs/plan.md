@@ -17,6 +17,7 @@
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
 * протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
+* TOPIC должна расслыать всем какое-то сообщение?
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
  * JOIN #сhannel,#сhannel
