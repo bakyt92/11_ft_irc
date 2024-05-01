@@ -1,13 +1,11 @@
 ## Понять, как должен вести себя сервер
-* https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
-* JOIN отправляется всем пользователям канала - что именно им отправляется?
+* https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit  
+* JOIN отправляется всем пользователям канала - что именно им отправляется?  
   + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
-* MODE отправляется всем пользователям канала - что именно им отправляется?
 * KICK отправляется всем пользователям канала - что именно им отправляется?
 * QUIT отправляется всем пользователям канала - что именно им отправляется?
   + :dan-!d@localhost QUIT :Quit: Bye for now!
   + ; dan- is exiting the network with the message: "Quit: Bye for now!"
-* PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG alice,alice hello
 * JOIN #channel, JOIN #channel
 * MODE #ch
@@ -23,8 +21,6 @@
 * INVITE на несуществующий канал
 * NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
-
-
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
 
