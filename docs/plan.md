@@ -89,7 +89,6 @@
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
   + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
 * low bandwidth (checklist) - **я не поняла, как протестировать**
-* NOTICE выдавать сообщение с каким-нибудь цветом
 * OPER регистрация клиентом самого себя в качестве оператора канала
 * MODE +ti
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
