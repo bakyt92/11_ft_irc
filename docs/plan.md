@@ -10,12 +10,14 @@
 * **B** PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
 * **B** PRIVMSG alice,alice,alice,alice,alice,alice
 * **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
-  + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
   + sends the user a message asking them if they want to join you in the indicated channel
+  + то есть клиент не попадает сразу на канал
+  + как клиент должен выразить своё согласие?
+  + клиент должен сделать JOIN?
 * **B** INVITE на несуществующий канал
 * **B** NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
-* **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
+* **JOIN #channel в irssi после этого все сообщения по умолчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
 * протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * TOPIC должна расслыать всем какое-то сообщение?
