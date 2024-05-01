@@ -22,6 +22,10 @@ void Server::sigHandler(int sig) {
   (void)sig;
 }
 
+// SOL_SOCKET = установка параметров на уровне сокета
+// 1 настройка = (optname, optval, optlen)
+// SO_KEEPALIVE отслеживаниe на серверной стороне клиентских соединений и их принудительного отключения
+
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler); // catch ctrl + c
@@ -34,24 +38,23 @@ void Server::init() {
   sigReceived = false;
   struct addrinfo hints, *listRes;
   std::memset(&hints, 0, sizeof(hints));
-  hints.ai_family   = AF_INET;
+  hints.ai_family   = AF_INET;      // the address family AF_INET =r IPv4
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags    = AI_PASSIVE;
   if(getaddrinfo(NULL, port.c_str(), &hints, &listRes))
     throw std::runtime_error("getaddrinfo error: [" + std::string(strerror(errno)) + "]");
-  int notUsed = 1;
-  for(struct addrinfo* hint = listRes; hint != NULL; hint = hint->ai_next) {
+  int optVal = 1;
+  for(struct addrinfo* hint = listRes; hint != NULL; hint = hint->ai_next)
     if((fdForNewClis = socket(hint->ai_family, hint->ai_socktype, hint->ai_protocol)) < 0)
       throw std::runtime_error("function socket error: [" + std::string(strerror(errno)) + "]");
-    else if(setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR , &notUsed, sizeof(notUsed)))
+    else if(setsockopt(fdForNewClis, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &optVal, sizeof(optVal)))
       throw std::runtime_error("setsockopt error: [" + std::string(strerror(errno)) + "]");
-    else if(bind(fdForNewClis, hint->ai_addr, hint->ai_addrlen)) { 
+    else if(bind(fdForNewClis, hint->ai_addr, hint->ai_addrlen)) {
       close(fdForNewClis);
-      hint->ai_next == NULL ? throw std::runtime_error("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error"); // tested
+      hint->ai_next == NULL ? throw std::runtime_error("bind error: [" + std::string(strerror(errno)) + "]") : perror("bind error");
     }
     else
       break ;
-  }
   freeaddrinfo(listRes);
   if(listen(fdForNewClis, SOMAXCONN))
     throw std::runtime_error("listen error: [" + std::string(strerror(errno)) + "]");
@@ -84,14 +87,14 @@ void Server::run() {
   std::cout << "Terminated\n";
 }
 
+// inet_ntoa() converts the Internet host address in, given in network byte order, to a string in IPv4 dotted-decimal notation
 void Server::addNewClient(pollfd poll) {
   struct sockaddr sa;
   socklen_t       saLen = sizeof(sa);
   int fdForMsgs = accept(poll.fd, &sa, &saLen);                                       // у каждого клиента свой fd для сообщений
   if(fdForMsgs == -1)
     return perror("accept");
-  struct Cli *newCli = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));
-  clis[fdForMsgs] = newCli;
+  clis[fdForMsgs] = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));;
   struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
   polls.push_back(pollForMsgs);
   cout << "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n\n";
