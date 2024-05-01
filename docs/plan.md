@@ -33,7 +33,8 @@
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
   + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
-* Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (checklist) - у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?
+* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
+  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?**
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
