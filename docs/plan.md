@@ -1,10 +1,9 @@
-## нерешённые проблемы, связанные с irssi
+## сравнить с irssi
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
-* Сравнить с irssi:
-  + USER a 0 * a, USER a 0 * a
-  + PASS c неправильным паролем
-  + USER a 0 * ""
-  + USER "" 0 * ""
+* USER a 0 * a, USER a 0 * a
+* PASS c неправильным паролем
+* USER a 0 * ""
+* USER "" 0 * ""
 * PRIVMSG alice,alice hello
 * JOIN #сhannel,#сhannel
 * JOIN #channel, JOIN #channel
