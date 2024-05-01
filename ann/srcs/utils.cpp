@@ -185,6 +185,7 @@ void Server::markClisToSendMsgsTo() {
 }
 
 Cli* Server::getCli(string &nick) {
+  nick = toLower(nick);
   for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
     if(it->second->nick == nick)
       return it->second;

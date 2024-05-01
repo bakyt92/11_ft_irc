@@ -73,8 +73,8 @@ int Server::execNick() {
 int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
-  if(cli->uName != "")  // cli->rName != "" ? т.к. uName и rName у нас всегда устанавлиается одной командой, то достаточно только один из них проверить
-    return prepareResp(cli, "462 :Unauthorized command (already registered)");           // ERR_ALREADYREGISTRED тут надо протестировать!
+  if(cli->uName != "")  // uName и rName у нас всегда устанавлиается одной командой, то достаточно только один из них проверить
+    return prepareResp(cli, "462 :Unauthorized command (already registered)");          // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && !cli->capInProgress)
@@ -106,11 +106,10 @@ int Server::execWhois() {
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   std::vector<string> nicks = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++) {
-    *nick = toLower(*nick);
     if(getCli(*nick) == NULL)
       prepareResp(cli, "401 :" + *nick + " No such nick");                              // ERR_NOSUCHNICK
     else
-      prepareResp(cli, getCli(*nick)->nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
+      prepareResp(cli, *nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
   }
   return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
 }
@@ -135,7 +134,7 @@ int Server::execPrivmsg() {
     else if((*to)[0] == '#')
       prepareRespAuthorIncluding(chs[*to], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");               // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel");               // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
       prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
@@ -217,7 +216,7 @@ int Server::execPart() {
     return prepareResp(cli, "461 PART :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   vector<string> chNames = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
-    *chName = toLower(*chName);                                                         // проверить toLower
+    *chName = toLower(*chName);
     if(chs.find(*chName) == chs.end())
       prepareResp(cli, "403 " + *chName + " :No such channel");                        // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
@@ -239,7 +238,7 @@ int Server::execKick() {
   std::vector<string> chNames    = splitArgToSubargs(ar[1]);
   std::vector<string> targetClis = splitArgToSubargs(ar[2]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
-    *chName = toLower(*chName);                                                         // проверить toLower
+    *chName = toLower(*chName);
     if(chs.find(*chName) == chs.end())
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end()) 
@@ -286,7 +285,7 @@ int Server::execTopic() {
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );               // ERR_NOTREGISTERED
   if(ar.size() < 2)
     return prepareResp(cli, "461 TOPIC :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  string chName = toLower(ar[1]);                                                        // проверить toLower
+  string chName = toLower(ar[1]);
   if(chs.find(chName) == chs.end())
     return prepareResp(cli, "403 " + chName + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if (ar.size() == 3 && (ar[2] == "" || ar[2] == ":")) {
