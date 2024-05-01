@@ -61,10 +61,10 @@ int Server::execNick() {
       return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
     else if (toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick == "") {
       fdsToEraseNextIteration.insert(cli->fd);
-      return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");            // ERR_NICKNAMEINUSE
+      return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");            // ERR_NICKNAMEOLLISION
     }
   }
-  if (cli->nick == "" && cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
+  if (cli->nick == "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   cli->nick = ar[1];
   return 0;
@@ -73,7 +73,7 @@ int Server::execNick() {
 int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
-  if(cli->uName != "")  // uName и rName у нас всегда устанавлиается одной командой, то достаточно только один из них проверить
+  if(cli->uName != "")
     return prepareResp(cli, "462 :Unauthorized command (already registered)");          // ERR_ALREADYREGISTRED тут надо протестировать!
   cli->uName = ar[1];
   cli->rName = ar[4];
@@ -111,7 +111,7 @@ int Server::execWhois() {
       prepareResp(cli, "401 :" + *nick + " No such nick");                              // ERR_NOSUCHNICK
     else {
       prepareResp(cli, "311 " + *nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
-      prepareResp(cli, "318 " + *nick + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
+      prepareResp(cli, "318 " + *nick + " :End of WHOIS list");                         // RPL_ENDOFWHOIS
     }
   return 0;
 }
@@ -139,11 +139,11 @@ int Server::execPrivmsg() {
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
-      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                        // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));               // ERR_NOSUCHNICK
     else if((*to)[0] == '#')
       prepareRespAuthorIncluding(chs[*to], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                      // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));               // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
       prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
@@ -210,7 +210,7 @@ int Server::execJoin() {
         chs[*chName]->clis.insert(cli);
         prepareRespAuthorIncluding(chs[*chName], cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + cli->nick + " is joining " + *chName);
         prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + chs[*chName]->topic); // RPL_TOPIC
-        prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не в точности RPL_NAMREPLY
+        prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // RPL_NAMREPLY но не в точности
       }
     }
   return 0;
@@ -225,7 +225,7 @@ int Server::execPart() {
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     *chName = toLower(*chName);
     if(chs.find(*chName) == chs.end())
-      prepareResp(cli, "403 " + *chName + " :No such channel");                        // ERR_NOSUCHCHANNEL
+      prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
     else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
@@ -335,32 +335,34 @@ int Server::execMode() {
   if(chs[chName]->adms.find(cli) == chs[chName]->adms.end())
     return prepareResp(cli, "482 " + chName + " :You're not channel operator");         // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
-    return prepareResp(cli, "324 " + chName + "  " + mode(chs[chName]));                // RPL_CHANNELMODEIS разослать всему каналу?
-  if(ar.size() == 3 && ar[2] == "+i")
-    return (chs[chName]->optI = true);
-  if(ar.size() == 3 && ar[2] == "-i")
-    return (chs[chName]->optI = false);
-  if(ar.size() == 3 && ar[2] == "+t")
-    return (chs[chName]->optT = true);
-  if(ar.size() == 3 && ar[2] == "-t")
-    return (chs[chName]->optT = false);
-  if(ar.size() == 3 && ar[2] == "-l")
-    return chs[chName]->limit = std::numeric_limits<unsigned int>::max();
-  if(ar.size() == 3 && ar[2] == "-k")
-    return (chs[chName]->pass = "", 0);
+    return prepareResp(cli, "MODE " + chName + " " + mode(chs[chName]));                // RPL_CHANNELMODEIS
   if(ar.size() == 3 && (ar[2] == "+k" || ar[2] == "+l" || ar[2] == "+o" || ar[2] == "-o"))
+    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEED  && ar[2] &= "-t")MOREPARAMS
+  if(ar.size() == 3 && ar[2] != "+i" && ar[2] != "-i" && ar[2] != "+t" && ar[2] != "-t" && ar[2] != "-l" && ar[2] != "-k")
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(ar.size() == 3)
-    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(ar[2] == "+k" && chs[chName]->pass != "")
+  if(ar.size() >= 4 && ar[2] == "+k" && chs[chName]->pass != "")
     return prepareResp(cli, "467 " + chName + " :Channel key already set");             // ERR_KEYSET
-  if(ar[2] == "+k")
-    return (chs[chName]->pass = ar[3], 0);
-  if(ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
-    return (chs[chName]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10)), 0);
-  if(ar[2] == "+o")
+  if(ar.size() >= 4 && ar[2] == "+o" && chs[chName]->clis.count(getCli(ar[3])) > 0) //// проблема большие маленькие
     return prepareResp(cli, "441 " + ar[3] + " " + chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
-  if(ar[2] == "-o")
-    return chs[chName]->adms.erase(getCli(ar[3]));
-  return prepareResp(cli, "472 " + ar[0] + " " + chName + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
+  if(ar.size() == 3 && ar[2] == "+i")
+    chs[chName]->optI = true;
+  else if(ar.size() == 3 && ar[2] == "-i")
+    chs[chName]->optI = false;
+  else if(ar.size() == 3 && ar[2] == "+t")
+    chs[chName]->optT = true;
+  else if(ar.size() == 3 && ar[2] == "-t")
+    chs[chName]->optT = false;
+  else if(ar.size() == 3 && ar[2] == "-l")
+    chs[chName]->limit = std::numeric_limits<unsigned int>::max();
+  else if(ar.size() == 3 && ar[2] == "-k")
+    chs[chName]->pass = "";
+  else if(ar.size() >= 4 && ar[2] == "+k")
+    chs[chName]->pass = ar[3];
+  else if(ar.size() >= 4 && ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
+    chs[chName]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10));
+  else if(ar.size() >= 4 && ar[2] == "-o")
+    chs[chName]->adms.erase(getCli(ar[3]));
+  else
+    return prepareResp(cli, "472 " + ar[0] + " " + chName + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
+  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + chName + " " + mode(chs[chName]));
 }

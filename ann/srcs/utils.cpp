@@ -29,7 +29,7 @@ string Server::mode(Ch *ch) {
     mode += "l";
   if (mode == "+")
     mode = "";
-  mode += users(ch);
+  mode += " " + users(ch);
   return mode;
 }
 
