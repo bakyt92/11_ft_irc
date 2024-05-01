@@ -57,23 +57,16 @@ int Server::execNick() {
   if(ar[1].size() > 9 || ar[1].find_first_not_of("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") != string::npos)
     return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
   for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
-    if(toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick != "") {
-      // fdsToEraseNextIteration.insert(cli->fd); <== Не нужно удалять пользователя, т.к. он текущий.
-      // он удаляется не сразу, а только в начале следующей итерации главного цикла, тут мы его просто пометили для удаления
+    if(toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick != "")
       return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
-    }
     else if (toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick == "") {
       fdsToEraseNextIteration.insert(cli->fd);
       return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");            // ERR_NICKNAMEINUSE
     }
   }
-  if (cli->nick == "") {
-    cli->nick = ar[1];
-    if(cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
-      prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
-  }
-  else
-    cli->nick = ar[1];
+  if (cli->nick == "" && cli->uName != "" && cli->passOk && !cli->capInProgress)                            // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
+    prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+  cli->nick = ar[1];
   return 0;
 }
 
