@@ -57,8 +57,12 @@ string Server::infoCmd() {          // debugging
 
 string Server::infoServ() {        // debugging
   string ret;
+  string myChar;
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
       {
+        myChar = it->second->passOk  ? 'T' : 'F';
+        ret += "My client                 : [[" + it->second->nick + "] with bufR = [" + it->second->bufRecv + "] with rName = "+ it->second->rName + "] username " + it->second->uName + " / pass:" + myChar + "]\n";
+      }
   ret += "My polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
