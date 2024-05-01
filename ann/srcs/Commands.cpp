@@ -131,17 +131,17 @@ int Server::execPrivmsg() {
   else if (ar[1][0] != '#') 
   {
     for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-      *to = (*to);
+      *to = *to;
   }
   if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
-      prepareResp(cli, "401 " + *to + " :No such nick/channel");                        // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                        // ERR_NOSUCHNICK
     else if((*to)[0] == '#')
       prepareRespAuthorIncluding(chs[*to], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + *to + " :No such nick/channel");               // ERR_NOSUCHNICK
+      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                      // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
       prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
