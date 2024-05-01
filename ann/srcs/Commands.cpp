@@ -165,7 +165,7 @@ int Server::execJoin() {
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
-      return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels"); // ERR_TOOMANYCHANNELS
+      return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels");  // ERR_TOOMANYCHANNELS
     else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL ?
     else {
@@ -308,13 +308,15 @@ int Server::execMode() {
   if(ar.size() == 2)
     return prepareResp(cli, "MODE " + ar[1] + " " + mode(getCh(ar[1])));                // RPL_CHANNELMODEIS
   if(ar.size() == 3 && (ar[2] == "+k" || ar[2] == "+l" || ar[2] == "+o" || ar[2] == "-o"))
-    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEED  && ar[2] &= "-t")MOREPARAMS
+    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar.size() == 3 && ar[2] != "+i" && ar[2] != "-i" && ar[2] != "+t" && ar[2] != "-t" && ar[2] != "-l" && ar[2] != "-k")
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar.size() >= 4 && ar[2] == "+k" && getCh(ar[1])->pass != "")
-    return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");             // ERR_KEYSET
+    return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");              // ERR_KEYSET
   if(ar.size() >= 4 && ar[2] == "+o" && getCliOnCh(ar[3], ar[1]) == NULL)
     return prepareResp(cli, "441 " + ar[3] + " " + ar[1] + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
+  if(ar.size() >= 4 && ar[2] == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
+    return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
   if(ar.size() == 3 && ar[2] == "+i")
     getCh(ar[1])->optI = true;
   else if(ar.size() == 3 && ar[2] == "-i")
@@ -335,5 +337,5 @@ int Server::execMode() {
     getCh(ar[1])->adms.erase(getCli(ar[3]));
   else
     return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
-  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1] + " " + mode(getCh(ar[1])));
+  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]);
 }

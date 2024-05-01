@@ -29,7 +29,7 @@ string Server::mode(Ch *ch) {
     mode += "l";
   if (mode == "+")
     mode = "";
-  mode += " " + users(ch);
+  mode += ", " + users(ch);
   return mode;
 }
 
@@ -63,7 +63,7 @@ string Server::infoServ() {        // debugging
     ret += "My client                 : [nick = " + it->second->nick + ", bufR = [" + it->second->bufRecv + "], rName = ["+ it->second->rName + "], uName = " + it->second->uName + ", passOk = " + myChar + "]\n";
   }
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
-    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", mode = " + mode(ch->second) + "\n";
+    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", limit = " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->second->limit) )).str() + ", mode = " + mode(ch->second) + "\n";
   ret += "My polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
