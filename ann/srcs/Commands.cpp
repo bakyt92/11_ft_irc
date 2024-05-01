@@ -123,8 +123,16 @@ int Server::execPrivmsg() {
   if(ar.size() == 2)
     return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
   vector<string> tos = splitArgToSubargs(ar[1]);
-  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    *to = toLower(*to);
+  if (ar[1][0] == '#') 
+  {
+    for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+      *to = toLower(*to);
+  }
+  else if (ar[1][0] != '#') 
+  {
+    for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+      *to = (*to);
+  }
   if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
