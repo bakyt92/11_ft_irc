@@ -25,6 +25,7 @@
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала ?
+* в каналах сообщения из NC в IRSSI не поступают
 * test with irssi and nc at the same time (checklist)
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 * удалять пустые каналы и пустые poll
