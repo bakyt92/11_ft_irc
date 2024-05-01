@@ -105,12 +105,11 @@ int Server::execWhois() {
   if(ar.size() < 2)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   std::vector<string> nicks = splitArgToSubargs(ar[1]);
-  for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++) {
+  for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(*nick) == NULL)
       prepareResp(cli, "401 :" + *nick + " No such nick");                              // ERR_NOSUCHNICK
     else
       prepareResp(cli, *nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
-  }
   return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
 }
 
@@ -124,7 +123,7 @@ int Server::execPrivmsg() {
     return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
   vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    *to = *to;
+    *to = toLower(*to);
   set<std::string> tosSet(tos.begin(), tos.end());                                      // то же самое но без дубликатов
   if(tosSet.size() < tos.size() || tos.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
@@ -179,7 +178,7 @@ int Server::execJoin() {
     *chName = toLower(*chName);                                                         // проверить toLower
   set<std::string> tosSet(chNames.begin(), chNames.end());
   if (tosSet.size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");                // ERR_TOOMANYTARGETS сколько именно можно?
+    return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");       // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
