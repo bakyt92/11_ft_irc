@@ -1,4 +1,4 @@
-  ## нерешённые проблемы
+## нерешённые проблемы связынне с irssi
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
 * Сравнить с irssi:
   + USER a 0 * a, USER a 0 * a
@@ -22,11 +22,13 @@
   + сначала NICK, потом PASS
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
+* test with irssi and nc at the same time (checklist)
+
+## нерешённые проблемы, не связынне с irssi
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала ?
-* test with irssi and nc at the same time (checklist)
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 * удалять пустые каналы и пустые poll
 * Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И д
