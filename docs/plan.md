@@ -16,6 +16,7 @@
 * WHOIS alice (до регистрации)
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
+* протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
@@ -25,10 +26,6 @@
 * USER a 0 * a, USER a 0 * a  - no command USER on IRSSI
 * PASS c неправильным паролем
 * JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально? <== решили игнорировать, это нормальное поведение. 
-
-## Другие проблемы
-* MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
-* **A** ник с большими и маленькими букваим
 
 ## решённые проблемы
 * сначала NICK, потом PASS - некритична последовательность, только важно выполнение 3 условий (наличие ника, юзернейма, совпадение пароля)
