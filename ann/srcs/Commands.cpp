@@ -116,55 +116,33 @@ int Server::execWhois() {
   return 0;
 }
 
-// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY
+// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY ERR_TOOMANYTARGETS
 int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")");                 // ERR_NORECIPIENT протестировать
+    return prepareResp(cli, "411 :No recipient given (PRIVMSG)");                 // ERR_NORECIPIENT протестировать
   if(ar.size() == 2)
     return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
-  vector<string> tos = splitArgToSubargs(ar[1]);
-  if (ar[1][0] == '#') 
-  {
-    for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-      *to = toLower(*to);
-  }
-  else if (ar[1][0] != '#') 
-  {
-    for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-      *to = *to;
-  }
-  if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
-  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
-      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));               // ERR_NOSUCHNICK
-    else if((*to)[0] == '#')
-      prepareRespAuthorIncluding(chs[*to], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
-    else if((*to)[0] != '#' && !getCli(*to))
-      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));               // ERR_NOSUCHNICK
-    else if((*to)[0] != '#')
-      prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+  if(ar[1][0] == '#' && chs.find(toLower(ar[1])) == chs.end())
+    return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
+  if(ar[1][0] != '#' && !getCli(ar[1]))
+    return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
+  if(ar[1][0] == '#')
+    return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+  if(ar[1][0] != '#')
+    return prepareResp(getCli(ar[1]), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
 }
 
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY
 int Server::execNotice() {
-  if(!cli->passOk || cli->nick== "" || cli->uName == "")
-    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
-  if(ar.size() < 3)
+  if(!cli->passOk || cli->nick== "" || cli->uName == "" || ar.size() < 3)
     return 0;
-  vector<string> tos = splitArgToSubargs(ar[1]);
-  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    *to = toLower(*to);
-  if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > 10)
-    return 0;
-  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
-    if((*to)[0] == '#' && chs.find(toLower(*to)) != chs.end())
-      prepareRespExceptAuthor(chs[*to], ": " + cli->nick + ": " + ar[2]);
-    else if((*to)[0] != '#' && getCli(*to))
-      prepareResp(getCli(*to), ": " + cli->nick + ": " + ar[2]);
+  if(ar[1][0] == '#' && chs.find(toLower(ar[1])) != chs.end())
+    return prepareRespExceptAuthor(chs[ar[1]], ": " + cli->nick + ": " + ar[2]);
+  if(ar[1][0] != '#' && getCli(ar[1]))
+    return prepareResp(getCli(ar[1]), ": " + cli->nick + ": " + ar[2]);
   return 0;
 }
 
