@@ -21,8 +21,9 @@
 * test with irssi and nc at the same time (checklist)
 * протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * TOPIC должна расслыать всем какое-то сообщение?
-* протестиовать все функции с valgrind с несуществущими каналами и пользователями 
 * просмотреть комментарии в коде, там есть вопросительные знаки
+* протестиовать все функции с valgrind с несуществущими каналами и пользователями
+* протестировать все случаи ошибок, которые есть в коде
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
  * JOIN #сhannel,#сhannel
