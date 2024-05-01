@@ -24,7 +24,6 @@
 * JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
-* MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала ?
 * test with irssi and nc at the same time (checklist)
@@ -97,6 +96,7 @@
 * MODE #ch -t : любой продписанный на канал может менят топик
 * JOIN с паролем
 * в каналах сообщения из NC в IRSSI не поступают
+* MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
