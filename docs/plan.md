@@ -28,8 +28,6 @@
 
 ## Другие проблемы
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
-* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
-  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
 * **A** ник с большими и маленькими букваим
 
 ## решённые проблемы
@@ -85,7 +83,9 @@
   + ; dan- is exiting the network with the message: "Quit: Bye for now!"
 
 ## проблемы второй срочности
-* low bandwidth (checklist) - **я не поняла, как**
+* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
+  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
+* low bandwidth (checklist) - **я не поняла, как протестировать**
 * NOTICE выдавать сообщение с каким-нибудь цветом
 * OPER регистрация клиентом самого себя в качестве оператора канала
 * MODE +ti
