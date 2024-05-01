@@ -29,9 +29,10 @@
 
 ## нерешённые проблемы, не связнные с irssi
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
-* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
+  + * **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 
 ## решённые проблемы
