@@ -124,8 +124,7 @@ int Server::execPrivmsg() {
   vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     *to = toLower(*to);
-  set<std::string> tosSet(tos.begin(), tos.end());                                      // то же самое но без дубликатов
-  if(tosSet.size() < tos.size() || tos.size() > MAX_NB_TARGETS)
+  if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
@@ -148,8 +147,7 @@ int Server::execNotice() {
   vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     *to = toLower(*to);
-  set<std::string> tosSet(tos.begin(), tos.end());
-  if(tosSet.size() < tos.size() || tos.size() > 10)
+  if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > 10)
     return 0;
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) != chs.end())
@@ -176,8 +174,7 @@ int Server::execJoin() {
   vector<string> chNames = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     *chName = toLower(*chName);                                                         // проверить toLower
-  set<std::string> tosSet(chNames.begin(), chNames.end());
-  if (tosSet.size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
+  if ((set<std::string>(chNames.begin(), chNames.end())).size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");       // ERR_TOOMANYTARGETS сколько именно можно?
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
