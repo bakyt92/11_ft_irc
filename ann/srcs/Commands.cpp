@@ -124,9 +124,9 @@ int Server::execPrivmsg() {
     return prepareResp(cli, "411 :No recipient given (PRIVMSG)");                       // ERR_NORECIPIENT
   if(ar.size() == 2)
     return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND
-  if(ar[1][0] == '#' && chs.find(toLower(ar[1])) == chs.end())
+  if(ar[1][0] == '#' && getCh(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
-  if(ar[1][0] != '#' && !getCli(ar[1]))
+  if(ar[1][0] != '#' && getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
   if(ar[1][0] == '#')
     return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
@@ -135,13 +135,12 @@ int Server::execPrivmsg() {
   return 0;
 }
 
-// not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY
 int Server::execNotice() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "" || ar.size() < 3)
     return 0;
-  if(ar[1][0] == '#' && chs.find(toLower(ar[1])) != chs.end())
+  if(ar[1][0] == '#' && getCh(ar[1]) != NULL)
     return prepareRespExceptAuthor(chs[ar[1]], ": " + cli->nick + ": " + ar[2]);
-  if(ar[1][0] != '#' && getCli(ar[1]))
+  if(ar[1][0] != '#' && getCli(ar[1]) != NULL)
     return prepareResp(getCli(ar[1]), ": " + cli->nick + ": " + ar[2]);
   return 0;
 }
@@ -161,34 +160,33 @@ int Server::execJoin() {
     return execPart();
   }
   vector<string> chNames = splitArgToSubargs(ar[1]);
-  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
-    *chName = toLower(*chName);                                                         // проверить toLower
   if ((set<std::string>(chNames.begin(), chNames.end())).size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");       // ERR_TOOMANYTARGETS сколько именно можно?
+    return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");       // ERR_TOOMANYTARGETS
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
-      return prepareResp(cli, "405 " + ar[1] + "  :You have joined too many channels"); // ERR_TOOMANYCHANNELS сколько именно можно?
-    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)  // ^G ?
-      prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL сообщение точно правильное?
+      return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels"); // ERR_TOOMANYCHANNELS
+    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)
+      prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL сообщение
     else {
-      chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
+      if(getCh(*chName) == NULL)
+        chs[*chName] = new Ch(cli);
       string pass = "";
       if (passes.size() > 0) {
         pass = *(passes.begin());
         passes.erase(passes.begin());
       }
-      if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
+      if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
         prepareResp(cli, "475 " + *chName + " :Cannot join channel (+k)");              // ERR_BADCHANNELKEY
-      if(chs[*chName]->size() >= chs[*chName]->limit)
+      else if(getCh(*chName)->size() >= getCh(*chName)->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
-      else if(chs[*chName]->optI && cli->invits.find(*chName) == cli->invits.end())
+      else if(getCh(*chName)->optI && cli->invits.find(*chName) == cli->invits.end())
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
-        chs[*chName]->clis.insert(cli);
-        prepareRespAuthorIncluding(chs[*chName], cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + cli->nick + " is joining " + *chName);
-        prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + chs[*chName]->topic); // RPL_TOPIC
-        prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // RPL_NAMREPLY но не в точности
+        getCh(*chName)->clis.insert(cli);
+        prepareRespAuthorIncluding(getCh(*chName), cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + cli->nick + " is joining " + *chName);
+        prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC
+        prepareResp(cli, "353 " + *chName + " " + users(getCh(*chName)));               // RPL_NAMREPLY но не в точности
       }
     }
   return 0;
@@ -200,17 +198,15 @@ int Server::execPart() {
   if(ar.size() < 2)
     return prepareResp(cli, "461 PART :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   vector<string> chNames = splitArgToSubargs(ar[1]);
-  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
-    *chName = toLower(*chName);
-    if(chs.find(*chName) == chs.end())
+  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
+    if(getCh(*chName) == NULL)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
-    else if(chs[*chName]->clis.find(cli) == chs[*chName]->clis.end())
+    else if(getCliOnCh(cli->nick, *chName) == NULL)
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " quits " + *chName + (ar.size() >= 3 ? " : " + ar[2] : ""));
+      prepareRespAuthorIncluding(getCh(*chName), ": " + cli->nick + " quits " + *chName + (ar.size() >= 3 ? " : " + ar[2] : ""));
       eraseCliFromCh(cli->nick, *chName);
     }
-  }
   return 0;
 }
 
@@ -221,25 +217,23 @@ int Server::execKick() {
   if(ar.size() < 3)
     return prepareResp(cli, "461 KICK :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   std::vector<string> chNames    = splitArgToSubargs(ar[1]);
-  std::vector<string> targetClis = splitArgToSubargs(ar[2]);
-  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
-    *chName = toLower(*chName);
-    if(chs.find(*chName) == chs.end())
+  std::vector<string> targets = splitArgToSubargs(ar[2]);
+  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
+    if(getCh(*chName) == NULL)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
-    else if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(cli) == chs[*chName]->clis.end()) 
+    else if(getCliOnCh(cli->nick, *chName) == NULL)
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
-    else if(chs[*chName]->adms.find(cli) == chs[*chName]->adms.end()) 
+    else if(getAdmOnCh(cli->nick, *chName) == NULL)
       prepareResp(cli, "482 " + *chName + " :You're not channel operator");             // ERR_CHANOPRIVSNEEDED
     else {
-      for(vector<string>::iterator targetCli = targetClis.begin(); targetCli != targetClis.end(); targetCli++)
-        if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
-          prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
-        else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick);
-          eraseCliFromCh(*targetCli, *chName);
+      for(vector<string>::iterator target = targets.begin(); target != targets.end(); target++)
+        if(getCliOnCh(*target, *chName) == NULL)
+          prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
+        else {
+          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >= 4 ? ar[3] : "") + " " + *target + " is kicked from " + *chName + " by " + cli->nick);
+          eraseCliFromCh(*target, *chName);
         }
       }
-    }
   return 0;
 }
 
@@ -248,47 +242,45 @@ int Server::execInvite() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
-    return prepareResp(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS 
-  string chName = toLower(ar[2]);
-  if(chs.find(toLower(chName)) == chs.end())
-    return prepareResp(cli, "403 " + chName + " :No such channel");                      // ERR_NOSUCHCHANNEL ?
-  if(chs[chName]->adms.find(cli) == chs[chName]->adms.end()) 
-    return prepareResp(cli, "482 " + chName + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
-  if(chs[chName]->clis.find(cli) == chs[chName]->clis.end()) 
-    return prepareResp(cli, "442 " + chName + " :You're not on that channel");           // ERR_NOTONCHANNEL
+    return prepareResp(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS
   if(getCli(ar[1]) == NULL)
-    return prepareResp(cli, "401 " + ar[1] + " :No such nick");                          // ERR_NOSUCHNICK
-  if(chs[chName]->clis.find(getCli(ar[1])) != chs[chName]->clis.end()) 
-    return prepareResp(cli, "443 " + ar[1] + " " + chName + " :is already on channel");  // ERR_USERONCHANNEL
-  //getCli(ar[1])->invits.insert(chName);  <== удалить???
-  chs[chName]->clis.insert(getCli(ar[1])); 
-  return prepareRespAuthorIncluding(chs[chName], "341 " + chName + " " + ar[1]);         // RPL_INVITING
+    return prepareResp(cli, "401 " + ar[1] + " :No such nick");                         // ERR_NOSUCHNICK
+  if(getCh(ar[2]) == NULL)
+    return prepareResp(cli, "403 " + ar[2] + " :No such channel");                      // ERR_NOSUCHCHANNEL
+  if(getCliOnCh(cli, ar[2]) == NULL)
+    return prepareResp(cli, "442 " + ar[2] + " :You're not on that channel");           // ERR_NOTONCHANNEL
+  if(getCliOnCh(ar[1], ar[2]) != NULL)
+    return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
+  if(getAdmOnCh(cli, ar[2]) == NULL)
+    return prepareResp(cli, "482 " + ar[2] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
+  getCh(ar[2])->clis.insert(getCli(ar[1]));
+  return prepareRespAuthorIncluding(getCh(ar[2]), "341 " + ar[2] + " " + ar[1]);        // RPL_INVITING
 }
 
 int Server::execTopic() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
-    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );               // ERR_NOTREGISTERED
+    return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
-    return prepareResp(cli, "461 TOPIC :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  string chName = toLower(ar[1]);
-  if(chs.find(chName) == chs.end())
-    return prepareResp(cli, "403 " + chName + " :No such channel");                      // ERR_NOSUCHCHANNEL
+    return prepareResp(cli, "461 TOPIC :Not enough parameters");                        // ERR_NEEDMOREPARAMS
+  if(getCh(ar[1]) == NULL)
+    return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
+  if(ar.size() == 2 && getCh(ar[1])->topic == "")
+    return prepareResp(cli, "331 " + ar[1] + " :No topic is set");                      // RPL_NOTOPIC
+  if(ar.size() == 2 && getCh(ar[1])->topic != "")
+    return prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);               // RPL_TOPIC
   if (ar.size() == 3 && (ar[2] == "" || ar[2] == ":")) {
-    chs[chName]->topic = "";
-    return prepareResp(cli, "331 " + chName + " :No topic is set");                      // RPL_NOTOPIC
+    getCh(ar[1])->topic = "";
+    return prepareResp(cli, "331 " + ar[1] + " :No topic is set");                      // RPL_NOTOPIC
   }
-  if(ar.size() == 2 && chs[chName]->topic == "")
-    return prepareResp(cli, "331 " + chName + " :No topic is set");                      // RPL_NOTOPIC
-  if(ar.size() == 2 && chs[chName]->topic != "")
-    return prepareResp(cli, "332 " + chName + " :" + chs[chName]->topic);                // RPL_TOPIC
-  if(chs[chName]->clis.empty() || chs[chName]->clis.find(cli) == chs[chName]->clis.end()) 
-    return prepareResp(cli, "442 " + chName + " :You're not on that channel");           // ERR_NOTONCHANNEL
-  if(chs[chName]->adms.find(cli) == chs[chName]->adms.end()) 
-    return prepareResp(cli, "482 " + chName + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
-  if (chs[chName]->optT == true)
-    return prepareResp(cli, "477 " + ar[1] + " :Channel doesn't support modes");         // ERR_NOCHANMODES
-  chs[chName]->topic = ar[2];
-  return prepareRespAuthorIncluding(chs[chName], "332 " + chName + " :" + ar[2]);        // RPL_TOPIC
+  if(getCliOnCh(cli->nick, ar[1]))
+    return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");           // ERR_NOTONCHANNEL
+  if(getAdmOnCh(cli, ar[2]) == NULL)
+    return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
+  if (getCh(ar[1])->optT == true)
+    return prepareResp(cli, "477 " + ar[1] + " :Channel doesn't support modes");        // ERR_NOCHANMODES
+  getCh(ar[1])->topic = ar[2];
+  return prepareRespAuthorIncluding(getCh(ar[1]), "332 " + ar[1] + " :" + ar[2]);
+  return  prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " TOPIC :" + ar[1] + " " + ar[2]);
 }
 
 int Server::execQuit() {
@@ -303,44 +295,43 @@ int Server::execMode() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   char *notUsed;
-  string chName = toLower(ar[1]);
   if(ar.size() < 2)
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(chs.find(chName) == chs.end())
-    return prepareResp(cli, "403 " + chName + " :No such channel");                     // ERR_NOSUCHCHANNEL
-  if(chs[chName]->clis.empty() || chs[chName]->clis.find(cli) == chs[chName]->clis.end()) 
-    return prepareResp(cli, "442 " + chName + " :You're not on that channel");          // ERR_NOTONCHANNEL
-  if(chs[chName]->adms.find(cli) == chs[chName]->adms.end())
-    return prepareResp(cli, "482 " + chName + " :You're not channel operator");         // ERR_CHANOPRIVSNEEDED
+  if(getCh(ar[1]) == NULL)
+    return prepareResp(cli, "403 " + ar[1] + " :No such channel");                     // ERR_NOSUCHCHANNEL
+  if(getCh(ar[1])->clis.empty() || getCliOnCh(cli->nick, ar[1]) == NULL)
+    return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");          // ERR_NOTONCHANNEL
+  if(getAdmOnCh(cli->nick, ar[1]) == NULL)
+    return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");         // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
-    return prepareResp(cli, "MODE " + chName + " " + mode(chs[chName]));                // RPL_CHANNELMODEIS
+    return prepareResp(cli, "MODE " + ar[1] + " " + mode(getCh(ar[1])));                // RPL_CHANNELMODEIS
   if(ar.size() == 3 && (ar[2] == "+k" || ar[2] == "+l" || ar[2] == "+o" || ar[2] == "-o"))
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEED  && ar[2] &= "-t")MOREPARAMS
   if(ar.size() == 3 && ar[2] != "+i" && ar[2] != "-i" && ar[2] != "+t" && ar[2] != "-t" && ar[2] != "-l" && ar[2] != "-k")
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(ar.size() >= 4 && ar[2] == "+k" && chs[chName]->pass != "")
-    return prepareResp(cli, "467 " + chName + " :Channel key already set");             // ERR_KEYSET
-  if(ar.size() >= 4 && ar[2] == "+o" && chs[chName]->clis.count(getCli(ar[3])) > 0) //// проблема большие маленькие
-    return prepareResp(cli, "441 " + ar[3] + " " + chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
+  if(ar.size() >= 4 && ar[2] == "+k" && getCh(ar[1])->pass != "")
+    return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");             // ERR_KEYSET
+  if(ar.size() >= 4 && ar[2] == "+o" && getCliOnCh(ar[3], ar[1]))
+    return prepareResp(cli, "441 " + ar[3] + " " + ar[1] + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
   if(ar.size() == 3 && ar[2] == "+i")
-    chs[chName]->optI = true;
+    getCh(ar[1])->optI = true;
   else if(ar.size() == 3 && ar[2] == "-i")
-    chs[chName]->optI = false;
+    getCh(ar[1])->optI = false;
   else if(ar.size() == 3 && ar[2] == "+t")
-    chs[chName]->optT = true;
+    getCh(ar[1])->optT = true;
   else if(ar.size() == 3 && ar[2] == "-t")
-    chs[chName]->optT = false;
+    getCh(ar[1])->optT = false;
   else if(ar.size() == 3 && ar[2] == "-l")
-    chs[chName]->limit = std::numeric_limits<unsigned int>::max();
+    getCh(ar[1])->limit = std::numeric_limits<unsigned int>::max();
   else if(ar.size() == 3 && ar[2] == "-k")
-    chs[chName]->pass = "";
+    getCh(ar[1])->pass = "";
   else if(ar.size() >= 4 && ar[2] == "+k")
-    chs[chName]->pass = ar[3];
+    getCh(ar[1])->pass = ar[3];
   else if(ar.size() >= 4 && ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
-    chs[chName]->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10));
+    getCh(ar[1])->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10));
   else if(ar.size() >= 4 && ar[2] == "-o")
-    chs[chName]->adms.erase(getCli(ar[3]));
+    getCh(ar[1])->adms.erase(getCli(ar[3]));
   else
-    return prepareResp(cli, "472 " + ar[0] + " " + chName + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
-  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + chName + " " + mode(chs[chName]));
+    return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
+  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1] + " " + mode(getCh(ar[1])));
 }

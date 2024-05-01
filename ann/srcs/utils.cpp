@@ -90,8 +90,8 @@ vector<string> Server::splitCmdToArgs(string s) {
     parts.push_back(s);
   if(afterColon.size() > 0)
     parts.push_back(afterColon);
-  if(parts.size() > 16)
-    parts.resize(16);
+  if(parts.size() > 17)
+    parts.resize(17);
   return parts;
 }
 
@@ -191,18 +191,33 @@ Cli* Server::getCli(string &nick) {
   return NULL;
 }
 
-bool Server::isOnServ(string &nick) {
-  for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
-    if(toLower(it->second->nick) == toLower(nick))
-      return true
-  return false;
+Ch* Server::getCh(string &chName) {
+  for(map<string, Ch* >::iterator it = chs.begin(); it != chs.end(); it++)
+    if(toLower(it->first) == toLower(chName))
+      return it->second;
+  return NULL;
 }
 
-bool Server::isOnCh(string &nick, string chName) {
-  for(map<string, Ch* >::iterator it = chs[chName]->clis.begin(); it != chs[chName]->.end(); it++)
-    if(toLower(it->first) == toLower(nick))
-      return true
-  return false;
+Cli* Server::getCliOnCh(string &nick, string chName) {
+  for(set<Cli*>::iterator it = chs[chName]->clis.begin(); it != chs[chName]->clis.end(); it++)
+    if(toLower((*it)->nick) == toLower(nick))
+      return *it;
+  return NULL;
+}
+
+Cli* Server::getCliOnCh(Cli* cli, string chName) {
+  return getCliOnCh(cli->nick, chName);
+}
+
+Cli* Server::getAdmOnCh(string &nick, string chName) {
+  for(set<Cli*>::iterator it = chs[chName]->adms.begin(); it != chs[chName]->adms.end(); it++)
+    if(toLower((*it)->nick) == toLower(nick))
+      return *it;
+  return NULL;
+}
+
+Cli* Server::getAdmOnCh(Cli* cli, string chName) {
+  return getAdmOnCh(cli->nick, chName);
 }
 
 int Server::nbChannels(Cli *c) {

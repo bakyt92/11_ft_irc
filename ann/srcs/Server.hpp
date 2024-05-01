@@ -104,8 +104,11 @@ public:
 // utils:
   static  void             sigHandler(int sig);
   Cli*                     getCli(string &name);
-  bool                     isOnServ(string &nick);
-  bool                     isOnCh(string &nick, string chName);
+  Cli*                     getCliOnCh(string &nick, string chName);
+  Cli*                     getCliOnCh(Cli* cli, string chName);
+  Cli*                     getAdmOnCh(string &nick, string chName);
+  Cli*                     getAdmOnCh(Cli* cli, string chName);
+  Ch*                      getCh(string &chName);
   int                      nbChannels(Cli *c);
   void                     eraseCliFromCh(string nick, string chName);
   void                     eraseEmptyChs();
