@@ -185,8 +185,8 @@ int Server::execJoin() {
     else {
       chs[*chName] = (chs.find(*chName) == chs.end()) ? new Ch(cli) : chs[*chName];
       string pass = "";
-      if (passes.size() > 1) {
-        string pass = *(passes.begin());
+      if (passes.size() > 0) {
+        pass = *(passes.begin());
         passes.erase(passes.begin());
       }
       if(chs[*chName]->pass != "" && pass != chs[*chName]->pass)
