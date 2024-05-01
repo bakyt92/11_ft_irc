@@ -28,7 +28,6 @@
 * test with irssi and nc at the same time (checklist)
 
 ## нерешённые проблемы, не связнные с irssi
-* KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
@@ -37,6 +36,7 @@
   + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?**
 
 ## решённые проблемы
+* KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала - РАБОТАЕТ (БАКЫТ)
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
 * если вводится неправильное количество аргументов (например для команды MODE #channel +l 20 необходимо 4 аргумента) - нет уведомления об ошибке, что количество аргументов неправильное.
 * PASS  с пробелом, то видимо программа считает что есть второй аргумент и ошибка не выводится
