@@ -26,6 +26,7 @@ void Server::sigHandler(int sig) {
 // 1 настройка = (optname, optval, optlen)
 // SO_KEEPALIVE отслеживаниe на серверной стороне клиентских соединений и их принудительного отключения
 // create the socket in non-blocking mode https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking
+// ещё есть https://www.ibase.ru/keepalive/
 void Server::init() {
   try {
     signal(SIGINT,  sigHandler); // catch ctrl + c
@@ -81,7 +82,7 @@ void Server::run() {
         }
         else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)                // клиент прислал нам сообщение через свой fdForMsgs
           receiveBufAndExecCmds(poll->fd);
-        else if (poll->revents & POLLOUT) {                                           // есть сообщения для отпраки клиентам
+        else if (poll->revents & POLLOUT) {                                          // есть сообщения для отпраки клиентам
           sendPreparedResps(clis.at(poll->fd));
         }
     }
@@ -99,13 +100,13 @@ void Server::addNewClient(pollfd poll) {
   clis[fdForMsgs] = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));;
   struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
   polls.push_back(pollForMsgs);
-  cout << "New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n\n";
+  cout << "*** New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n\n";
 }
 
 void Server::receiveBufAndExecCmds(int fd) {
   if(!(cli = clis.at(fd)))
     return ;
-  vector<unsigned char> buf0(BUFSIZE);
+  vector<unsigned char> buf0(BUFSIZE); // std::vector is the recommended way of implementing a variable-length buffer in C++
   for(size_t i = 0; i < buf0.size(); i++)
     buf0[i] = '\0';
   int bytes = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -120,7 +121,7 @@ void Server::receiveBufAndExecCmds(int fd) {
     buf = cli->bufRecv + buf;
     std::vector<string> cmds = splitBufToCmds(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
-      vector<string>().swap(ar); // попробовать убрать
+      //vector<string>().swap(ar); // попробовать убрать
       ar = splitCmdToArgs(*cmd);
       cout << infoCmd();
       execCmd();
