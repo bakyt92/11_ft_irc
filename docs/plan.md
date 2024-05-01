@@ -1,29 +1,24 @@
 ## Понять, как должен вести себя сервер
-* https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit  
-* JOIN отправляется всем пользователям канала - что именно им отправляется?  
-  + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
-* KICK отправляется всем пользователям канала - что именно им отправляется?
-* QUIT отправляется всем пользователям канала - что именно им отправляется?
-  + :dan-!d@localhost QUIT :Quit: Bye for now!
-  + ; dan- is exiting the network with the message: "Quit: Bye for now!"
 * PRIVMSG alice,alice hello
 * JOIN #channel, JOIN #channel
 * MODE #ch
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
-* PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
-* PRIVMSG если между двумя пользователями есть канал на двоих, то все личные сообщения попадают туда ?
-* PRIVMSG без параметров, а также все команды без параметров
-* PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
-* PRIVMSG alice,alice,alice,alice,alice,alice
-* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
+* **B** PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
+* **B** PRIVMSG если между двумя пользователями есть канал на двоих, то все личные сообщения попадают туда ?
+* **B** PRIVMSG без параметров, а также все команды без параметров
+* **B** PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
+* **B** PRIVMSG alice,alice,alice,alice,alice,alice
+* **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
   + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
-* INVITE на несуществующий канал
-* NOTICE alice,alice Hello
+* **B** INVITE на несуществующий канал
+* **B** NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
-
+* протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
+* TOPIC должна расслыать всем какое-то сообщение?
+* у нас когда юзер ещё не залогинился, он уже получает сообщения, это нормлаьно?
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
  * JOIN #сhannel,#сhannel
@@ -32,12 +27,6 @@
 * USER a 0 * a, USER a 0 * a  - no command USER on IRSSI
 * PASS c неправильным паролем
 * JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально? <== решили игнорировать, это нормальное поведение. 
-
-## Другие проблемы
-* MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
-* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
-  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
-* ник с большими и маленькими букваим
 
 ## решённые проблемы
 * сначала NICK, потом PASS - некритична последовательность, только важно выполнение 3 условий (наличие ника, юзернейма, совпадение пароля)
@@ -83,13 +72,23 @@
   + If the listen queue is empty of connection requests and O_NONBLOCK is not set on the file descriptor for the socket, accept() shall block until a connection is present. If the listen() queue is empty of connection requests and O_NONBLOCK is set on the file descriptor for the socket, accept() shall fail and set errno to [EAGAIN] or [EWOULDBLOCK].
 * удалять неиспользумые данные каналов, данные клинетов и poll - вроде бы работает
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
+* https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit  
+* JOIN отправляется всем пользователям канала - что именно им отправляется?  
+  + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
+* KICK отправляется всем пользователям канала - что именно им отправляется?
+* QUIT отправляется всем пользователям канала - что именно им отправляется?
+  + :dan-!d@localhost QUIT :Quit: Bye for now!
+  + ; dan- is exiting the network with the message: "Quit: Bye for now!"
 
 ## проблемы второй срочности
-* low bandwidth (checklist) - **я не поняла, как**
+* Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
+  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
+* low bandwidth (checklist) - **я не поняла, как протестировать**
 * NOTICE выдавать сообщение с каким-нибудь цветом
 * OPER регистрация клиентом самого себя в качестве оператора канала
 * MODE +ti
 * Clients connecting from a host which name is longer than 63 characters are registered using the host (numeric) address instead of the host name
+* Если сразу две проблемы, он какое из сообщений об ошибке отправляется клиенту?
 * PRIVMSG: verify that is **fully functional with different parameters** (checklist)
   + **есть ли всё ещё в чеклисте это фраза?**
   + RCF2812 : The <target> parameter may also be a host mask (#<mask>)
