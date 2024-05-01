@@ -11,6 +11,7 @@
 * **B** PRIVMSG alice,alice,alice,alice,alice,alice
 * **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
   + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
+  + sends the user a message asking them if they want to join you in the indicated channel
 * **B** INVITE на несуществующий канал
 * **B** NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
@@ -19,6 +20,8 @@
 * протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * TOPIC должна расслыать всем какое-то сообщение?
 * у нас когда юзер ещё не залогинился, он уже получает сообщения, это нормлаьно?
+* протестиовать все фенкции с несуществушими каналами и пользователями
+* просмотреть комментарии в коде, там есть вопросительные знаки
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
  * JOIN #сhannel,#сhannel
