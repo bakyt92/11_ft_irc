@@ -6,7 +6,6 @@
   + USER a 0 * ""
   + USER "" 0 * ""
   + PRIVMSG alice,alice hello
-  + JOIN channel (без решётки)
   + JOIN #сhannel,#сhannel
   + JOIN #channel, JOIN #channel
   + JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально?
@@ -21,7 +20,6 @@
   + NOTICE alice,alice Hello
   + WHOIS alice (до регистрации)
   + сначала NICK, потом PASS
-* JOIN  с паролем
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
@@ -98,6 +96,7 @@
 * TOPIC #ch myTopic - меняет топик
 * MODE #ch +t : делает так, что только админ может менять топик
 * MODE #ch -t : любой продписанный на канал может менят топик
+* JOIN с паролем
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
