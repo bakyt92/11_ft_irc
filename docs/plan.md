@@ -36,9 +36,9 @@
 
 ## Другие проблемы
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
-* WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
-  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?**
+  + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
+* ник с большими и маленькими букваим
 
 ## решённые проблемы
 * сначала NICK, потом PASS - некритична последовательность, только важно выполнение 3 условий (наличие ника, юзернейма, совпадение пароля)
@@ -83,6 +83,7 @@
 * * Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И для этих клиентских сокетов в проектах пиров не вызывается setsockopt
   + If the listen queue is empty of connection requests and O_NONBLOCK is not set on the file descriptor for the socket, accept() shall block until a connection is present. If the listen() queue is empty of connection requests and O_NONBLOCK is set on the file descriptor for the socket, accept() shall fail and set errno to [EAGAIN] or [EWOULDBLOCK].
 * удалять неиспользумые данные каналов, данные клинетов и poll - вроде бы работает
+* WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
