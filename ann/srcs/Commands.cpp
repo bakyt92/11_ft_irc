@@ -140,11 +140,11 @@ int Server::execPrivmsg() {
     if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
       prepareResp(cli, "401 " + *to + " :No such nick/channel");                        // ERR_NOSUCHNICK
     else if((*to)[0] == '#')
-      prepareRespAuthorIncluding(chs[*to], ":" + cli->nick + ": " + ar[2]);
+      prepareRespAuthorIncluding(chs[*to], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + toLower(*to) + " :No such nick/channel");               // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
-      prepareResp(getCli(*to), ": " + cli->nick + ": " + ar[2]);
+      prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
 }
 
