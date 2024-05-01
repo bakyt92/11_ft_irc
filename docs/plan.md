@@ -17,7 +17,6 @@
   + PRIVMSG без параметров, а также все команды без параметров
   + WHOIS alice (до регистрации)
   + сначала NICK, потом PASS
-* PRIVMSG: никнеймы могут быть и в верхнем регистре
 * JOIN  с паролем
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
@@ -26,15 +25,12 @@
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала ?
-* TOPIC #ch myTopic - меняет топик
-* MODE #ch +t : делает так, что только админ может менять топик
-* MODE #ch -t : любой продписанный на канал может менят топик
 * test with the IRC client and nc at the same time (checklist)
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 * удалять пустые каналы и пустые poll
 * подстроиться к **irssi**
 * Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И д
-* ля этих клиентских сокетов в проектах пиров не вызывается setsockopt.
+* для этих клиентских сокетов в проектах пиров не вызывается setsockopt
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
@@ -94,6 +90,10 @@
 * PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, у получателя должен высвечиваться не ник получателя, а ник отправителя (от кого сообщение пришло), также  KICK, PART
 * PRIVMSG У получателя paul24 высвечивается `paul24 ::Gello gow`, убрать двойное двоеточие
 * send() вернула число, меньшее длины буфера, т.е. отправила не весь буфер
+* PRIVMSG: никнеймы могут быть и в верхнем регистре
+* TOPIC #ch myTopic - меняет топик
+* MODE #ch +t : делает так, что только админ может менять топик
+* MODE #ch -t : любой продписанный на канал может менят топик
 
 ## Инфо
 * https://github.com/levensta/IRC-Server
