@@ -30,7 +30,6 @@
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * JOIN, MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала ?
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
-* удалять пустые каналы и пустые poll
 
 ## решённые проблемы
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
@@ -72,6 +71,7 @@
 * MODE Флаг +k, пароль установлен, при попытке джоин пишет что нельзя войти, но всё рано присоединяет к каналу
 * * Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И для этих клиентских сокетов в проектах пиров не вызывается setsockopt
   + If the listen queue is empty of connection requests and O_NONBLOCK is not set on the file descriptor for the socket, accept() shall block until a connection is present. If the listen() queue is empty of connection requests and O_NONBLOCK is set on the file descriptor for the socket, accept() shall fail and set errno to [EAGAIN] or [EWOULDBLOCK].
+* удалять неиспользумые данные каналов, данные клинетов и poll - вроде бы работает
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
