@@ -28,7 +28,8 @@
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 * удалять пустые каналы и пустые poll
 * подстроиться к **irssi**
-* Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И для этих клиентских сокетов в проектах пиров не вызывается setsockopt.
+* Настройка setsockopt касается только первого сокета, который мы создаём, чтобы приниматть новых клиентов. После своего появления, каждый из клиентов создаёт сам себе сокет для сообщений. Сервер делает только accept этого сокета. И д
+* ля этих клиентских сокетов в проектах пиров не вызывается setsockopt.
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
