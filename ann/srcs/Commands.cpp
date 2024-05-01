@@ -111,7 +111,7 @@ int Server::execPing() {
 int Server::execWhois() {
   if(ar.size() < 2)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
-  std::vector<string> nicks = splitArgToSubargs(ar[1], ',');
+  std::vector<string> nicks = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++) {
     *nick = toLower(*nick);
     if(getCli(*nick) == NULL)
@@ -130,7 +130,7 @@ int Server::execPrivmsg() {
     return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")");                 // ERR_NORECIPIENT протестировать
   if(ar.size() == 2)
     return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
-  vector<string> tos = splitArgToSubargs(ar[1], ',');
+  vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     *to = *to;
   set<std::string> tosSet(tos.begin(), tos.end());                                      // то же самое но без дубликатов
@@ -154,7 +154,7 @@ int Server::execNotice() {
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
     return 0;
-  vector<string> tos = splitArgToSubargs(ar[1], ',');
+  vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     *to = toLower(*to);
   set<std::string> tosSet(tos.begin(), tos.end());
@@ -182,13 +182,13 @@ int Server::execJoin() {
       ar[1].resize(ar[1].size() - 1);
     return execPart();
   }
-  vector<string> chNames = splitArgToSubargs(ar[1], ',');
+  vector<string> chNames = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     *chName = toLower(*chName);                                                         // проверить toLower
   set<std::string> tosSet(chNames.begin(), chNames.end());
   if (tosSet.size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
     return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");                // ERR_TOOMANYTARGETS сколько именно можно?
-  vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2], ',') : vector<string>();
+  vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
       return prepareResp(cli, "405 " + ar[1] + "  :You have joined too many channels"); // ERR_TOOMANYCHANNELS сколько именно можно?
@@ -222,7 +222,7 @@ int Server::execPart() {
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
     return prepareResp(cli, "461 PART :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  vector<string> chNames = splitArgToSubargs(ar[1], ',');
+  vector<string> chNames = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     *chName = toLower(*chName);                                                         // проверить toLower
     if(chs.find(*chName) == chs.end())
@@ -243,8 +243,8 @@ int Server::execKick() {
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
     return prepareResp(cli, "461 KICK :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  std::vector<string> chNames    = splitArgToSubargs(ar[1], ',');
-  std::vector<string> targetClis = splitArgToSubargs(ar[2], ',');
+  std::vector<string> chNames    = splitArgToSubargs(ar[1]);
+  std::vector<string> targetClis = splitArgToSubargs(ar[2]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     *chName = toLower(*chName);                                                         // проверить toLower
     if(chs.find(*chName) == chs.end())

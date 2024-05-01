@@ -116,6 +116,6 @@ public:
   string                   infoServ();
   vector<string>           splitBufToCmds(string s);
   vector<string>           splitCmdToArgs(string s);
-  vector<string>           splitArgToSubargs(string s, char delim);
+  vector<string>           splitArgToSubargs(string s);
 };
 #endif

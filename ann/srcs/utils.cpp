@@ -95,11 +95,11 @@ vector<string> Server::splitCmdToArgs(string s) {
   return parts;
 }
 
-vector<string> Server::splitArgToSubargs(string s, char delim) {
+vector<string> Server::splitArgToSubargs(string s) {
   if (s.size() == 0)
     return vector<string>();
   vector<string> parts;
-  for(size_t pos = s.find(delim); pos != string::npos; pos = s.find(delim)) {
+  for(size_t pos = s.find(','); pos != string::npos; pos = s.find(',')) {
     if(pos > 0)
       parts.push_back(s.substr(0, pos));
     s.erase(0, pos + 1);
