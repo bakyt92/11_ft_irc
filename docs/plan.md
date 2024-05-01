@@ -1,11 +1,4 @@
 ## Понять, как должен вести себя сервер
-* https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit  
-* JOIN отправляется всем пользователям канала - что именно им отправляется?  
-  + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
-* KICK отправляется всем пользователям канала - что именно им отправляется?
-* QUIT отправляется всем пользователям канала - что именно им отправляется?
-  + :dan-!d@localhost QUIT :Quit: Bye for now!
-  + ; dan- is exiting the network with the message: "Quit: Bye for now!"
 * PRIVMSG alice,alice hello
 * JOIN #channel, JOIN #channel
 * MODE #ch
@@ -83,6 +76,13 @@
   + If the listen queue is empty of connection requests and O_NONBLOCK is not set on the file descriptor for the socket, accept() shall block until a connection is present. If the listen() queue is empty of connection requests and O_NONBLOCK is set on the file descriptor for the socket, accept() shall fail and set errno to [EAGAIN] or [EWOULDBLOCK].
 * удалять неиспользумые данные каналов, данные клинетов и poll - вроде бы работает
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
+* https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit  
+* JOIN отправляется всем пользователям канала - что именно им отправляется?  
+  + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
+* KICK отправляется всем пользователям канала - что именно им отправляется?
+* QUIT отправляется всем пользователям канала - что именно им отправляется?
+  + :dan-!d@localhost QUIT :Quit: Bye for now!
+  + ; dan- is exiting the network with the message: "Quit: Bye for now!"
 
 ## проблемы второй срочности
 * low bandwidth (checklist) - **я не поняла, как**
