@@ -1,4 +1,3 @@
-## сравнить с irssi
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
 * JOIN отправляется всем пользователям канала - что именно им отправляется?
 * MODE отправляется всем пользователям канала - что именно им отправляется?
@@ -17,17 +16,16 @@
 * PRIVMSG без параметров, а также все команды без параметров
 * PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
 * PRIVMSG alice,alice,alice,alice,alice,alice
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
+  + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
+* INVITE на несуществующий канал
 * NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
 * сначала NICK, потом PASS
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
-
-## нерешённые проблемы, не связнные с irssi
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
-* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
-  + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
   + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?**
 
