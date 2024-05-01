@@ -6,7 +6,6 @@
 * QUIT отправляется всем пользователям канала - что именно им отправляется?
   + :dan-!d@localhost QUIT :Quit: Bye for now!
   + ; dan- is exiting the network with the message: "Quit: Bye for now!"
-* PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG alice,alice hello
 * JOIN #channel, JOIN #channel
 * MODE #ch
