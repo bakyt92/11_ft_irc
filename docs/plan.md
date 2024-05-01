@@ -11,7 +11,7 @@
 * **B** PRIVMSG alice,alice,alice,alice,alice,alice
 * **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
   + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
-  + If you want to ask a user to join you in another channel, use the “/invite command, which will send the user a message asking them if they want to join you in the indicated channel.
+  + sends the user a message asking them if they want to join you in the indicated channel
 * **B** INVITE на несуществующий канал
 * **B** NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
