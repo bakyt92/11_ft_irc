@@ -1,18 +1,12 @@
-## сравнить с irssi
+## Понять, как должен вести себя сервер
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
 * JOIN отправляется всем пользователям канала - что именно им отправляется?
 * MODE отправляется всем пользователям канала - что именно им отправляется?
 * KICK отправляется всем пользователям канала - что именно им отправляется?
 * QUIT отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
-* USER a 0 * a, USER a 0 * a
-* PASS c неправильным паролем
-* USER a 0 * ""
-* USER "" 0 * ""
 * PRIVMSG alice,alice hello
-* JOIN #сhannel,#сhannel
 * JOIN #channel, JOIN #channel
-* JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально?
 * MODE #ch
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
@@ -21,22 +15,34 @@
 * PRIVMSG без параметров, а также все команды без параметров
 * PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
 * PRIVMSG alice,alice,alice,alice,alice,alice
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
+  + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
+* INVITE на несуществующий канал
 * NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
-* сначала NICK, потом PASS
+
+
 * **JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?**
 * test with irssi and nc at the same time (checklist)
 
-## нерешённые проблемы, не связнные с irssi
-* KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
+
+## ПРОТЕСТИРОВАНО на IRSSI 
+ * JOIN #сhannel,#сhannel
+* USER a 0 * ""  - no command USER on IRSSI
+* USER "" 0 * ""  - no command USER on IRSSI
+* USER a 0 * a, USER a 0 * a  - no command USER on IRSSI
+* PASS c неправильным паролем
+* JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально? <== решили игнорировать, это нормальное поведение. 
+
+## Другие проблемы
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
 * WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
-* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
-  + **Клиент сразу должен попадать на канал? Или он должен сделать JOIN, чтобы попасть на канал?**
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
   + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать __ live again__ ?**
 
 ## решённые проблемы
+* сначала NICK, потом PASS - некритична последовательность, только важно выполнение 3 условий (наличие ника, юзернейма, совпадение пароля)
+* KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала - РАБОТАЕТ (БАКЫТ)
 * при установке лимита на количество пользователей на канале (команда MODE #channel +l 20) изменяется топик канала, а не описание MODE
 * если вводится неправильное количество аргументов (например для команды MODE #channel +l 20 необходимо 4 аргумента) - нет уведомления об ошибке, что количество аргументов неправильное.
 * PASS  с пробелом, то видимо программа считает что есть второй аргумент и ошибка не выводится
