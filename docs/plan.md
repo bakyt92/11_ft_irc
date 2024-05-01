@@ -1,5 +1,10 @@
 ## сравнить с irssi
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
+* JOIN отправляется всем пользователям канала - что именно им отправляется?
+* MODE отправляется всем пользователям канала - что именно им отправляется?
+* KICK отправляется всем пользователям канала - что именно им отправляется?
+* QUIT отправляется всем пользователям канала - что именно им отправляется?
+* PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
 * USER a 0 * a, USER a 0 * a
 * PASS c неправильным паролем
 * USER a 0 * ""
@@ -8,11 +13,9 @@
 * JOIN #сhannel,#сhannel
 * JOIN #channel, JOIN #channel
 * JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально?
-* JOIN отправляется всем пользователям канала - что именно им отправляется?
 * MODE #ch
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
-* MODE отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
 * PRIVMSG если между двумя пользователями есть канал на двоих, то все личные сообщения попадают туда ?
 * PRIVMSG без параметров, а также все команды без параметров
@@ -28,7 +31,7 @@
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
-* MODE, KICK, QUIT, PRIVMSG отправляются всем пользователям канала 
+* WHOIS почему-то выдает I send buf to fd=5 : [401 :moscow No such nick_4\r\n318moscow :End of WHOIS list\r\n]
 * Stop a client (^-Z) **connected on a channel**. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for **memory leaks** during this operation. (checklist)
 
 ## решённые проблемы
