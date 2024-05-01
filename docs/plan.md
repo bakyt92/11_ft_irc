@@ -1,6 +1,6 @@
   ## нерешённые проблемы
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
-* правильно ли работают:
+* Сравнить с irssi:
   + USER a 0 * a, USER a 0 * a
   + PASS c неправильным паролем
   + USER a 0 * ""
