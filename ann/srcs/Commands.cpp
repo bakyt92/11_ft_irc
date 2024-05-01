@@ -206,7 +206,7 @@ int Server::execJoin() {
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        //prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " joined " + *chName);
+        //prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " joined " + *chName); // надо что-то разослать всему каналу
         prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + chs[*chName]->topic); // RPL_TOPIC
         prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не в точности RPL_NAMREPLY
       }
@@ -331,7 +331,7 @@ int Server::execMode() {
   if(chs[chName]->adms.find(cli) == chs[chName]->adms.end())
     return prepareResp(cli, "482 " + chName + " :You're not channel operator");         // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
-    return prepareResp(cli, "324 " + chName + "  " + mode(chs[chName]));                // RPL_CHANNELMODEIS
+    return prepareResp(cli, "324 " + chName + "  " + mode(chs[chName]));                // RPL_CHANNELMODEIS разослать всему каналу?
   if(ar.size() == 3 && ar[2] == "+i")
     return (chs[chName]->optI = true);
   if(ar.size() == 3 && ar[2] == "-i")
