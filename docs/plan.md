@@ -17,6 +17,7 @@
   + WHOIS alice (до регистрации)
   + сначала NICK, потом PASS
 * PRIVMSG: никнеймы могут быть и в верхнем регистре
+* JOIN  с паролем
 * JOIN when a user joins a server you have to greed him with a welcome message
 * JOIN #channel в irssi после этого все сообщения по умлчанию идут в этот канал ?
 * KICK, а потом INVITE того же пользователя, выходит сообщшение INVITE chel2 #chan1` `443 chel2 #chan1 :is already on channel` Хотя этого человека уже исключили из канала
