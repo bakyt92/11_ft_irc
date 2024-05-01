@@ -197,8 +197,8 @@ int Server::execJoin() {
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         chs[*chName]->clis.insert(cli);
-        prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " joined " + *chName);
-        prepareResp(cli, "332 " + *chName + " :" + chs[*chName]->topic);                // RPL_TOPIC
+        //prepareRespAuthorIncluding(chs[*chName], ": " + cli->nick + " joined " + *chName);
+        prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + chs[*chName]->topic); // RPL_TOPIC
         prepareResp(cli, "353 " + *chName + " " + users(chs[*chName]));                 // это не в точности RPL_NAMREPLY
       }
     }
