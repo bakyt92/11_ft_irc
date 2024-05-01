@@ -62,13 +62,32 @@ string Server::infoServ() {        // debugging
     myChar = it->second->passOk ? 'T' : 'F';
     ret += "My client                 : [nick = " + it->second->nick + ", bufR = [" + it->second->bufRecv + "], rName = ["+ it->second->rName + "], uName = " + it->second->uName + ", passOk = " + myChar + "]\n";
   }
+  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
+    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", mode = " + mode(ch->second) + "\n";
   ret += "My polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
-  ret += "\n";
-  for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
-    ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", mode = " + mode(ch->second) + "\n";
-  return ret;
+  return ret + "\n";
+}
+
+vector<string> Server::splitBufToCmds(string s) {
+  if (s.size() == 0)
+    return vector<string>();
+  if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r' && s.find("\r\n") == string::npos) { // в конце \n и в буфере одна команда, т.е. почти наерняка это пришло через nc
+    s[s.size() - 1] = '\r';
+    s += '\n';
+  }
+  vector<string> parts;
+  for(size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
+    if(pos > 0)
+      parts.push_back(s.substr(0, pos));
+    s.erase(0, pos + 2);
+  }
+  if(s.size() > 0)
+    cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть это скорее всего начало следующей команды)
+  else
+    cli->bufRecv = "";
+  return parts;
 }
 
 vector<string> Server::splitCmdToArgs(string s) {
@@ -108,30 +127,11 @@ vector<string> Server::splitArgToSubargs(string s) {
   return parts;
 }
 
-vector<string> Server::splitBufToCmds(string s) {
-  if (s.size() == 0)
-    return vector<string>();
-  if(s.size() >= 2 && s[s.size() - 1] == '\n' && s[s.size() - 2] != '\r' && s.find("\r\n") == string::npos) { // в конце \n и в буфере одна команда, т.е. почти наерняка это пришло через nc
-    s[s.size() - 1] = '\r';
-    s += '\n';
-  }
-  vector<string> parts;
-  for(size_t pos = s.find("\r\n"); pos != string::npos; pos = s.find("\r\n")) {
-    if(pos > 0)
-      parts.push_back(s.substr(0, pos));
-    s.erase(0, pos + 2);
-  }
-  if(s.size() > 0)
-    cli->bufRecv = s; // последний кусок сообщения, если он не заканчивается на \r\n (то есть это скорее всего начало следующей команды)
-  else
-    cli->bufRecv = "";
-  return parts;
-}
-
 int Server::prepareResp(Cli *to, string msg) {
   if(msg.size() > MAX_CMD_LEN - 2)
     msg.resize(MAX_CMD_LEN - 2);
-  to->bufToSend += (msg + "\r\n");
+  if(to->passOk && to->nick != "" && to->uName != "")
+    to->bufToSend += (msg + "\r\n");
   return 0;
 }
 
@@ -183,13 +183,6 @@ void Server::markClisToSendMsgsTo() {
         }
 }
 
-Cli* Server::getCli(string &nick) {
-  for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
-    if(toLower(it->second->nick) == toLower(nick))
-      return it->second;
-  return NULL;
-}
-
 Ch* Server::getCh(string &chName) {
   for(map<string, Ch* >::iterator it = chs.begin(); it != chs.end(); it++)
     if(toLower(it->first) == toLower(chName))
@@ -197,7 +190,16 @@ Ch* Server::getCh(string &chName) {
   return NULL;
 }
 
+Cli* Server::getCli(string &nick) {
+  for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
+    if(toLower(it->second->nick) == toLower(nick))
+      return it->second;
+  return NULL;
+}
+
 Cli* Server::getCliOnCh(string &nick, string chName) {
+  if(getCh(chName) == NULL)
+    return NULL;
   for(set<Cli*>::iterator it = chs[chName]->clis.begin(); it != chs[chName]->clis.end(); it++)
     if(toLower((*it)->nick) == toLower(nick))
       return *it;
@@ -209,6 +211,8 @@ Cli* Server::getCliOnCh(Cli* cli, string chName) {
 }
 
 Cli* Server::getAdmOnCh(string &nick, string chName) {
+  if(getCh(chName) == NULL)
+    return NULL;
   for(set<Cli*>::iterator it = chs[chName]->adms.begin(); it != chs[chName]->adms.end(); it++)
     if(toLower((*it)->nick) == toLower(nick))
       return *it;
