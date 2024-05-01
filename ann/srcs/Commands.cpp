@@ -109,9 +109,11 @@ int Server::execWhois() {
   for(vector<string>::iterator nick = nicks.begin(); nick != nicks.end(); nick++)
     if(getCli(*nick) == NULL)
       prepareResp(cli, "401 :" + *nick + " No such nick");                              // ERR_NOSUCHNICK
-    else
-      prepareResp(cli, *nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
-  return prepareResp(cli, "318" + nicks[0] + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
+    else {
+      prepareResp(cli, "311 " + *nick + " " + getCli(*nick)->uName + " " + getCli(*nick)->host + " * :" + getCli(*nick)->rName); // RPL_WHOISUSER
+      prepareResp(cli, "318 " + *nick + " :End of WHOIS list");                    // RPL_ENDOFWHOIS ? проверить этот ответ
+    }
+  return 0;
 }
 
 // not implemented here: ERR_CANNOTSENDTOCHAN ERR_NOTOPLEVEL ERR_WILDTOPLEVEL RPL_AWAY
@@ -255,7 +257,8 @@ int Server::execKick() {
         if(chs[*chName]->clis.empty() || chs[*chName]->clis.find(getCli(*targetCli)) == chs[*chName]->clis.end())
           prepareResp(cli, "441 " + *targetCli + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else if(chs[*chName]->clis.size() > 0 && chs[*chName]->clis.find(getCli(*targetCli)) != chs[*chName]->clis.end()) {
-          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick);
+          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >=43 ? ar[3] : "") + " " + *targetCli + " is kicked from " + *chName + " by " + cli->nick); // что разослать всему каналу?
+
           eraseCliFromCh(*targetCli, *chName);
         }
       }
@@ -281,7 +284,7 @@ int Server::execInvite() {
   if(chs[chName]->clis.find(getCli(ar[1])) != chs[chName]->clis.end()) 
     return prepareResp(cli, "443 " + ar[1] + " " + chName + " :is already on channel");  // ERR_USERONCHANNEL
   //getCli(ar[1])->invits.insert(chName);  <== удалить???
-  chs[chName]->clis.insert(getCli(ar[1]));
+  chs[chName]->clis.insert(getCli(ar[1])); 
   return prepareRespAuthorIncluding(chs[chName], "341 " + chName + " " + ar[1]);         // RPL_INVITING
 }
 
