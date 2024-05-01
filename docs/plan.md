@@ -19,8 +19,7 @@
 * test with irssi and nc at the same time (checklist)
 * протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * TOPIC должна расслыать всем какое-то сообщение?
-* у нас когда юзер ещё не залогинился, он уже получает сообщения, это нормлаьно?
-* протестиовать все фенкции с несуществушими каналами и пользователями
+* протестиовать все функции с valgrind с несуществущими каналами и пользователями 
 * просмотреть комментарии в коде, там есть вопросительные знаки
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
