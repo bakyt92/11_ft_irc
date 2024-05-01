@@ -1,9 +1,12 @@
 ## Понять, как должен вести себя сервер
 * https://docs.google.com/document/d/1LWeMJM_zX9QMq45KrkiC1M_1J22aQpmWtJTZlqtP3NY/edit
 * JOIN отправляется всем пользователям канала - что именно им отправляется?
+  + :dan-!d@localhost JOIN #test    ; dan- is joining the channel #test
 * MODE отправляется всем пользователям канала - что именно им отправляется?
 * KICK отправляется всем пользователям канала - что именно им отправляется?
 * QUIT отправляется всем пользователям канала - что именно им отправляется?
+  + :dan-!d@localhost QUIT :Quit: Bye for now!
+  + ; dan- is exiting the network with the message: "Quit: Bye for now!"
 * PRIVMSG отправляется всем пользователям канала - что именно им отправляется?
 * PRIVMSG alice,alice hello
 * JOIN #channel, JOIN #channel
@@ -35,7 +38,7 @@
 * JOIN #ch1,ch2,ch3,ch4,ch5,ch6 - у нас лимит 5 каналов, это нормально? <== решили игнорировать, это нормальное поведение. 
 
 ## Другие проблемы
-* MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (checklist)
+* MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * Stop a client (^-Z) connected on a channel. Then flood the channel using another client. When the client is live again, all stored commands should be processed normally. Check for memory leaks. (**checklist**)
   + **у меня не получается это протестировать, клиент после ^Z просто пропадает, как мне его сделать _live again_ ?**
 * ник с большими и маленькими букваим
