@@ -173,7 +173,7 @@ int Server::execJoin() {
   if ((set<std::string>(chNames.begin(), chNames.end())).size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
     return prepareResp(cli, ar[1] + " :407 recipients. Too many targets.");             // ERR_TOOMANYTARGETS
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
-  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
+  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
       return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels");  // ERR_TOOMANYCHANNELS
     else if(chName->size() <= 1 || chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos)
@@ -186,8 +186,9 @@ int Server::execJoin() {
         pass = *(passes.begin());
         passes.erase(passes.begin());
       }
+      cout << "*** " << cli->nick << " wants to join " << *chName << endl;
       if(getCliOnCh(cli->nick, *chName) != NULL)
-        ;                                                                               // already on channel ?
+        prepareResp(cli, ":you are already on channel " + *chName);                     // already on channel ?
       else if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
         prepareResp(cli, "475 " + *chName + " :Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       else if(getCh(*chName)->size() >= getCh(*chName)->limit)
@@ -204,6 +205,7 @@ int Server::execJoin() {
         prepareResp(cli, "353 " + *chName + " " + users(getCh(*chName)));               // RPL_NAMREPLY
       } 
     }
+  }
   return 0;
 }
 
