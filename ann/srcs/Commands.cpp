@@ -315,7 +315,8 @@ int Server::execTopic() {
   }
   getCh(ar[1])->topic = ar[2];
   prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);                        // RPL_TOPIC
-  return prepareRespAuthorIncluding(getCh(ar[1]), cli->nick + "!" + cli->uName + "@" + cli->host + " TOPIC :" + ar[1] + " " + ar[2]);
+  prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + " TOPIC " + ar[1] + " :" + ar[2]);
+  return prepareRespAuthorIncluding(getCh(ar[1]), cli->nick + "!" + cli->uName + "@" + cli->host + " TOPIC " + ar[1] + " :" + ar[2]);
 }
 
 int Server::execQuit() {
