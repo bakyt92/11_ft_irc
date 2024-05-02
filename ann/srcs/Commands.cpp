@@ -148,9 +148,9 @@ int Server::execNotice() {
   vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && getCh(*to) != NULL)
-      prepareRespExceptAuthor(getCh(*to), ": " + cli->nick + ": \033[1;31m" + ar[2] + "\033[0m");
+      prepareRespExceptAuthor(getCh(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 NOTICE " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && getCli(*to) != NULL)
-      prepareResp(getCli(*to), ": " + cli->nick + ": \033[1;31m" + ar[2] + "\033[0m");
+      prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 NOTICE " + ar[1] + " :" + ar[2]);
   return 0;
 }
 
