@@ -1,7 +1,7 @@
 ## Понять, как должен вести себя сервер
 * NICK проверить, точно ли нужно :Nickname collision KILL
 * PRIVMSG alice,alice hello
-* PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 **B** 
+* какая-то команда более, чем 15 аргументами **B** 
 * PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально? **B** 
 * PRIVMSG alice,alice,alice,alice,alice,alice **B** 
 * NOTICE alice,alice Hello **B** 
