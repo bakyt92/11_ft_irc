@@ -130,8 +130,8 @@ vector<string> Server::splitArgToSubargs(string s) {
 int Server::prepareResp(Cli *to, string msg) {
   if(msg.size() > MAX_CMD_LEN - 2)
     msg.resize(MAX_CMD_LEN - 2);
-  if(to->passOk && to->nick != "" && to->uName != "")
-    to->bufToSend += (msg + "\r\n");
+  // if(to->passOk && to->nick != "" && to->uName != "") << не позволяет отправлять сообщения
+  to->bufToSend += (msg + "\r\n");
   return 0;
 }
 
