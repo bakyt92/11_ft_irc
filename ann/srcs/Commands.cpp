@@ -167,13 +167,15 @@ int Server::execJoin() {
   }
   vector<string> chNames = splitArgToSubargs(ar[1]);
   if ((set<std::string>(chNames.begin(), chNames.end())).size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, ar[1] + " :407 recipients. Too many targets.");            // ERR_TOOMANYTARGETS
+    return prepareResp(cli, ar[1] + " :407 recipients. Too many targets.");             // ERR_TOOMANYTARGETS
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
       return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels");  // ERR_TOOMANYCHANNELS
-    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("\0") != string::npos)
+    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos) {
+      // cout << "*** chName->size() = " << chName->size() << ", (*chName)[0] = " << (*chName)[0] << ", find = " << (chName->find_first_of("0\\") != string::npos) <<  endl;
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL ?
+    }
     else {
       if(getCh(*chName) == NULL)
         chs[*chName] = new Ch(cli);

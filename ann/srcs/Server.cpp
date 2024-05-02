@@ -69,14 +69,13 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >\n";
   while (sigReceived == false) {
-    eraseUnusedClis();
-    eraseUnusedChs();
-    markClisToSendMsgsTo();
+    clear();
+    markPollsToSendMsgsTo();
     int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
     if(countEvents > 0) {                                                            // в каких=то сокетах есть данные
-      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)  // новый клиент подключился к сокету fdServ
+      for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) // новый клиент подключился к сокету fdServ
         if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {
           addNewClient(*poll);
           break;

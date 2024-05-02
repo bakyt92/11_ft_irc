@@ -173,7 +173,7 @@ void Server::sendPreparedResps(Cli *to) {
     to->bufToSend.erase(0, nbBytesReallySent);
 }
 
-void Server::markClisToSendMsgsTo() {
+void Server::markPollsToSendMsgsTo() {
   for (map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); ++it)
     if (it->second->bufToSend.size() > 0)
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++)
@@ -183,14 +183,14 @@ void Server::markClisToSendMsgsTo() {
         }
 }
 
-Ch* Server::getCh(string &chName) {
+Ch* Server::getCh(string chName) {
   for(map<string, Ch* >::iterator it = chs.begin(); it != chs.end(); it++)
     if(toLower(it->first) == toLower(chName))
       return it->second;
   return NULL;
 }
 
-Cli* Server::getCli(string &nick) {
+Cli* Server::getCli(string nick) {
   for(map<int, Cli* >::iterator it = clis.begin(); it != clis.end(); it++)
     if(toLower(it->second->nick) == toLower(nick))
       return it->second;
@@ -248,7 +248,7 @@ void Server::eraseUnusedChs() {
     if(ch->second->size() == 0)
       toErases.insert(ch->first);
   for(set<string>::iterator toErase = toErases.begin(); toErase != toErases.end(); toErase++) {
-    delete chs[*toErase];
+    delete getCh(*toErase);
     chs.erase(*toErase);
   }
 }
@@ -284,4 +284,11 @@ void Server::eraseUnusedClis() {                                              //
   }
   for(set<int>::iterator it = reallyRemouved.begin(); it != reallyRemouved.end(); it++)
     fdsToEraseNextIteration.erase(*it);
+}
+
+void Server::clear() {
+  eraseUnusedClis();
+  eraseUnusedChs();
+  ar.clear();
+  cli = NULL;
 }
