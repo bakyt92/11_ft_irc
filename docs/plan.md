@@ -1,31 +1,31 @@
 ## Понять, как должен вести себя сервер
+* NICK проверить, точно ли нужно :Nickname collision KILL
 * PRIVMSG alice,alice hello
-* JOIN #channel, JOIN #channel
-* MODE #ch
-* MODE #channel +l 999999999999999`
-* MODE #channel +l -1
 * **B** PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
 * **B** PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
 * **B** PRIVMSG alice,alice,alice,alice,alice,alice
+* **B** NOTICE alice,alice Hello
+* JOIN #channel, JOIN #channel
+* **JOIN #channel в irssi после этого все сообщения по умолчанию идут в этот канал ?**
 * **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
   + sends the user a message asking them if they want to join you in the indicated channel
   + то есть клиент не попадает сразу на канал
   + как клиент должен выразить своё согласие?
   + клиент должен сделать JOIN?
 * **B** INVITE на несуществующий канал
-* **B** NOTICE alice,alice Hello
-* WHOIS alice (до регистрации)
-* **JOIN #channel в irssi после этого все сообщения по умолчанию идут в этот канал ?**
-* TOPIC должна расслыать всем какое-то сообщение?
-* test with irssi and nc at the same time (checklist)
+* MODE #ch
+* MODE #channel +l 999999999999999`
+* MODE #channel +l -1
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * MODE +t +t +t
 * MODE +k 22, MODE +k 22
-* NICK проверить, точно ли нужно :Nickname collision KILL
+* TOPIC должна расслыать всем какое-то сообщение?
+* TOPIC #channel должно отвечать "недостаточно параметров" и устанавливать пустой топик?
+* TOPIC #channel ":" 
+* WHOIS alice (до регистрации)
+* test with irssi and nc at the same time (checklist)
 * протестиовать с valgrind все функции с несуществущими каналами и пользователями
 * протестировать с valgrind все случаи ошибок, которые есть в коде
-* TOPIC #channel должно отвечать "недостаточно параметров" и устанавливать пустой топик?
-* TOPIC невозможно установить топик ":" ?
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
  * JOIN #сhannel,#сhannel
