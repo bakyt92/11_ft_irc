@@ -276,14 +276,14 @@ int Server::execInvite() {
     return prepareResp(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS
   if(getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick");                         // ERR_NOSUCHNICK
+  if(getCh(ar[2]) == NULL)
+    return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if(getCh(ar[2]) != NULL && getCliOnCh(cli, ar[2]) == NULL)
     return prepareResp(cli, "442 " + ar[2] + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(getCh(ar[2]) != NULL && getAdmOnCh(cli, ar[2]) == NULL && getCh(ar[2])->optI == true)
     return prepareResp(cli, "482 " + ar[2] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(getCh(ar[2]) != NULL && getCliOnCh(ar[1], ar[2]) != NULL)
     return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
-  if(getCh(ar[2]) == NULL && (ar[2].size() > 200 || ar[2][0] != '#' || ar[2].find_first_of("\0") != string::npos))
-    return prepareResp(getCli(ar[1]), "403 " + ar[2] + " bad channel name");            // ERR_NOSUCHCHANNEL ?
   if(getCh(ar[2]) == NULL)
     chs[ar[2]] = new Ch(cli);
   getCli(ar[1])->invits.insert(ar[2]);
