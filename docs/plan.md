@@ -1,5 +1,4 @@
 ## Понять, как должен вести себя сервер
-* PASS какие есть ограничения на пароль по длине и по символам
 * NICK проверить, точно ли нужно :Nickname collision KILL
 * PRIVMSG alice,alice hello
 * PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 **B** 
@@ -18,6 +17,7 @@
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * MODE +t +t +t
 * MODE +k 22, MODE +k 22
+* MODE +k какие есть ограничения на пароль канала по длине и по символам
 * TOPIC должна рассылать всем какое-то сообщение?
 * `TOPIC #channel` должно отвечать "недостаточно параметров" или устанавливать пустой топик?
 * `TOPIC #channel ":"` 
