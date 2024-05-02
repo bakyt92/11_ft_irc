@@ -232,12 +232,14 @@ int Server::nbChannels(Cli *c) {
 }
 
 void Server::eraseCliFromCh(string nick, string chName) {
-  if(chs[chName]->clis.count(getCli(nick)) > 0)
-    chs[chName]->clis.erase(getCli(nick));
-  if(chs[chName]->adms.count(getCli(nick)) > 0)
-    chs[chName]->adms.erase(getCli(nick));
-  if(chs[chName]->adms.size() == 0 && chs[chName]->clis.size() > 0)
-    chs[chName]->adms.insert(*(chs[chName]->clis.begin()));                   // сделать самого старого пользователя админом
+  if(getCli(nick)->invits.find(chName) != getCli(nick)->invits.end()) //
+    getCli(nick)->invits.erase(chName);
+  if(getCh(chName)->clis.count(getCli(nick)) > 0)
+    getCh(chName)->clis.erase(getCli(nick));
+  if(getCh(chName)->adms.count(getCli(nick)) > 0)
+    getCh(chName)->adms.erase(getCli(nick));
+  if(getCh(chName)->adms.size() == 0 && getCh(chName)->clis.size() > 0)
+    getCh(chName)->adms.insert(*(getCh(chName)->clis.begin())); // сделать самого старого пользователя админом
 }
 
 void Server::eraseUnusedChs() {
