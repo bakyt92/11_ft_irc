@@ -135,7 +135,7 @@ int Server::execPrivmsg() {
     else if((*to)[0] == '#' && getCliOnCh(cli->nick, *to) == NULL)
       prepareResp(cli, "404 " + cli->nick + " " + *to + ":Cannot send to channel"); // 404 - not on channel ?
     else if((*to)[0] == '#' && getCliOnCh(cli->nick, *to) != NULL)
-      prepareRespAuthorIncluding(getCh(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+      prepareRespExceptAuthor(getCh(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
       prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                      // ERR_NOSUCHNICK
     else if((*to)[0] != '#')
@@ -200,9 +200,10 @@ int Server::execJoin() {
         if(cli->invits.find(*chName) != cli->invits.end())
           cli->invits.erase(*chName);
         prepareRespAuthorIncluding(getCh(*chName), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN " + *chName); // ok channel
-        prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC                      // ok channel
+        if(getCh(*chName)->topic != "")
+          prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC                      // ok channel
         prepareResp(cli, "353 " + *chName + " " + users(getCh(*chName)));               // RPL_NAMREPLY
-      }
+      } 
     }
   return 0;
 }
@@ -248,11 +249,11 @@ int Server::execKick() {
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {
           if (ar.size() > 3) {
-              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2] + " :" + ar[3]);
-            }
+            prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2] + " :" + ar[3]);
+          }
           else {
-              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2]);
-            }
+            prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2]);
+          }
           eraseCliFromCh(*target, *chName);
         }
       }
