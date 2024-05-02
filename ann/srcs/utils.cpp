@@ -51,7 +51,7 @@ string Server::toLower(string s) {
 }
 
 string Server::infoCmd() {          // debugging
-  if(ar[0] == "PING")
+  if(ar.size() == 0 || ar[0] == "PING")
     return "";
   string ret = "I execute                 : ";
   for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
@@ -60,7 +60,7 @@ string Server::infoCmd() {          // debugging
 }
 
 string Server::infoServ() {        // debugging
-  if(ar[0] == "PING")
+  if(ar.size() == 0 || ar[0] == "PING")
     return "";
   string ret;
   string myChar;
@@ -167,7 +167,8 @@ int Server::prepareRespAuthorIncluding(Ch *ch, string msg) {
 //   This can only be detected when a send is attempted, and the destination isn't reachable
 //   That could happen only after minutes or hours (or someone could in the mean time plug the cable back in, and you never know!)
 void Server::sendPreparedResps(Cli *to) {
-  cout << "I send buf to fd=" << to->fd << "        : [" << withoutRN(to->bufToSend) << "]\n";
+  if(to->bufToSend.substr(0, 4) != "PONG")
+    cout << "I send buf to fd=" << to->fd << "        : [" << withoutRN(to->bufToSend) << "]\n";
   ssize_t nbBytesReallySent = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL | MSG_DONTWAIT);
   if (nbBytesReallySent == (ssize_t)to->bufToSend.size()) {
     to->bufToSend = "";
