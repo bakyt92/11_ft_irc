@@ -57,20 +57,15 @@ int Server::execPass() {
   return 0;
 }
 
-// not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED
+// not implemented here ERR_UNAVAILRESOURCE ERR_RESTRICTED ERR_NICKNAMEOLLISION
 int Server::execNick() {
   if(ar.size() < 2 || ar[1].size() == 0)
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   if(ar[1].size() > 9 || ar[1].find_first_not_of("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") != string::npos)
     return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
-  for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++) {
+  for(std::map<int, Cli *>::iterator itCli = clis.begin(); itCli != clis.end(); itCli++)
     if(toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick != "")
-      return prepareResp(cli, "433 " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
-    else if (toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick == "") {
-      fdsToEraseNextIteration.insert(cli->fd);
-      return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");            // ERR_NICKNAMEOLLISION
-    }
-  }
+      return prepareResp(cli, "433 " + cli->nick + " " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
   cli->nick = ar[1];
   if (cli->nick == "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
@@ -187,7 +182,7 @@ int Server::execJoin() {
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
       return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels");  // ERR_TOOMANYCHANNELS
-    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos)
+    else if(chName->size() <= 1 || chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL ?
     else {
       if(getCh(*chName) == NULL)
