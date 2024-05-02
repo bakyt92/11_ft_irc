@@ -172,10 +172,8 @@ int Server::execJoin() {
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
       return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels");  // ERR_TOOMANYCHANNELS
-    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos) {
-      // cout << "*** chName->size() = " << chName->size() << ", (*chName)[0] = " << (*chName)[0] << ", find = " << (chName->find_first_of("0\\") != string::npos) <<  endl;
+    else if(chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL ?
-    }
     else {
       if(getCh(*chName) == NULL)
         chs[*chName] = new Ch(cli);
@@ -303,50 +301,68 @@ int Server::execQuit() {
 }
 
 // not implemented here: ERR_NOCHANMODES RPL_BANLIST RPL_ENDOFBANLIST RPL_EXCEPTLIST RPL_ENDOFEXCEPTLIST RPL_INVITELIST RPL_ENDOFINVITELIST RPL_UNIQOPIS (creator of the channel)
-int Server::execMode() {
+int Server::execMode() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o alice,bob   -o alice,bob
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
-  char *notUsed;
   if(ar.size() < 2)
     return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(getCh(ar[1]) == NULL)
     return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if(getCliOnCh(cli, ar[1]) == NULL)
     return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");           // ERR_NOTONCHANNEL
-  if(getAdmOnCh(cli, ar[1]) == NULL)
+  if(getAdmOnCh(cli, ar[1]) == NULL) // ? 481 ERR_NOPRIVILEGES ":Permission Denied- You're not an IRC operator"
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
     return prepareResp(cli, "MODE " + ar[1] + " " + mode(getCh(ar[1])));                // RPL_CHANNELMODEIS
+  execModeOneOoption(ar[2], ar.size() >= 4 ? ar[3] : ""); // boocle
+  return 0;
+}
 
-  if(ar.size() == 3 && (ar[2] == "+k" || ar[2] == "+l" || ar[2] == "+o" || ar[2] == "-o"))
-    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(ar.size() == 3 && ar[2] != "+i" && ar[2] != "-i" && ar[2] != "+t" && ar[2] != "-t" && ar[2] != "-l" && ar[2] != "-k")
-    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(ar.size() >= 4 && ar[2] == "+k" && getCh(ar[1])->pass != "")
-    return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");              // ERR_KEYSET
-  if(ar.size() >= 4 && ar[2] == "+o" && getCliOnCh(ar[3], ar[1]) == NULL)
-    return prepareResp(cli, "441 " + ar[3] + " " + ar[1] + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
-  if(ar.size() >= 4 && ar[2] == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
-    return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
-  if(ar.size() == 3 && ar[2] == "+i")
+int Server::execModeOneOoption(string opt, string val) {
+  char *notUsed;
+  if(opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "+l" && opt != "-l" && opt != "+k" && opt != "-k" && opt != "+o" && opt != "-o")
+    return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + ar[2]); // ERR_UNKNOWNMODE
+  if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k")
+    return prepareResp(cli, "461 MODE :Not enough parameters");                          // ERR_NEEDMOREPARAMS
+  if(opt == "+k" && getCh(ar[1])->pass != "")
+    return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");               // ERR_KEYSET
+  if(opt == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
+    return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + opt + " " + val + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
+  if(opt == "+i")
     getCh(ar[1])->optI = true;
-  else if(ar.size() == 3 && ar[2] == "-i")
+  else if(opt == "-i")
     getCh(ar[1])->optI = false;
-  else if(ar.size() == 3 && ar[2] == "+t")
+  else if(opt == "+t")
     getCh(ar[1])->optT = true;
-  else if(ar.size() == 3 && ar[2] == "-t")
+  else if(opt == "-t")
     getCh(ar[1])->optT = false;
-  else if(ar.size() == 3 && ar[2] == "-l")
+  else if(opt == "-l")
     getCh(ar[1])->limit = std::numeric_limits<unsigned int>::max();
-  else if(ar.size() == 3 && ar[2] == "-k")
+  else if(opt == "+k")
+    getCh(ar[1])->pass = val; // limitations for a password ?
+  else if(opt == "-k")
     getCh(ar[1])->pass = "";
-  else if(ar.size() >= 4 && ar[2] == "+k")
-    getCh(ar[1])->pass = ar[3];
-  else if(ar.size() >= 4 && ar[2] == "+l" && atoi(ar[3].c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
+  else if(opt == "+l" && atoi(val.c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
     getCh(ar[1])->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10));
-  else if(ar.size() >= 4 && ar[2] == "-o")
-    getCh(ar[1])->adms.erase(getCli(ar[3]));
-  else
-    return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + ar[2] + " " + ar[3] + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
-  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]);
+  else if(opt == "+l")
+    return prepareResp(cli, "? " + opt + " " + val + " MODE :bad option value");             // ?
+  else if(opt == "-o") {
+    vector<string> targets = splitArgToSubargs(val);
+    for(vector<string>::iterator it = targets.begin(); it != targets.end(); it++)
+      if(getCliOnCh(*it, ar[1]) != NULL) {
+        if(getAdmOnCh(*it, ar[1]) != NULL)
+          getCh(ar[1])->adms.erase(getCli(*it));
+      }
+      else
+        prepareResp(cli, "441 " + *it + " " + ar[1] + " :They aren't on that channel");      // ERR_USERNOTINCHANNEL
+  }
+  else if(opt == "+o" && getCliOnCh(ar[3], ar[1]) == NULL) {
+    vector<string> targets = splitArgToSubargs(val);
+    for(vector<string>::iterator it = targets.begin(); it != targets.end(); it++)
+      if(getCliOnCh(*it, ar[1]) != NULL)
+        getCh(ar[1])->adms.insert(getCli(*it));
+      else
+        prepareResp(cli, "441 " + *it + " " + ar[1] + " :They aren't on that channel");      // ERR_USERNOTINCHANNEL
+  }
+  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]); // ?
 }

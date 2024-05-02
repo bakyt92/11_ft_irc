@@ -97,6 +97,7 @@ public:
   int                      execNotice();
   int                      execTopic();
   int                      execMode();
+  int                      execModeOneOoption(string opt, string val);
   int                      execPing();
   int                      execWhois();
   int                      execPart();
