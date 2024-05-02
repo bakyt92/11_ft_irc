@@ -304,7 +304,13 @@ int Server::execTopic() {
 int Server::execQuit() {
   fdsToEraseNextIteration.insert(cli->fd);
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-    prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit: By for now");
+  {
+    if (ar.size() == 2)
+      prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:" + ar[1]);
+    else 
+      prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:");
+  }
+    
   return 0;
 }
 
