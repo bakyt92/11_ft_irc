@@ -1,4 +1,5 @@
 ## Понять, как должен вести себя сервер
+* PASS какие есть ограничения на пароль по длине и по символам
 * NICK проверить, точно ли нужно :Nickname collision KILL
 * PRIVMSG alice,alice hello
 * PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 **B** 
