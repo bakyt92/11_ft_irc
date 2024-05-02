@@ -239,8 +239,6 @@ int Server::nbChannels(Cli *c) {
 }
 
 void Server::eraseCliFromCh(string nick, string chName) {
-  if(getCli(nick)->invits.find(chName) != getCli(nick)->invits.end()) //
-    getCli(nick)->invits.erase(chName);
   if(getCh(chName)->clis.count(getCli(nick)) > 0)
     getCh(chName)->clis.erase(getCli(nick));
   if(getCh(chName)->adms.count(getCli(nick)) > 0)

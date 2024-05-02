@@ -186,7 +186,7 @@ int Server::execJoin() {
         pass = *(passes.begin());
         passes.erase(passes.begin());
       }
-      cout << "*** " << cli->nick << " wants to join " << *chName << endl;
+      //cout << "*** " << cli->nick << " wants to join " << *chName << ", getCliOnCh = " << getCliOnCh(cli->nick, *chName)->nick << endl;
       if(getCliOnCh(cli->nick, *chName) != NULL)
         prepareResp(cli, ":you are already on channel " + *chName);                     // already on channel ?
       else if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
@@ -222,10 +222,10 @@ int Server::execPart() {
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
       if (ar.size() > 2) {
-              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " :" + ar[2]);
+        prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " :" + ar[2]);
       }
       else {
-              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1]);
+        prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1]);
       }
 //      prepareRespAuthorIncluding(getCh(*chName), ": " + cli->nick + " quits " + *chName + (ar.size() >= 3 ? " : " + ar[2] : ""));
       eraseCliFromCh(cli->nick, *chName);
