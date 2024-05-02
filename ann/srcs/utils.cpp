@@ -9,9 +9,9 @@ string Server::users(Ch *ch) { // возможно это надо будет п
   string ret = "users: ";
   for(set<Cli*>::iterator it = ch->clis.begin(); it != ch->clis.end(); it++)
     if (ch->adms.find(*it) == ch->adms.end())
-      ret += (*it)->nick + ",";
+      ret += (*it)->nick + " ";
     else
-      ret += "@" + (*it)->nick + ",";
+      ret += "@" + (*it)->nick + " ";
   if (ret.size() > 0)
     ret.resize(ret.size() - 1);
   return ret;

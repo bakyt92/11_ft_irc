@@ -202,7 +202,7 @@ int Server::execJoin() {
         prepareRespAuthorIncluding(getCh(*chName), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN " + *chName); // ok channel
         if(getCh(*chName)->topic != "")
           prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC                      // ok channel
-        prepareResp(cli, "353 " + *chName + " " + users(getCh(*chName)));               // RPL_NAMREPLY
+        prepareResp(cli, ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + *chName + " :" + users(getCh(*chName)));               // RPL_NAMREPLY
       } 
     }
   }
