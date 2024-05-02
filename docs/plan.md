@@ -22,6 +22,7 @@
 * `TOPIC #channel` должно отвечать "недостаточно параметров" или устанавливать пустой топик?
 * `TOPIC #channel ":"` 
 * WHOIS alice (до регистрации)
+* проверить всё по https://modern.ircdocs.horse/#invite-message
 * test with irssi and nc at the same time (checklist)
 * протестировать с valgrind все функции с несуществущими каналами, пользователями, опциями
 * протестировать с valgrind все случаи ошибок, которые есть в коде
