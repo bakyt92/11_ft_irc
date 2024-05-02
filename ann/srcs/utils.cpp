@@ -13,7 +13,7 @@ string Server::users(Ch *ch) { // возможно это надо будет п
     else
       ret += "@" + (*it)->nick + ",";
   if (ret.size() > 0)
-    ret.substr(0, ret.size() - 1);
+    ret.resize(ret.size() - 1);
   return ret;
 }
 
