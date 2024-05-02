@@ -219,11 +219,11 @@ int Server::execPart() {
     else if(getCliOnCh(cli, *chName) == NULL)
       prepareResp(cli, "442 " + *chName + " :You're not on that channel");              // ERR_NOTONCHANNEL
     else {
-      if (ar.size() > 3) {
-              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " " + ar[2] + " :" + ar[3]);
+      if (ar.size() > 2) {
+              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " :" + ar[2]);
       }
       else {
-              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " " + ar[2]);
+              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1]);
       }
 //      prepareRespAuthorIncluding(getCh(*chName), ": " + cli->nick + " quits " + *chName + (ar.size() >= 3 ? " : " + ar[2] : ""));
       eraseCliFromCh(cli->nick, *chName);
