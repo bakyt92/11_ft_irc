@@ -19,7 +19,7 @@ re:			fclean all
 
 %.o:		%.cpp $(HDRS)
 			$(CPP) -c $< -o $@
-			echo $@ compilled
+			echo $@ compiled
 
 run:		all
 			./ircserv 6667 2
