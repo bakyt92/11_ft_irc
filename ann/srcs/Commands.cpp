@@ -154,7 +154,8 @@ int Server::execJoin() {
   if(ar.size() == 2 && ar[1] == "0") {
     ar[1] = "";
     for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
-      ar[1] += ch->first + ",";
+      if(getCliOnCh(cli, ch->first) != NULL)
+        ar[1] += ch->first + ",";
     if(ar[1].size() > 0)
       ar[1].resize(ar[1].size() - 1);
     return execPart();
@@ -230,7 +231,7 @@ int Server::execKick() {
         if(getCliOnCh(*target, *chName) == NULL)
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {
-          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >= 4 ? ar[3] : "") + " " + *target + " is kicked from " + *chName + " by " + cli->nick);
+          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >= 4 ? ar[3] + " " : "") + *target + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*target, *chName);
         }
       }

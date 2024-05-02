@@ -111,11 +111,11 @@ public:
   Ch*                      getCh(string &chName);
   int                      nbChannels(Cli *c);
   void                     eraseCliFromCh(string nick, string chName);
-  void                     eraseEmptyChs();
+  void                     eraseUnusedChs();
   void                     eraseUnusedClis();
   string                   mode(Ch *ch);
   string                   users(Ch *ch);
-  string                   without_r_n(string s);
+  string                   withoutRN(string s);
   string                   toLower(string s);
   string                   infoCmd();
   string                   infoServ();

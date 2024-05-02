@@ -70,7 +70,7 @@ void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >\n";
   while (sigReceived == false) {
     eraseUnusedClis();
-    eraseEmptyChs();
+    eraseUnusedChs();
     markClisToSendMsgsTo();
     int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
@@ -112,13 +112,13 @@ void Server::receiveBufAndExecCmds(int fd) {
     buf0[i] = '\0';
   int nbBytesReallyReceived = recv(cli->fd, buf0.data(), buf0.size() - 1, MSG_NOSIGNAL | MSG_DONTWAIT);
   if(nbBytesReallyReceived < 0)
-    perror("recv");                                                                  // ошибка, но не делаем execQuit(), возможно клиент ещё тут
+    perror("recv");                                                                  // ошибка, но возможно клиент ещё тут
   else if(nbBytesReallyReceived == 0)                                                                // клиент пропал
     fdsToEraseNextIteration.insert(cli->fd);
   else {
     string buf = string(buf0.begin(), buf0.end());
     buf.resize(nbBytesReallyReceived);
-    cout << without_r_n("I have received from " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd))).str() + " buf: [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
+    cout << withoutRN("I have received from " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd))).str() + " buf: [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
     buf = cli->bufRecv + buf;
     std::vector<string> cmds = splitBufToCmds(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {

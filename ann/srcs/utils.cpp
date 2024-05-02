@@ -33,7 +33,7 @@ string Server::mode(Ch *ch) {
   return mode;
 }
 
-string Server::without_r_n(string s) {                // debugging
+string Server::withoutRN(string s) {                // debugging
   for(size_t pos = s.find('\r'); pos != string::npos; pos = s.find('\r', pos))
     s.replace(pos, 1, "\\r");
   for(size_t pos = s.find('\n'); pos != string::npos; pos = s.find('\n', pos))
@@ -60,7 +60,7 @@ string Server::infoServ() {        // debugging
   string myChar;
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++) {
     myChar = it->second->passOk ? 'T' : 'F';
-    ret += "My client                 : [nick = " + it->second->nick + ", bufR = [" + it->second->bufRecv + "], rName = ["+ it->second->rName + "], uName = " + it->second->uName + ", passOk = " + myChar + "]\n";
+    ret += "My client                 : nick = " + it->second->nick + ", bufR = [" + it->second->bufRecv + "], rName = ["+ it->second->rName + "], uName = " + it->second->uName + ", passOk = " + myChar + "\n";
   }
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
     ret += "My channel                : name = " + ch->first + ", topic = " + ch->second->topic + ", pass = " + ch->second->pass + ", limit = " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (ch->second->limit) )).str() + ", mode = " + mode(ch->second) + "\n";
@@ -161,7 +161,7 @@ int Server::prepareRespExceptAuthor(Ch *ch, string msg) {
 //   This can only be detected when a send is attempted, and the destination isn't reachable
 //   That could happen only after minutes or hours (or someone could in the mean time plug the cable back in, and you never know!)
 void Server::sendPreparedResps(Cli *to) {
-  cout << "I send buf to fd=" << to->fd << "        : [" << without_r_n(to->bufToSend) << "]\n";
+  cout << "I send buf to fd=" << to->fd << "        : [" << withoutRN(to->bufToSend) << "]\n";
   ssize_t nbBytesReallySent = send(to->fd, (to->bufToSend).c_str(), (to->bufToSend).size(), MSG_NOSIGNAL | MSG_DONTWAIT);
   if (nbBytesReallySent == (ssize_t)to->bufToSend.size()) {
     to->bufToSend = "";
@@ -240,7 +240,7 @@ void Server::eraseCliFromCh(string nick, string chName) {
     chs[chName]->adms.insert(*(chs[chName]->clis.begin()));                   // сделать самого старого пользователя админом
 }
 
-void Server::eraseEmptyChs() {
+void Server::eraseUnusedChs() {
   set<string> toErases;
   for(map<string, Ch*>::iterator ch = chs.begin(); ch != chs.end(); ch++)
     if(ch->second->size() == 0)
