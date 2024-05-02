@@ -207,7 +207,7 @@ int Server::execJoin() {
         prepareResp(cli, "473 " + *chName + " :Cannot join channel (+i)");              // ERR_INVITEONLYCHAN
       else {
         getCh(*chName)->clis.insert(cli);
-        if(cli->invits.find(*chName) != cli->invits.end()) //
+        if(cli->invits.find(*chName) != cli->invits.end())
           cli->invits.erase(*chName);
         prepareRespAuthorIncluding(getCh(*chName), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN " + *chName); // ok channel
         prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC                      // ok channel
