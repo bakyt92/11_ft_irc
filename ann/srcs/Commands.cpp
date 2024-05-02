@@ -100,11 +100,6 @@ int Server::execCap() {
 }
 
 int Server::execPing() {
-  // if(ar.size() < 2)
-  //   return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
-  // string nick = ar[1].substr(0, ar[1].find('@'));
-  // if(getCli(nick) == NULL)
-  //   return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
   return prepareResp(cli, "PONG");
 }
 
@@ -252,12 +247,10 @@ int Server::execKick() {
         if(getCliOnCh(*target, *chName) == NULL)
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {
-          if (ar.size() > 3)
-            {
+          if (ar.size() > 3) {
               prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2] + " :" + ar[3]);
             }
-          else 
-            {
+          else {
               prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2]);
             }
           eraseCliFromCh(*target, *chName);

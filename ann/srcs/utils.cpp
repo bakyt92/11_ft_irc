@@ -137,14 +137,14 @@ int Server::prepareResp(Cli *to, string msg) {
   return 0;
 }
 
-int Server::prepareRespAuthorIncluding(Ch *ch, string msg) {
+int Server::prepareRespExceptAuthor(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
     if((*to)->fd != cli->fd)
       prepareResp(*to, msg);
   return 0;
 }
 
-int Server::prepareRespExceptAuthor(Ch *ch, string msg) {
+int Server::prepareRespAuthorIncluding(Ch *ch, string msg) {
   for(set<Cli*>::iterator to = ch->clis.begin(); to != ch->clis.end(); to++) 
     prepareResp(*to, msg);
   return 0;
