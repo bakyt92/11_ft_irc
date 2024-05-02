@@ -291,7 +291,7 @@ int Server::execTopic() {
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2 || (ar.size() >= 3 && ar[2] == "") || (ar.size() >= 3 && ar[2] == ":")) { // ":" ?
     getCh(ar[1])->topic = "";
-    return prepareResp(cli, "331 " + ar[1] + " :No topic is set");                      // RPL_NOTOPIC
+    return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set");                      // RPL_NOTOPIC
   }
   getCh(ar[1])->topic = ar[2];
   prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);                        // RPL_TOPIC
