@@ -64,9 +64,9 @@ int Server::execNick() {
       return prepareResp(cli, "436 " + ar[1] + " :Nickname collision KILL");            // ERR_NICKNAMEOLLISION
     }
   }
+  cli->nick = ar[1];
   if (cli->nick == "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
-  cli->nick = ar[1];
   return 0;
 }
 
@@ -88,11 +88,11 @@ int Server::execCap() {
   if(ar[1] == "LS") {
     cli->capInProgress = true;
     prepareResp(cli, "CAP * LS :"); // КОСТЫЛЬ для тестов, после тестов вернуть на строку с RETURN 
-    return prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // ПОМЕНЯТЬ RETURN prepareResp(cli, "CAP * LS :") на строку выше
+    return prepareResp(cli, "001"); // ПОМЕНЯТЬ RETURN prepareResp(cli, "CAP * LS :") на строку выше
   }
   if(ar[1] == "END" && cli->passOk && cli->nick != "" && cli->uName != "") {
     cli->capInProgress = false;
-    return prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется, но для irssi это кажется не проблема
+    return prepareResp(cli, "001"); // :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME целиком не отпраляется, но для irssi это кажется не проблема
   }
   return 0;
 }
