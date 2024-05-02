@@ -30,6 +30,8 @@ int Server::execCmd() {
     return execModeCh();
   if(ar[0] == "MODE" && ar.size() > 1 && ar[1][0] != '#')
     return execModeCli();
+  if(ar[0] == "MODE" && ar.size() == 1)
+    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(ar[0] == "TOPIC")
     return execTopic();
   if(ar[0] == "INVITE")
@@ -320,8 +322,6 @@ int Server::execQuit() {
 int Server::execModeCh() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o alice,bob   -o alice,bob
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
-  if(ar.size() < 2)
-    return prepareResp(cli, "461 MODE :Not enough parameters");                         // ERR_NEEDMOREPARAMS
   if(getCh(ar[1]) == NULL)
     return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if(getCliOnCh(cli, ar[1]) == NULL)
@@ -380,9 +380,19 @@ int Server::execModeOneOoption(string opt, string val) {
     getCh(ar[1])->adms.insert(getCli(val));
   else if(opt == "-o" && getAdmOnCh(val, ar[1]) != NULL)
     getCh(ar[1])->adms.erase(getCli(val));
-  return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]); // ?
+  return prepareResp(cli, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]);
 }
 
+// not imple;ented ERR_UMODEUNKNOWNFLAG
+// partially implemented RPL_UMODEIS
 int Server::execModeCli() {
-
+  if(getCli(ar[1]) == NULL)
+    return prepareResp(cli, "401 :" + ar[1] + " No such nick");                           // ERR_NOSUCHNICK
+  if(getCli(ar[1])->nick != cli->nick)
+    return prepareResp(cli, "502 :" + ar[1] + " :Cant change mode for other users");      // ERR_USERSDONTMATCH
+  if(ar.size() == 2)
+    return prepareResp(cli, "221 :" + cli->nick + " ");                                   // RPL_UMODEIS
+  if(ar.size() > 3 && ar[2] == "+i")
+    return prepareResp(cli, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1] + " +i ");
+  return 0;
 }
