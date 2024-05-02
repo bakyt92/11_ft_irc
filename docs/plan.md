@@ -20,6 +20,7 @@
 * test with irssi and nc at the same time (checklist)
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * MODE +t +t +t
+* MODE +k 22, MODE +k 22
 * NICK проверить, точно ли нужно :Nickname collision KILL
 * протестиовать с valgrind все функции с несуществущими каналами и пользователями
 * протестировать с valgrind все случаи ошибок, которые есть в коде
