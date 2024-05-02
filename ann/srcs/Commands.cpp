@@ -187,6 +187,8 @@ int Server::execJoin() {
         pass = *(passes.begin());
         passes.erase(passes.begin());
       }
+      if(getCliOnCh(cli->nick, *chName) != NULL)
+        ;                                                                               // already on channel
       if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
         prepareResp(cli, "475 " + *chName + " :Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       else if(getCh(*chName)->size() >= getCh(*chName)->limit)
@@ -289,9 +291,13 @@ int Server::execTopic() {
     return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");           // ERR_NOTONCHANNEL
   if(getAdmOnCh(cli, ar[1]) == NULL && getCh(ar[1])->optT == true)
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
-  if(ar.size() == 2 || (ar.size() >= 3 && ar[2] == "") || (ar.size() >= 3 && ar[2] == ":")) { // ":" ?
+  if(ar.size() == 2 && getCh(ar[1])->topic == "")  
+    return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
+  if(ar.size() == 2 && getCh(ar[1])->topic != "")  
+    return prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);                // RPL_TOPIC
+  if(ar.size() >= 3 && (ar[2] == ":" || ar[2] == "")) { 
     getCh(ar[1])->topic = "";
-    return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set");                      // RPL_NOTOPIC
+    return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
   }
   getCh(ar[1])->topic = ar[2];
   prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);                        // RPL_TOPIC
@@ -336,6 +342,7 @@ int Server::execMode() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o a
 
 int Server::execModeOneOoption(string opt, string val) {
   char *notUsed;
+  cout << "execModeOneOoption " << opt << " " << val << endl;
   if(opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "+l" && opt != "-l" && opt != "+k" && opt != "-k" && opt != "+o" && opt != "-o")
     return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + ar[2]); // ERR_UNKNOWNMODE
   if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k" && opt != "+o" && opt != "-o")
