@@ -117,7 +117,8 @@ void Server::receiveBufAndExecCmds(int fd) {
   else {
     string buf = string(buf0.begin(), buf0.end());
     buf.resize(nbBytesReallyReceived);
-    cout << withoutRN("I have received from " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd))).str() + " buf: [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
+    if(ar[0] != "PING")
+      cout << withoutRN("I have received from " + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (cli->fd))).str() + " buf: [" + buf + "] -> [" + cli->bufRecv + buf + "]") << "\n";
     buf = cli->bufRecv + buf;
     std::vector<string> cmds = splitBufToCmds(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {

@@ -51,6 +51,8 @@ string Server::toLower(string s) {
 }
 
 string Server::infoCmd() {          // debugging
+  if(ar[0] == "PING")
+    return "";
   string ret = "I execute                 : ";
   for(vector<string>::iterator it = ar.begin(); it != ar.end(); it++)
     ret += "[" + *it + "] ";
@@ -58,6 +60,8 @@ string Server::infoCmd() {          // debugging
 }
 
 string Server::infoServ() {        // debugging
+  if(ar[0] == "PING")
+    return "";
   string ret;
   string myChar;
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++) {
