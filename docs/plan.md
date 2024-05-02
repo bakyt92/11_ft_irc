@@ -10,6 +10,7 @@
   + sends the user a message asking them if they want to join you in the indicated channel
   + как клиент должен выразить своё согласие?
   + клиент должен сделать JOIN?
+* MODE доделать **A** 
 * MODE #ch
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
@@ -25,7 +26,6 @@
 * test with irssi and nc at the same time (checklist)
 * протестировать с valgrind все функции с несуществущими каналами, пользователями, опциями
 * протестировать с valgrind все случаи ошибок, которые есть в коде
-* MODE доделать **A** 
 * проверить всё по https://modern.ircdocs.horse/#invite-message **A**
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
