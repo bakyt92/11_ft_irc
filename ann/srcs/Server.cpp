@@ -82,7 +82,7 @@ void Server::run() {
         }
         else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)                // клиент прислал нам сообщение через свой fdForMsgs
           receiveBufAndExecCmds(poll->fd);
-        else if (poll->revents & POLLOUT) d                                          // есть сообщения для отпраки клиентам
+        else if (poll->revents & POLLOUT)                                          // есть сообщения для отпраки клиентам
           sendPreparedResps(clis.at(poll->fd));
       }
   }
