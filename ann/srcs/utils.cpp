@@ -287,10 +287,3 @@ void Server::eraseUnusedClis() {                                              //
   for(set<int>::iterator it = reallyRemouved.begin(); it != reallyRemouved.end(); it++)
     fdsToEraseNextIteration.erase(*it);
 }
-
-void Server::clear() {
-  eraseUnusedClis();
-  eraseUnusedChs();
-  ar.clear();
-  cli = NULL;
-}

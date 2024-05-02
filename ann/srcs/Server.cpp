@@ -69,7 +69,8 @@ void Server::init() {
 void Server::run() {
   std::cout << "Server is running. Waiting clients to connect >\n";
   while (sigReceived == false) {
-    clear();
+    eraseUnusedClis();
+    eraseUnusedChs();
     markPollsToSendMsgsTo();
     int countEvents = poll(polls.data(), polls.size(), 100);                       // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
@@ -121,6 +122,7 @@ void Server::receiveBufAndExecCmds(int fd) {
     std::vector<string> cmds = splitBufToCmds(buf);
     for(std::vector<string>::iterator cmd = cmds.begin(); cmd != cmds.end(); cmd++) {
       //vector<string>().swap(ar); // попробовать убрать
+      ar.clear();
       ar = splitCmdToArgs(*cmd);
       cout << infoCmd();
       execCmd();
