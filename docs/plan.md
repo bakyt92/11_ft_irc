@@ -8,7 +8,6 @@
 * JOIN #channel, JOIN #channel
 * INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере **B** 
   + sends the user a message asking them if they want to join you in the indicated channel
-  + то есть клиент не попадает сразу на канал
   + как клиент должен выразить своё согласие?
   + клиент должен сделать JOIN?
 * MODE #ch
