@@ -71,7 +71,7 @@ void Server::run() {
   while (sigReceived == false) {
     clear();
     markPollsToSendMsgsTo();
-    int countEvents = poll(polls.data(), polls.size(), 1000);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
+    int countEvents = poll(polls.data(), polls.size(), 100);                        // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
     if(countEvents > 0) {                                                            // в каких=то сокетах есть данные

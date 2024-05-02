@@ -134,7 +134,7 @@ int Server::execPrivmsg() {
   if(ar[1][0] != '#' && getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
   if(ar[1][0] == '#' && getCliOnCh(cli->nick, ar[1]) == NULL)
-    return prepareResp(cli, "404 " + cli->nick + " " + ar[1] + ":Cannot send to channel"); // 404 - not on channel
+    return prepareResp(cli, "404 " + cli->nick + " " + ar[1] + ":Cannot send to channel"); // 404 - not on channel ?
   if(ar[1][0] == '#' && getCliOnCh(cli->nick, ar[1]) != NULL)
     return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   if(ar[1][0] != '#')
@@ -185,8 +185,8 @@ int Server::execJoin() {
         passes.erase(passes.begin());
       }
       if(getCliOnCh(cli->nick, *chName) != NULL)
-        ;                                                                               // already on channel
-      if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
+        ;                                                                               // already on channel ?
+      else if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
         prepareResp(cli, "475 " + *chName + " :Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       else if(getCh(*chName)->size() >= getCh(*chName)->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
@@ -339,7 +339,7 @@ int Server::execMode() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o a
 
 int Server::execModeOneOoption(string opt, string val) {
   char *notUsed;
-  cout << "execModeOneOoption " << opt << " " << val << endl;
+  cout << "*** execModeOneOoption " << opt << " " << val << endl;
   if(opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "+l" && opt != "-l" && opt != "+k" && opt != "-k" && opt != "+o" && opt != "-o")
     return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + ar[2]); // ERR_UNKNOWNMODE
   if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k" && opt != "+o" && opt != "-o")
