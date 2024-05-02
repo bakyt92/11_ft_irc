@@ -19,10 +19,10 @@
 * TOPIC должна расслыать всем какое-то сообщение?
 * test with irssi and nc at the same time (checklist)
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
+* MODE +t +t +t
 * NICK проверить, точно ли нужно :Nickname collision KILL
-* просмотреть комментарии в коде, там есть вопросительные знаки
-* протестиовать все функции с valgrind с несуществущими каналами и пользователями
-* протестировать все случаи ошибок, которые есть в коде
+* протестиовать с valgrind все функции с несуществущими каналами и пользователями
+* протестировать с valgrind все случаи ошибок, которые есть в коде
 * TOPIC #channel должно отвечать "недостаточно параметров" и устанавливать пустой топик?
 * TOPIC невозможно установить топик ":" ?
 
