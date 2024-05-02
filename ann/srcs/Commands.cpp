@@ -47,8 +47,11 @@ int Server::execPass() {
     return prepareResp(cli, "462 :Unauthorized command (already registered)");          // ERR_ALREADYREGISTRED
   if(ar.size() < 2 || ar[1] == "")
     return prepareResp(cli, "461 PASS :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  if(ar[1] == pass)
-    cli->passOk = true;
+  if(ar[1] != pass) {
+    fdsToEraseNextIteration.insert(cli->fd);
+    prepareResp(cli, "464 :" + cli->nick + " :Password incorrect");                     // ERR_PASSWDMISMATCH
+  }
+  cli->passOk = true;
   if(cli->passOk && cli->nick != "" && cli->uName != "" && !cli->capInProgress)
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
@@ -102,11 +105,11 @@ int Server::execCap() {
 }
 
 int Server::execPing() {
-  if(ar.size() < 2)
-    return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
-  string nick = ar[1].substr(0, ar[1].find('@'));
-  if(getCli(nick) == NULL)
-    return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
+  // if(ar.size() < 2)
+  //   return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
+  // string nick = ar[1].substr(0, ar[1].find('@'));
+  // if(getCli(nick) == NULL)
+  //   return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
   return prepareResp(cli, "PONG");
 }
 
@@ -307,14 +310,12 @@ int Server::execTopic() {
 
 int Server::execQuit() {
   fdsToEraseNextIteration.insert(cli->fd);
-  for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++)
-  {
+  for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++) {
     if (ar.size() == 2)
       prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:" + ar[1]);
     else 
       prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:");
   }
-    
   return 0;
 }
 
