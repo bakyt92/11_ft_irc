@@ -16,9 +16,9 @@
 * **B** NOTICE alice,alice Hello
 * WHOIS alice (до регистрации)
 * **JOIN #channel в irssi после этого все сообщения по умолчанию идут в этот канал ?**
-* test with irssi and nc at the same time (checklist)
-* протестировать MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * TOPIC должна расслыать всем какое-то сообщение?
+* test with irssi and nc at the same time (checklist)
+* MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * просмотреть комментарии в коде, там есть вопросительные знаки
 * протестиовать все функции с valgrind с несуществущими каналами и пользователями
 * протестировать все случаи ошибок, которые есть в коде
