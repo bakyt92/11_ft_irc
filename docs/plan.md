@@ -5,7 +5,6 @@
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
 * **B** PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
-
 * **B** PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
 * **B** PRIVMSG alice,alice,alice,alice,alice,alice
 * **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
@@ -100,6 +99,7 @@
   + The server will only send the PRIVMSG to those who have a host matching the mask
   + The mask MUST have at least 1 (one) "." in it and no wildcards following the last "."
   + Wildcards are the '*' and '?'  characters. It is only available to operators.
+* 01 :Welcome to the Internet Relay Network molodoTR!Molod1@127.0.0.1 У в нашей версии почему-то обрубок текста
 * **wireshark** / netcat / a custom **proxy** etc… permet de **voir en raw ce qui est send entre ton client et ton serveur**, easily debug your server, gives you the ability to check how already existing one behaves 
   + альтерантива: https://github.com/LiveOverflow/PwnAdventure3/blob/master/tools/proxy/proxy_part9.py.
 * IRC channels
