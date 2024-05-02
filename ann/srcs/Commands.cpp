@@ -134,7 +134,12 @@ int Server::execPrivmsg() {
   if(ar[1][0] != '#' && getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
   if(ar[1][0] == '#')
-    return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+  {
+    if (getCliOnCh(cli->nick, ar[1]) == NULL)
+      return prepareResp(cli, "404 " + cli->nick + " " + ar[1] + ":Cannot send to channel");                 // 404 - not on channel
+    else
+      return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+  }
   if(ar[1][0] != '#')
     return prepareResp(getCli(ar[1]), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
