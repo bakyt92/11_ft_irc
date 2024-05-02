@@ -12,6 +12,8 @@ string Server::users(Ch *ch) { // возможно это надо будет п
       ret += (*it)->nick + ",";
     else
       ret += "@" + (*it)->nick + ",";
+  if (ret.size() > 0)
+    ret.substr(0, ret.size() - 1);
   return ret;
 }
 
