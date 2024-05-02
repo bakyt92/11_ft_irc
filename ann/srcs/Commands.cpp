@@ -3,7 +3,7 @@ class Server;
 
 int Server::execCmd() {
   if(ar.size() == 0)
-    return 0; //
+    return 0;
   if(ar[0] == "PASS")
     return execPass();
   if(ar[0] == "NICK")

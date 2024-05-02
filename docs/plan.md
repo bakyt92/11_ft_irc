@@ -1,14 +1,6 @@
 ## Понять, как должен вести себя сервер
-* PRIVMSG alice,alice hello <=== Дважды отправляется сообщение на одного адресата
-* какая-то команда более, чем 15 аргументами **B** 
-* PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально? **B** 
-* PRIVMSG alice,alice,alice,alice,alice,alice **B** 
 * NOTICE alice,alice Hello **B** 
-* JOIN #channel, JOIN #channel
-* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере **B** 
-  + sends the user a message asking them if they want to join you in the indicated channel
-  + как клиент должен выразить своё согласие?
-  + клиент должен сделать JOIN?
+
 * MODE доделать **A** 
 * MODE #ch
 * MODE #channel +l 999999999999999`
@@ -18,7 +10,6 @@
 * MODE +k 22, MODE +k 22
 * MODE +k какие есть ограничения на пароль канала по длине и по символам
 * TOPIC должна рассылать всем какое-то сообщение?
-* `TOPIC #channel ":"` <== устанавливает пустой топик
 * WHOIS alice (до регистрации)
 * в коде несколько мест, где я не знаю, как конструировать ответ (они отмечены вопросительными знаками)
 * test with irssi and nc at the same time (checklist)
@@ -27,7 +18,16 @@
 * проверить всё по https://modern.ircdocs.horse/#invite-message **A**
 
 ## ПРОТЕСТИРОВАНО на IRSSI 
- * JOIN #сhannel,#сhannel
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере **B** <== БАКЫТ - протестировано.
+  + sends the user a message asking them if they want to join you in the indicated channel <<= реализовано. 
+  + как клиент должен выразить своё согласие? <<< НЕТ, мы не подключаем пользователя, а заносим в отдельный список, по которому потом можно вступить в канал. 
+  + клиент должен сделать JOIN? <<< НЕТ, заносим в отдельный список. 
+ * JOIN #сhannel,#сhannel << ошибка 407. 
+ * JOIN #channel, JOIN #channel <== не подключается дважды подряд, все ок
+ * `TOPIC #channel ":"` <== устанавливает пустой топик
+ * PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально? **B** << это ОК
+ * PRIVMSG alice,alice,alice,alice,alice,alice **B** << это ОК, обсудили
+ * PRIVMSG alice,alice hello <=== Дважды отправляется сообщение на одного адресата, протестировано
 * USER a 0 * ""  - no command USER on IRSSI
 * USER "" 0 * ""  - no command USER on IRSSI
 * USER a 0 * a, USER a 0 * a  - no command USER on IRSSI
