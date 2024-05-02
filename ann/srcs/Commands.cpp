@@ -87,8 +87,8 @@ int Server::execCap() {
     return 0;
   if(ar[1] == "LS") {
     cli->capInProgress = true;
-    prepareResp(cli, "CAP * LS :"); // КОСТЫЛЬ для тестов, после тестов вернуть на строку с RETURN 
-    return prepareResp(cli, "001"); // ПОМЕНЯТЬ RETURN prepareResp(cli, "CAP * LS :") на строку выше
+//    prepareResp(cli, "CAP * LS :"); // КОСТЫЛЬ для тестов, после тестов вернуть на строку с RETURN 
+    return prepareResp(cli, "CAP * LS :"); // ПОМЕНЯТЬ RETURN prepareResp(cli, "CAP * LS :") на строку выше
   }
   if(ar[1] == "END" && cli->passOk && cli->nick != "" && cli->uName != "") {
     cli->capInProgress = false;
