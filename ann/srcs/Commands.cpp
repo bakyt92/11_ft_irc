@@ -76,7 +76,7 @@ int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
   if(cli->uName != "")
-    return prepareResp(cli, "462 :Unauthorized command (already registered)");          // ERR_ALREADYREGISTRED тут надо протестировать!
+    return prepareResp(cli, ":username can not be empty");                              // 
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && !cli->capInProgress)
