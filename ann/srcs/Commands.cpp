@@ -203,7 +203,7 @@ int Server::execJoin() {
         getCh(*chName)->clis.insert(cli);
         if(cli->invits.find(*chName) != cli->invits.end()) //
           cli->invits.erase(*chName);
-        prepareRespAuthorIncluding(getCh(*chName), cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN :" + cli->nick + " is joining " + *chName);
+        prepareRespAuthorIncluding(getCh(*chName), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN " + *chName);
         prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC
         prepareResp(cli, "353 " + *chName + " " + users(getCh(*chName)));               // RPL_NAMREPLY but not exactly
       }
