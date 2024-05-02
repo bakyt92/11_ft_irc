@@ -133,13 +133,10 @@ int Server::execPrivmsg() {
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
   if(ar[1][0] != '#' && getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
-  if(ar[1][0] == '#')
-  {
-    if (getCliOnCh(cli->nick, ar[1]) == NULL)
-      return prepareResp(cli, "404 " + cli->nick + " " + ar[1] + ":Cannot send to channel");                 // 404 - not on channel
-    else
-      return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
-  }
+  if(ar[1][0] == '#' && getCliOnCh(cli->nick, ar[1]) == NULL)
+    return prepareResp(cli, "404 " + cli->nick + " " + ar[1] + ":Cannot send to channel"); // 404 - not on channel
+  if(ar[1][0] == '#' && getCliOnCh(cli->nick, ar[1]) != NULL)
+    return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   if(ar[1][0] != '#')
     return prepareResp(getCli(ar[1]), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
@@ -294,7 +291,7 @@ int Server::execTopic() {
   if(ar.size() == 2 && getCh(ar[1])->topic == "")  
     return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
   if(ar.size() == 2 && getCh(ar[1])->topic != "")  
-    return prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);                // RPL_TOPIC
+    return prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);               // RPL_TOPIC
   if(ar.size() >= 3 && (ar[2] == ":" || ar[2] == "")) { 
     getCh(ar[1])->topic = "";
     return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
