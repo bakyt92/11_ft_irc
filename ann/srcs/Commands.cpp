@@ -98,6 +98,11 @@ int Server::execCap() {
 }
 
 int Server::execPing() {
+  if(ar.size() < 2)
+    return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
+  string nick = ar[1].substr(0, ar[1].find('@'));
+  if(getCli(nick) == NULL)
+    return prepareResp(cli, "409 :No origin specified");                                // ERR_NOORIGIN
   return prepareResp(cli, "PONG");
 }
 
@@ -162,7 +167,7 @@ int Server::execJoin() {
   }
   vector<string> chNames = splitArgToSubargs(ar[1]);
   if ((set<std::string>(chNames.begin(), chNames.end())).size() < chNames.size() || chNames.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + ": 407 recipients. Abort message.");       // ERR_TOOMANYTARGETS
+    return prepareResp(cli, ar[1] + " :407 recipients. Too many targets.");            // ERR_TOOMANYTARGETS
   vector<string> passes = ar.size() >= 3 ? splitArgToSubargs(ar[2]) : vector<string>();
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
     if (nbChannels(cli) > MAX_CHS_PER_USER - 1)
@@ -217,9 +222,10 @@ int Server::execKick() {
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 3)
     return prepareResp(cli, "461 KICK :Not enough parameters");                         // ERR_NEEDMOREPARAMS
-  std::vector<string> chNames    = splitArgToSubargs(ar[1]);
+  std::vector<string> chNames = splitArgToSubargs(ar[1]);
   std::vector<string> targets = splitArgToSubargs(ar[2]);
-  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++)
+  for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
+    cout << "*** cnName = " << *chName << endl;
     if(getCh(*chName) == NULL)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
     else if(getCliOnCh(cli, *chName) == NULL)
@@ -227,7 +233,8 @@ int Server::execKick() {
     else if(getAdmOnCh(cli, *chName) == NULL)
       prepareResp(cli, "482 " + *chName + " :You're not channel operator");             // ERR_CHANOPRIVSNEEDED
     else {
-      for(vector<string>::iterator target = targets.begin(); target != targets.end(); target++)
+      for(vector<string>::iterator target = targets.begin(); target != targets.end(); target++) {
+      cout << "*** target = " << *target << endl;
         if(getCliOnCh(*target, *chName) == NULL)
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {
@@ -235,6 +242,8 @@ int Server::execKick() {
           eraseCliFromCh(*target, *chName);
         }
       }
+    }
+  }
   return 0;
 }
 
@@ -246,19 +255,19 @@ int Server::execInvite() {
     return prepareResp(cli, "461 INVITE :Not enough parameters");                       // ERR_NEEDMOREPARAMS
   if(getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 " + ar[1] + " :No such nick");                         // ERR_NOSUCHNICK
-  if(getCliOnCh(cli, ar[2]) == NULL)
+  if(getCh(ar[2]) != NULL && getCliOnCh(cli, ar[2]) == NULL)
     return prepareResp(cli, "442 " + ar[2] + " :You're not on that channel");           // ERR_NOTONCHANNEL
-  if(getCliOnCh(ar[1], ar[2]) != NULL)
+  if(getCh(ar[2]) != NULL && getCliOnCh(ar[1], ar[2]) != NULL)
     return prepareResp(cli, "443 " + ar[1] + " " + ar[2] + " :is already on channel");  // ERR_USERONCHANNEL
-  if(getAdmOnCh(cli, ar[2]) == NULL && getCh(ar[2])->optI == true)
+  if(getCh(ar[2]) != NULL && getAdmOnCh(cli, ar[2]) == NULL && getCh(ar[2])->optI == true)
     return prepareResp(cli, "482 " + ar[2] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(getCh(ar[2]) == NULL && (ar[2].size() > 200 || ar[2][0] != '#' || ar[2].find_first_of("\0") != string::npos))
-    return prepareResp(getCli(ar[1]), ar[2] + " bad channel name");                     // ?
+    return prepareResp(getCli(ar[1]), "403 " + ar[2] + " bad channel name");            // ERR_NOSUCHCHANNEL ?
   if(getCh(ar[2]) == NULL)
-    chs[ar[2]] = new Ch(cli);                                                           // если канал не существует, создать его
-  getCh(ar[2])->clis.insert(getCli(ar[1])); // кажется надо по-другому, написать приглашённому сообщение
-  prepareResp(getCli(ar[1]), "341 " + ar[2] + " " + ar[1]);                             // RPL_INVITING ?
-  return prepareRespAuthorIncluding(getCh(ar[2]), "341 " + ar[2] + " " + ar[1]);        // RPL_INVITING ?
+    chs[ar[2]] = new Ch(cli);
+  getCh(ar[2])->clis.insert(getCli(ar[1]));
+  prepareResp(cli, "341 " + ar[1] + " " + ar[2]);                                       // RPL_INVITING
+  return prepareResp(getCli(ar[1]), ": you are invited to " + ar[2]);                   // ?
 }
 
 int Server::execTopic() {

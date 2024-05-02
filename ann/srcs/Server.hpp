@@ -52,8 +52,8 @@ struct Ch {
   };
   string                   topic;
   string                   pass;  // k option
-  bool                     optI;  // i 
-  bool                     optT;  // t 
+  bool                     optI;  // i
+  bool                     optT;  // t
   unsigned int             limit; // l
   set<Cli*>                clis;
   set<Cli*>                adms;  // o
