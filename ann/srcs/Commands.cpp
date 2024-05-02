@@ -310,11 +310,22 @@ int Server::execMode() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o a
     return prepareResp(cli, "403 " + ar[1] + " :No such channel");                      // ERR_NOSUCHCHANNEL
   if(getCliOnCh(cli, ar[1]) == NULL)
     return prepareResp(cli, "442 " + ar[1] + " :You're not on that channel");           // ERR_NOTONCHANNEL
-  if(getAdmOnCh(cli, ar[1]) == NULL) // ? 481 ERR_NOPRIVILEGES ":Permission Denied- You're not an IRC operator"
+  if(getAdmOnCh(cli, ar[1]) == NULL)
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2)
     return prepareResp(cli, "MODE " + ar[1] + " " + mode(getCh(ar[1])));                // RPL_CHANNELMODEIS
-  execModeOneOoption(ar[2], ar.size() >= 4 ? ar[3] : ""); // boocle
+  for(size_t i = 2; i < ar.size(); ) {
+    string opt = ar[i];
+    string val = (ar.size() >= i + 2 && (opt == "+k" || opt == "+l" || opt != "+o" || opt == "-o")) ? ar[3] : "";
+    if((opt == "+o" || opt == "-o") && val != "") {
+      vector<string> vals = splitArgToSubargs(val);
+      for(vector<string>::iterator val = vals.begin(); val != vals.end(); val++)
+        execModeOneOoption(opt, *val);
+    }
+    else
+      execModeOneOoption(opt, val);
+    i += (ar.size() >= i + 2 && (opt == "+k" || opt == "+l" || opt != "+o" || opt == "-o")) ? 2 : 1;
+  }
   return 0;
 }
 
@@ -322,12 +333,16 @@ int Server::execModeOneOoption(string opt, string val) {
   char *notUsed;
   if(opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "+l" && opt != "-l" && opt != "+k" && opt != "-k" && opt != "+o" && opt != "-o")
     return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + ar[2]); // ERR_UNKNOWNMODE
-  if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k")
+  if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k" && opt != "+o" && opt != "-o")
     return prepareResp(cli, "461 MODE :Not enough parameters");                          // ERR_NEEDMOREPARAMS
   if(opt == "+k" && getCh(ar[1])->pass != "")
     return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");               // ERR_KEYSET
   if(opt == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
     return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + opt + " " + val + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
+  else if((opt == "+o" || opt == "-o") && getCliOnCh(val, ar[1]) == NULL)
+    return prepareResp(cli, "441 " + val + " " + ar[1] + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
+  if(opt == "+l" && (atoi(val.c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
+    return prepareResp(cli, "? " + opt + " " + val + " MODE :bad option value");          // ?
   if(opt == "+i")
     getCh(ar[1])->optI = true;
   else if(opt == "-i")
@@ -344,25 +359,9 @@ int Server::execModeOneOoption(string opt, string val) {
     getCh(ar[1])->pass = "";
   else if(opt == "+l" && atoi(val.c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
     getCh(ar[1])->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10));
-  else if(opt == "+l")
-    return prepareResp(cli, "? " + opt + " " + val + " MODE :bad option value");             // ?
-  else if(opt == "-o") {
-    vector<string> targets = splitArgToSubargs(val);
-    for(vector<string>::iterator it = targets.begin(); it != targets.end(); it++)
-      if(getCliOnCh(*it, ar[1]) != NULL) {
-        if(getAdmOnCh(*it, ar[1]) != NULL)
-          getCh(ar[1])->adms.erase(getCli(*it));
-      }
-      else
-        prepareResp(cli, "441 " + *it + " " + ar[1] + " :They aren't on that channel");      // ERR_USERNOTINCHANNEL
-  }
-  else if(opt == "+o" && getCliOnCh(ar[3], ar[1]) == NULL) {
-    vector<string> targets = splitArgToSubargs(val);
-    for(vector<string>::iterator it = targets.begin(); it != targets.end(); it++)
-      if(getCliOnCh(*it, ar[1]) != NULL)
-        getCh(ar[1])->adms.insert(getCli(*it));
-      else
-        prepareResp(cli, "441 " + *it + " " + ar[1] + " :They aren't on that channel");      // ERR_USERNOTINCHANNEL
-  }
+  else if(opt == "+o")
+    getCh(ar[1])->adms.insert(getCli(val));
+  else if(opt == "-o" && getAdmOnCh(val, ar[1]) != NULL)
+    getCh(ar[1])->adms.erase(getCli(val));
   return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]); // ?
 }
