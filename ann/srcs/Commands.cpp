@@ -260,7 +260,6 @@ int Server::execKick() {
             {
               prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2]);
             }
-//           (ar.size() >= 4 ? ar[3] + " " : "") + *target + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*target, *chName);
         }
       }
