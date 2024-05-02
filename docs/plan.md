@@ -1,18 +1,18 @@
 ## Понять, как должен вести себя сервер
 * NICK проверить, точно ли нужно :Nickname collision KILL
 * PRIVMSG alice,alice hello
-* **B** PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15
-* **B** PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально?
-* **B** PRIVMSG alice,alice,alice,alice,alice,alice
-* **B** NOTICE alice,alice Hello
+* PRIVMSG alice h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 **B** 
+* PRIVMSG alice,bob,carol,david,eve,françois Hello - у нас лимит 5 адресатов, это нормально? **B** 
+* PRIVMSG alice,alice,alice,alice,alice,alice **B** 
+* NOTICE alice,alice Hello **B** 
 * JOIN #channel, JOIN #channel
 * **JOIN #channel в irssi после этого все сообщения по умолчанию идут в этот канал ?**
-* **B** INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере
+* INVITE с только что созданного канала - пишет: приглашенный пользователь уже есть на сервере **B** 
   + sends the user a message asking them if they want to join you in the indicated channel
   + то есть клиент не попадает сразу на канал
   + как клиент должен выразить своё согласие?
   + клиент должен сделать JOIN?
-* **B** INVITE на несуществующий канал
+* INVITE на несуществующий канал **B** 
 * MODE #ch
 * MODE #channel +l 999999999999999`
 * MODE #channel +l -1
