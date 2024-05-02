@@ -19,8 +19,8 @@
 * MODE Check that a regular user does not have privileges to do operator actions. Then test with an operator. All the channel operation commands should be tested. (**checklist**)
 * MODE +t +t +t
 * MODE +k 22, MODE +k 22
-* TOPIC должна расслыать всем какое-то сообщение?
-* TOPIC #channel должно отвечать "недостаточно параметров" и устанавливать пустой топик?
+* TOPIC должна рассылать всем какое-то сообщение?
+* TOPIC #channel должно отвечать "недостаточно параметров" или устанавливать пустой топик?
 * TOPIC #channel ":" 
 * WHOIS alice (до регистрации)
 * test with irssi and nc at the same time (checklist)
