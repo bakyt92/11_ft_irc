@@ -67,7 +67,7 @@ int Server::execNick() {
     if(toLower(ar[1]) == toLower(itCli->second->nick) && cli->nick != "")
       return prepareResp(cli, "433 " + cli->nick + " " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
   cli->nick = ar[1];
-  if (cli->nick == "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
+  if (cli->nick != "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
     prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
@@ -89,8 +89,7 @@ int Server::execCap() {
     return 0;
   if(ar[1] == "LS") {
     cli->capInProgress = true;
-//    prepareResp(cli, "CAP * LS :"); // КОСТЫЛЬ для тестов, после тестов вернуть на строку с RETURN 
-    return prepareResp(cli, "CAP * LS :"); // ПОМЕНЯТЬ RETURN prepareResp(cli, "CAP * LS :") на строку выше
+    return prepareResp(cli, "CAP * LS :");
   }
   if(ar[1] == "END" && cli->passOk && cli->nick != "" && cli->uName != "") {
     cli->capInProgress = false;
@@ -149,9 +148,9 @@ int Server::execNotice() {
   vector<string> tos = splitArgToSubargs(ar[1]);
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && getCh(*to) != NULL)
-      prepareRespExceptAuthor(getCh(*to), ": " + cli->nick + ": " + ar[2]);
+      prepareRespExceptAuthor(getCh(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 NOTICE " + ar[1] + " :\033[1;31m" + ar[2] + "\033[0m");
     else if((*to)[0] != '#' && getCli(*to) != NULL)
-      prepareResp(getCli(*to), ": " + cli->nick + ": " + ar[2]);
+      prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 NOTICE " + ar[1] + " :\033[1;31m" + ar[2] + "\033[0m");
   return 0;
 }
 
@@ -393,7 +392,7 @@ int Server::execModeCli() {
   if(getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 :" + ar[1] + " No such nick");                           // ERR_NOSUCHNICK
   if(getCli(ar[1])->nick != cli->nick)
-    return prepareResp(cli, "502 :" + ar[1] + " :Cant change mode for other users");      // ERR_USERSDONTMATCH
+    return prepareResp(cli, "502 :" + ar[1] + " :Can't change mode for other users");      // ERR_USERSDONTMATCH
   if(ar.size() == 2)
     return prepareResp(cli, "221 :" + cli->nick + " ");                                   // RPL_UMODEIS
   if(ar.size() > 3 && ar[2] == "+i")
