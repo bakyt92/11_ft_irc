@@ -277,7 +277,8 @@ int Server::execInvite() {
     chs[ar[2]] = new Ch(cli);
   getCli(ar[1])->invits.insert(ar[2]);
   prepareResp(cli, "341 " + ar[1] + " " + ar[2]);                                       // RPL_INVITING
-  return prepareResp(getCli(ar[1]), ": you are invited to " + ar[2]);                   // ?
+  prepareResp(getCli(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " INVITE " + ar[1] + " " + ar[2]);  
+  return prepareRespAuthorIncluding(getCh(ar[2]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " INVITE " + ar[1] + " " + ar[2]);
 }
 
 // not implemented here ERR_NOCHANMODES
