@@ -133,29 +133,35 @@ int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (PRIVMSG)");                       // ERR_NORECIPIENT
+    return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")");                 // ERR_NORECIPIENT протестировать
   if(ar.size() == 2)
-    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND
-  if(ar[1][0] == '#' && getCh(ar[1]) == NULL)
-    return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
-  if(ar[1][0] != '#' && getCli(ar[1]) == NULL)
-    return prepareResp(cli, "401 " + ar[1] + " :No such nick/channel");                 // ERR_NOSUCHNICK
-  if(ar[1][0] == '#' && getCliOnCh(cli->nick, ar[1]) == NULL)
-    return prepareResp(cli, "404 " + cli->nick + " " + ar[1] + ":Cannot send to channel"); // 404 - not on channel ?
-  if(ar[1][0] == '#' && getCliOnCh(cli->nick, ar[1]) != NULL)
-    return prepareRespAuthorIncluding(chs[ar[1]], ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
-  if(ar[1][0] != '#')
-    return prepareResp(getCli(ar[1]), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
+  vector<string> tos = splitArgToSubargs(ar[1]);
+  if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > MAX_NB_TARGETS)
+    return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
+  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+    if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
+      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                        // ERR_NOSUCHNICK
+    else if((*to)[0] == '#' && getCliOnCh(cli->nick, *to) == NULL)
+      prepareResp(cli, "404 " + cli->nick + " " + *to + ":Cannot send to channel"); // 404 - not on channel ?
+    else if((*to)[0] == '#' && getCliOnCh(cli->nick, *to) != NULL)
+      prepareRespAuthorIncluding(getCh(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
+    else if((*to)[0] != '#' && !getCli(*to))
+      prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                      // ERR_NOSUCHNICK
+    else if((*to)[0] != '#')
+      prepareResp(getCli(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
   return 0;
 }
 
 int Server::execNotice() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "" || ar.size() < 3)
     return 0;
-  if(ar[1][0] == '#' && getCh(ar[1]) != NULL)
-    return prepareRespExceptAuthor(chs[ar[1]], ": " + cli->nick + ": " + ar[2]);
-  if(ar[1][0] != '#' && getCli(ar[1]) != NULL)
-    return prepareResp(getCli(ar[1]), ": " + cli->nick + ": " + ar[2]);
+  vector<string> tos = splitArgToSubargs(ar[1]);
+  for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
+    if((*to)[0] == '#' && getCh(*to) != NULL)
+      prepareRespExceptAuthor(getCh(*to), ": " + cli->nick + ": " + ar[2]);
+    else if((*to)[0] != '#' && getCli(*to) != NULL)
+      prepareResp(getCli(*to), ": " + cli->nick + ": " + ar[2]);
   return 0;
 }
 
@@ -251,7 +257,7 @@ int Server::execKick() {
         if(getCliOnCh(*target, *chName) == NULL)
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {
-          prepareRespAuthorIncluding(chs[*chName], ": " + (ar.size() >= 4 ? ar[3] + " " : "") + *target + " is kicked from " + *chName + " by " + cli->nick);
+          prepareRespAuthorIncluding(getCh(*chName), ": " + (ar.size() >= 4 ? ar[3] + " " : "") + *target + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*target, *chName);
         }
       }
