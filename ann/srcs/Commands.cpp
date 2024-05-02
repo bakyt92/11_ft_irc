@@ -26,8 +26,10 @@ int Server::execCmd() {
     return execJoin();
   if(ar[0] == "PART")
     return execPart();
-  if(ar[0] == "MODE")
-    return execMode();
+  if(ar[0] == "MODE" && ar.size() > 1 && ar[1][0] == '#')
+    return execModeCh();
+  if(ar[0] == "MODE" && ar.size() > 1 && ar[1][0] != '#')
+    return execModeCli();
   if(ar[0] == "TOPIC")
     return execTopic();
   if(ar[0] == "INVITE")
@@ -309,7 +311,7 @@ int Server::execQuit() {
 }
 
 // not implemented here: ERR_NOCHANMODES RPL_BANLIST RPL_ENDOFBANLIST RPL_EXCEPTLIST RPL_ENDOFEXCEPTLIST RPL_INVITELIST RPL_ENDOFINVITELIST RPL_UNIQOPIS (creator of the channel)
-int Server::execMode() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o alice,bob   -o alice,bob
+int Server::execModeCh() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o alice,bob   -o alice,bob
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() < 2)
@@ -373,4 +375,8 @@ int Server::execModeOneOoption(string opt, string val) {
   else if(opt == "-o" && getAdmOnCh(val, ar[1]) != NULL)
     getCh(ar[1])->adms.erase(getCli(val));
   return prepareResp(cli, cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]); // ?
+}
+
+int Server::execModeCli() {
+
 }

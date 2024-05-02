@@ -96,7 +96,8 @@ public:
   int                      execPrivmsg();
   int                      execNotice();
   int                      execTopic();
-  int                      execMode();
+  int                      execModeCh();
+  int                      execModeCli();
   int                      execModeOneOoption(string opt, string val);
   int                      execPing();
   int                      execWhois();
