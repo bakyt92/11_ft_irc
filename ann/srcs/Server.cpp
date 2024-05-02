@@ -71,16 +71,16 @@ void Server::run() {
   while (sigReceived == false) {
     clear();
     markPollsToSendMsgsTo();
-    int countEvents = poll(polls.data(), polls.size(), 100);                         // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
+    int countEvents = poll(polls.data(), polls.size(), 100);                       // наблюдаем за всеми сокетами сразу, есть ли там что-то для нас
     if (countEvents < 0)
       throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
-    if(countEvents > 0)                                                             // в каких=то сокетах есть данные
+    if(countEvents > 0)                                                            // в каких=то сокетах есть данные
       for(std::vector<struct pollfd>::iterator poll = polls.begin(); poll != polls.end(); poll++) {
-        if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {                   // новый клиент подключился к сокету fdServ
+        if((poll->revents & POLLIN) && poll->fd == fdForNewClis) {                 // новый клиент подключился к сокету fdServ
           addNewClient(*poll);
           break;
         }
-        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)                // клиент прислал нам сообщение через свой fdForMsgs
+        else if((poll->revents & POLLIN) && poll->fd != fdForNewClis)              // клиент прислал нам сообщение через свой fdForMsgs
           receiveBufAndExecCmds(poll->fd);
         else if (poll->revents & POLLOUT)                                          // есть сообщения для отпраки клиентам
           sendPreparedResps(clis.at(poll->fd));
