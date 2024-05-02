@@ -257,7 +257,15 @@ int Server::execKick() {
         if(getCliOnCh(*target, *chName) == NULL)
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {
-          prepareRespAuthorIncluding(getCh(*chName), ": " + (ar.size() >= 4 ? ar[3] + " " : "") + *target + " is kicked from " + *chName + " by " + cli->nick);
+          if (ar.size() > 3)
+            {
+              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2] + " :" + ar[3]);
+            }
+          else 
+            {
+              prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2]);
+            }
+//           (ar.size() >= 4 ? ar[3] + " " : "") + *target + " is kicked from " + *chName + " by " + cli->nick);
           eraseCliFromCh(*target, *chName);
         }
       }
