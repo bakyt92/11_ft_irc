@@ -223,11 +223,11 @@ int Server::execPart() {
     else {
       if (ar.size() > 2) {
         prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " :" + ar[2]);
-//        prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
+//      prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
       }
       else {
         prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1]);
-//        prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
+//      prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
       }
       eraseCliFromCh(cli->nick, *chName);
     }
@@ -322,9 +322,9 @@ int Server::execQuit() {
   fdsToEraseNextIteration.insert(cli->fd);
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++) {
     if (ar.size() == 2)
-      prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:" + ar[1]);
+      prepareRespAuthorIncluding(getCh(ar[1]), it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:" + ar[1]);
     else 
-      prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:");
+      prepareRespAuthorIncluding(getCh(ar[1]), it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:");
   }
   return 0;
 }
@@ -383,7 +383,7 @@ int Server::execModeOneOoption(string opt, string val) {
   else if(opt == "-l")
     getCh(ar[1])->limit = std::numeric_limits<unsigned int>::max();
   else if(opt == "+k")
-    getCh(ar[1])->pass = val; // limitations for a password ?
+    getCh(ar[1])->pass = val; // no limitations for a pass ?
   else if(opt == "-k")
     getCh(ar[1])->pass = "";
   else if(opt == "+l" && atoi(val.c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
@@ -392,16 +392,16 @@ int Server::execModeOneOoption(string opt, string val) {
     getCh(ar[1])->adms.insert(getCli(val));
   else if(opt == "-o" && getAdmOnCh(val, ar[1]) != NULL)
     getCh(ar[1])->adms.erase(getCli(val));
-  return prepareResp(cli, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1] + " " + ar[2]);
+  return prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1] + " " + opt);
 }
 
-// not imple;ented ERR_UMODEUNKNOWNFLAG
+// not implemented ERR_UMODEUNKNOWNFLAG
 // partially implemented RPL_UMODEIS
 int Server::execModeCli() {
   if(getCli(ar[1]) == NULL)
     return prepareResp(cli, "401 :" + ar[1] + " No such nick");                           // ERR_NOSUCHNICK
   if(getCli(ar[1])->nick != cli->nick)
-    return prepareResp(cli, "502 :" + ar[1] + " :Can't change mode for other users");      // ERR_USERSDONTMATCH
+    return prepareResp(cli, "502 :" + ar[1] + " :Can't change mode for other users");     // ERR_USERSDONTMATCH
   if(ar.size() == 2)
     return prepareResp(cli, "221 :" + cli->nick + " ");                                   // RPL_UMODEIS
   if(ar.size() > 3 && ar[2] == "+i")
