@@ -178,6 +178,8 @@ int Server::execJoin() {
       return prepareResp(cli, "405 " + ar[1] + " :You have joined too many channels");  // ERR_TOOMANYCHANNELS
     else if(chName->size() <= 1 || chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL ?
+    else if(getCliOnCh(cli->nick, *chName) != NULL) 
+      prepareResp(cli, ":you are already on channel " + *chName);                     // already on channel ?
     else {
       if(getCh(*chName) == NULL)
         chs[*chName] = new Ch(cli);
@@ -186,10 +188,7 @@ int Server::execJoin() {
         pass = *(passes.begin());
         passes.erase(passes.begin());
       }
-      //cout << "*** " << cli->nick << " wants to join " << *chName << ", getCliOnCh = " << getCliOnCh(cli->nick, *chName)->nick << endl;
-      if(getCliOnCh(cli->nick, *chName) != NULL)
-        prepareResp(cli, ":you are already on channel " + *chName);                     // already on channel ?
-      else if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
+      if(getCh(*chName)->pass != "" && pass != getCh(*chName)->pass)
         prepareResp(cli, "475 " + *chName + " :Cannot join channel (+k)");              // ERR_BADCHANNELKEY
       else if(getCh(*chName)->size() >= getCh(*chName)->limit)
         prepareResp(cli, "471 " + *chName + " :Cannot join channel (+l)");              // ERR_CHANNELISFULL
@@ -244,7 +243,6 @@ int Server::execKick() {
   std::vector<string> chNames = splitArgToSubargs(ar[1]);
   std::vector<string> targets = splitArgToSubargs(ar[2]);
   for(vector<string>::iterator chName = chNames.begin(); chName != chNames.end(); chName++) {
-    cout << "*** cnName = " << *chName << endl;
     if(getCh(*chName) == NULL)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL
     else if(getCliOnCh(cli, *chName) == NULL)
@@ -253,7 +251,6 @@ int Server::execKick() {
       prepareResp(cli, "482 " + *chName + " :You're not channel operator");             // ERR_CHANOPRIVSNEEDED
     else {
       for(vector<string>::iterator target = targets.begin(); target != targets.end(); target++) {
-      cout << "*** target = " << *target << endl;
         if(getCliOnCh(*target, *chName) == NULL)
           prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
         else {

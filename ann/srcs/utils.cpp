@@ -73,7 +73,7 @@ string Server::infoServ() {        // debugging
   ret += "My polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
-  return ret + "\n";
+  return ret + "\n\n";
 }
 
 vector<string> Server::splitBufToCmds(string s) {
@@ -207,9 +207,11 @@ Cli* Server::getCli(string nick) {
 Cli* Server::getCliOnCh(string &nick, string chName) {
   if(getCh(chName) == NULL)
     return NULL;
-  for(set<Cli*>::iterator it = chs[chName]->clis.begin(); it != chs[chName]->clis.end(); it++)
+  for(set<Cli*>::iterator it = chs[chName]->clis.begin(); it != chs[chName]->clis.end(); it++) {
+    cout << "*** " << (*it)->nick << " on chqnnel?\n";
     if(toLower((*it)->nick) == toLower(nick))
       return *it;
+  }
   return NULL;
 }
 

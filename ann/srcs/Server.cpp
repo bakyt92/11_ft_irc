@@ -128,6 +128,6 @@ void Server::receiveBufAndExecCmds(int fd) {
       cout << infoCmd();
       execCmd();
     }
-    cout << infoServ() << endl;
+    cout << infoServ();
   }
 }
