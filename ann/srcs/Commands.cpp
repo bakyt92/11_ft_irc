@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ufitzhug <ufitzhug@student.42.fr>          +#+  +:+       +#+        */
+/*   By: akostrik <akostrik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 21:38:52 by ufitzhug          #+#    #+#             */
-/*   Updated: 2024/05/03 21:43:12 by ufitzhug         ###   ########.fr       */
+/*   Updated: 2024/05/03 22:01:50 by akostrik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,14 +75,9 @@ int Server::execNick() {
     return prepareResp(cli, "431 :No nickname given");                                  // ERR_NONICKNAMEGIVEN
   if(ar[1].size() > 9 || ar[1].find_first_not_of("-[]^{}0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM") != string::npos)
     return prepareResp(cli, "432 " + ar[1] + " :Erroneus nickname");                    // ERR_ERRONEUSNICKNAME
-  cout << "*** I execute NICK " << ar[1] << endl;
-  for(std::map<int, Cli *>::iterator it = clis.begin(); it != clis.end(); it++) {
-    cout << "*** new nick " << ar[1] << " == old nick " << it->second->nick << "?" << endl;
-    if(toLower(ar[1]) == toLower(it->second->nick)) {
-      cout << "*** PROBLEM" << endl;
+  for(std::map<int, Cli *>::iterator it = clis.begin(); it != clis.end(); it++)
+    if(toLower(ar[1]) == toLower(it->second->nick))
       return prepareResp(cli, "433 " + cli->nick + " " + ar[1] + " :Nickname is already in use"); // ERR_NICKNAMEINUSE
-    }
-  }
   cli->nick = ar[1];
   if (cli->nick != "" && cli->uName != "" && cli->passOk && !cli->capInProgress) 
     prepareResp(cli, "001 :" + cli->nick + ": Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME

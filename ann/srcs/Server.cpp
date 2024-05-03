@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ufitzhug <ufitzhug@student.42.fr>          +#+  +:+       +#+        */
+/*   By: akostrik <akostrik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 21:44:56 by ufitzhug          #+#    #+#             */
-/*   Updated: 2024/05/03 21:44:59 by ufitzhug         ###   ########.fr       */
+/*   Updated: 2024/05/03 22:02:18 by akostrik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void Server::addNewClient(pollfd poll) {
   clis[fdForMsgs] = new Cli(fdForMsgs, inet_ntoa(((struct sockaddr_in*)&sa)->sin_addr));;
   struct pollfd pollForMsgs = {fdForMsgs, POLLIN, 0};
   polls.push_back(pollForMsgs);
-  cout << "*** New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n\n";
+  cout << "\n*** New cli (fd=" + static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (fdForMsgs) )).str() + ")\n";
 }
 
 void Server::receiveBufAndExecCmds(int fd) {
