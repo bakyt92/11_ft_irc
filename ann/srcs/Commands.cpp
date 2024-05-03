@@ -346,22 +346,27 @@ int Server::execModeCh() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o
     return prepareResp(cli, "MODE " + ar[1] + " " + mode(getCh(ar[1])));                // RPL_CHANNELMODEIS
   for(size_t i = 2; i < ar.size(); ) {
     string opt = ar[i];
-    string val = (ar.size() >= i + 2 && (opt == "+k" || opt == "+l" || opt != "+o" || opt == "-o")) ? ar[3] : "";
+    string val = (ar.size() >= i + 2 && (opt == "+k" || opt == "+l" || opt == "+o" || opt == "-o")) ? ar[3] : "";
+    cout << "*** opt = " << opt << ", val = " << val << endl;
     if((opt == "+o" || opt == "-o") && val != "") {
       vector<string> vals = splitArgToSubargs(val);
-      for(vector<string>::iterator val = vals.begin(); val != vals.end(); val++)
-        execModeOneOoption(opt, *val);
+      for(vector<string>::iterator it = vals.begin(); it != vals.end(); it++) {
+        execModeOneOoption(opt, *it);
+      }
     }
-    else
+    else {
       execModeOneOoption(opt, val);
-    i += (ar.size() >= i + 2 && (opt == "+k" || opt == "+l" || opt != "+o" || opt == "-o")) ? 2 : 1;
+    }
+    cout << "*** COND = " << (opt == "+k" || opt == "+l" || opt == "+o" || opt == "-o") << ", opt = " << opt << endl;
+    i++;
+    if (opt == "+k" || opt == "+l" || opt == "+o" || opt == "-o")
+      i++;
   }
   return 0;
 }
 
 int Server::execModeOneOoption(string opt, string val) {
   char *notUsed;
-  cout << "*** execModeOneOoption " << opt << " " << val << endl;
   if(opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "+l" && opt != "-l" && opt != "+k" && opt != "-k" && opt != "+o" && opt != "-o")
     return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + ar[2]); // ERR_UNKNOWNMODE
   if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k" && opt != "+o" && opt != "-o")
@@ -370,7 +375,7 @@ int Server::execModeOneOoption(string opt, string val) {
     return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");               // ERR_KEYSET
   if(opt == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
     return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + opt + " " + val + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
-  else if((opt == "+o" || opt == "-o") && getCliOnCh(val, ar[1]) == NULL)
+  if((opt == "+o" || opt == "-o") && getCliOnCh(val, ar[1]) == NULL)
     return prepareResp(cli, "441 " + val + " " + ar[1] + " :They aren't on that channel!!!"); // ERR_USERNOTINCHANNEL
   if(opt == "+l" && (atoi(val.c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
     return prepareResp(cli, "? " + opt + " " + val + " MODE :bad option value");          // ?
