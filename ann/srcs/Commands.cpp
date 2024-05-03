@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Commands.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ufitzhug <ufitzhug@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 21:38:52 by ufitzhug          #+#    #+#             */
+/*   Updated: 2024/05/03 21:43:12 by ufitzhug         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server.hpp"
 class Server;
 
@@ -41,7 +53,7 @@ int Server::execCmd() {
   return prepareResp(cli, "421 " + ar[0] + " " + " :is unknown mode char to me");      // ERR_UNKNOWNCOMMAND
 }
 
-// комманды, необходимые для регистрации: PASS NICK USER CAP PING WHOIS
+// commands necessary for registration: PASS NICK USER CAP PING WHOIS
 int Server::execPass() {
   if(cli->passOk)
     return prepareResp(cli, "462 :Unauthorized command (already registered)");          // ERR_ALREADYREGISTRED
@@ -72,7 +84,7 @@ int Server::execNick() {
     }
   }
   cli->nick = ar[1];
-  if (cli->nick != "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
+  if (cli->nick != "" && cli->uName != "" && cli->passOk && !cli->capInProgress) 
     prepareResp(cli, "001 :" + cli->nick + ": Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
@@ -81,7 +93,7 @@ int Server::execUser() {
   if(ar.size() < 5)
     return prepareResp(cli, "461 USER :Not enough parameters");                         // ERR_NEEDMOREPARAMS 
   if(cli->uName != "")
-    return prepareResp(cli, ":username can not be empty");                              // 
+    return prepareResp(cli, ":username can not be empty");                              
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && !cli->capInProgress)
@@ -127,17 +139,17 @@ int Server::execPrivmsg() {
   if(!cli->passOk || cli->nick== "" || cli->uName == "")
     return prepareResp(cli, "451 " + cli->nick + " :User not logged in" );              // ERR_NOTREGISTERED
   if(ar.size() == 1) 
-    return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")");                 // ERR_NORECIPIENT протестировать
+    return prepareResp(cli, "411 :No recipient given (" + ar[0] + ")");                 // ERR_NORECIPIENT 
   if(ar.size() == 2)
-    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND протестировать
+    return prepareResp(cli, "412 :No text to send");                                    // ERR_NOTEXTTOSEND 
   vector<string> tos = splitArgToSubargs(ar[1]);
   if((set<std::string>(tos.begin(), tos.end())).size() < tos.size() || tos.size() > MAX_NB_TARGETS)
-    return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS сколько именно можно?
+    return prepareResp(cli, "407 " + ar[1] + " not valid recipients");                  // ERR_TOOMANYTARGETS -> how many?
   for(vector<string>::iterator to = tos.begin(); to != tos.end(); to++)
     if((*to)[0] == '#' && chs.find(toLower(*to)) == chs.end())
       prepareResp(cli, "401 " + *to + " :No such nick/channel " + (*to));                        // ERR_NOSUCHNICK
     else if((*to)[0] == '#' && getCliOnCh(cli->nick, *to) == NULL)
-      prepareResp(cli, "404 :" + cli->nick + "!" + cli->uName + "@127.0.0.1 " + *to + " :Cannot send to channel"); // 404 - not on channel ?
+      prepareResp(cli, "404 :" + cli->nick + "!" + cli->uName + "@127.0.0.1 " + *to + " :Cannot send to channel"); 
     else if((*to)[0] == '#' && getCliOnCh(cli->nick, *to) != NULL)
       prepareRespExceptAuthor(getCh(*to), ":" + cli->nick + "!" + cli->uName + "@127.0.0.1 PRIVMSG " + ar[1] + " :" + ar[2]);
     else if((*to)[0] != '#' && !getCli(*to))
@@ -228,11 +240,9 @@ int Server::execPart() {
     else {
       if (ar.size() > 2) {
         prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " :" + ar[2]);
-//      prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
       }
       else {
         prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1]);
-//      prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
       }
       eraseCliFromCh(cli->nick, *chName);
     }
@@ -257,7 +267,7 @@ int Server::execKick() {
     else {
       for(vector<string>::iterator target = targets.begin(); target != targets.end(); target++) {
         if(getCliOnCh(*target, *chName) == NULL)
-          prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL <== вот эта функция не работает
+          prepareResp(cli, "441 " + *target + " " + *chName + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL 
         else {
           if (ar.size() > 3) {
             prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " KICK " + ar[1] + " " + ar[2] + " :" + ar[3]);
