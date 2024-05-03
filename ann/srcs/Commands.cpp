@@ -179,7 +179,7 @@ int Server::execJoin() {
     else if(chName->size() <= 1 || chName->size() > 200 || (*chName)[0] != '#' || chName->find_first_of("0\\") != string::npos)
       prepareResp(cli, "403 " + *chName + " :No such channel");                         // ERR_NOSUCHCHANNEL ?
     else if(getCliOnCh(cli->nick, *chName) != NULL) 
-      prepareResp(cli, ":you are already on channel " + *chName);                     // already on channel ?
+      prepareResp(cli, ":you are already on channel " + *chName);                       // already on channel
     else {
       if(getCh(*chName) == NULL)
         chs[*chName] = new Ch(cli);
