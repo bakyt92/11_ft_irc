@@ -17,6 +17,8 @@ string Server::users(Ch *ch) { // возможно это надо будет п
   return ret;
 }
 
+// "<client> <channel> <modestring> <mode arguments>..."
+// <modestring> and <mode arguments> are a mode string and the mode arguments (delimited as separate parameters) as defined in the MODE message description
 string Server::mode(Ch *ch) {
   if (ch == NULL)
     return "ch is NULL\n";
