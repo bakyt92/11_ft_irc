@@ -6,7 +6,7 @@ string Server::users(Ch *ch) { // возможно это надо будет п
     return "ch is NULL\n";
   if (ch->size() == 0)
     return "no users";
-  string ret = "users: ";
+  string ret = "";
   for(set<Cli*>::iterator it = ch->clis.begin(); it != ch->clis.end(); it++)
     if (ch->adms.find(*it) == ch->adms.end())
       ret += (*it)->nick + " ";
