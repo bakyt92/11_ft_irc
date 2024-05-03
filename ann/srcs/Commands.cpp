@@ -305,17 +305,17 @@ int Server::execTopic() {
   if(getAdmOnCh(cli, ar[1]) == NULL && getCh(ar[1])->optT == true)
     return prepareResp(cli, "482 " + ar[1] + " :You're not channel operator");          // ERR_CHANOPRIVSNEEDED
   if(ar.size() == 2 && getCh(ar[1])->topic == "")  
-    return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
+    return prepareResp(cli, "331 :" + cli->nick + " " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
   if(ar.size() == 2 && getCh(ar[1])->topic != "")  
-    return prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);               // RPL_TOPIC
+    return prepareResp(cli, "332 :" + cli->nick + " " + ar[1] + " :" + getCh(ar[1])->topic);              // RPL_TOPIC
   if(ar.size() >= 3 && (ar[2] == ":" || ar[2] == "")) { 
     getCh(ar[1])->topic = "";
-    return prepareResp(cli, "331 " + cli->nick + "!" + cli->uName + "@127.0.0.1 " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
+    prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "@localhost" + " TOPIC " + ar[1] + " :No topic is set");
+    return prepareResp(cli, "331 :" + cli->nick + " " + ar[1] + " :No topic is set"); // RPL_NOTOPIC
   }
   getCh(ar[1])->topic = ar[2];
-  prepareResp(cli, "332 " + ar[1] + " :" + getCh(ar[1])->topic);                        // RPL_TOPIC
-  return prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + " TOPIC " + ar[1] + " :" + ar[2]);
-//  return prepareRespAuthorIncluding(getCh(ar[1]), cli->nick + "!" + cli->uName + "@" + cli->host + " TOPIC " + ar[1] + " :" + ar[2]);  <== нербочий вариант.
+  prepareResp(cli, "332 :" + cli->nick + " " + ar[1] + " :1" + getCh(ar[1])->topic);                        // RPL_TOPIC
+  return prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "@localhost" + " TOPIC " + ar[1] + " :2" + getCh(ar[1])->topic);
 }
 
 int Server::execQuit() {
