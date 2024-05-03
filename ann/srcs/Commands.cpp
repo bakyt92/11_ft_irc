@@ -347,17 +347,13 @@ int Server::execModeCh() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o
   for(size_t i = 2; i < ar.size(); ) {
     string opt = ar[i];
     string val = (ar.size() >= i + 2 && (opt == "+k" || opt == "+l" || opt == "+o" || opt == "-o")) ? ar[3] : "";
-    cout << "*** opt = " << opt << ", val = " << val << endl;
     if((opt == "+o" || opt == "-o") && val != "") {
       vector<string> vals = splitArgToSubargs(val);
-      for(vector<string>::iterator it = vals.begin(); it != vals.end(); it++) {
+      for(vector<string>::iterator it = vals.begin(); it != vals.end(); it++)
         execModeOneOoption(opt, *it);
-      }
     }
-    else {
+    else 
       execModeOneOoption(opt, val);
-    }
-    cout << "*** COND = " << (opt == "+k" || opt == "+l" || opt == "+o" || opt == "-o") << ", opt = " << opt << endl;
     i++;
     if (opt == "+k" || opt == "+l" || opt == "+o" || opt == "-o")
       i++;
