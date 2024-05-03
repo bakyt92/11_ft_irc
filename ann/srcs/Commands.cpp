@@ -368,7 +368,7 @@ int Server::execModeOneOoption(string opt, string val) {
   if(opt == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
     return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + opt + " " + val + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
   else if((opt == "+o" || opt == "-o") && getCliOnCh(val, ar[1]) == NULL)
-    return prepareResp(cli, "441 " + val + " " + ar[1] + " :They aren't on that channel"); // ERR_USERNOTINCHANNEL
+    return prepareResp(cli, "441 " + val + " " + ar[1] + " :They aren't on that channel!!!"); // ERR_USERNOTINCHANNEL
   if(opt == "+l" && (atoi(val.c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
     return prepareResp(cli, "? " + opt + " " + val + " MODE :bad option value");          // ?
   if(opt == "+i")
@@ -391,7 +391,7 @@ int Server::execModeOneOoption(string opt, string val) {
     getCh(ar[1])->adms.insert(getCli(val));
   else if(opt == "-o" && getAdmOnCh(val, ar[1]) != NULL)
     getCh(ar[1])->adms.erase(getCli(val));
-  return prepareResp(cli, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1]);
+  return prepareResp(cli, ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " MODE " + ar[1] + " " + ar[2]);
 }
 
 // not imple;ented ERR_UMODEUNKNOWNFLAG
