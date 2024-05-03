@@ -319,13 +319,13 @@ int Server::execTopic() {
 }
 
 int Server::execQuit() {
-  fdsToEraseNextIteration.insert(cli->fd);
   for(map<int, Cli*>::iterator it = clis.begin(); it != clis.end(); it++) {
     if (ar.size() == 2)
-      prepareRespAuthorIncluding(getCh(ar[1]), it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:" + ar[1]);
+      prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:" + ar[1]);
     else 
-      prepareRespAuthorIncluding(getCh(ar[1]), it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:");
+      prepareResp(it->second, it->second->nick + "!" + it->second->uName + "@" + it->second->host + " QUIT :Quit:");
   }
+  fdsToEraseNextIteration.insert(cli->fd);
   return 0;
 }
 
