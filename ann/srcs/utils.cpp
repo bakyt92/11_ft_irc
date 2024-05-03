@@ -73,7 +73,7 @@ string Server::infoServ() {        // debugging
   ret += "My polls                  : ";
   for(vector<pollfd>::iterator it = polls.begin(); it != polls.end(); it++)
     ret += static_cast< std::ostringstream &>((std::ostringstream() << std::dec << (it->fd) )).str() + " ";
-  return ret + "\n\n";
+  return ret + "\n";
 }
 
 vector<string> Server::splitBufToCmds(string s) {

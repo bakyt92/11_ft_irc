@@ -361,13 +361,13 @@ int Server::execModeCh() {  //  +i   -i   +t   -t   -k   -l   +k mdp   +l 5   +o
 int Server::execModeOneOoption(string opt, string val) {
   char *notUsed;
   if(opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "+l" && opt != "-l" && opt != "+k" && opt != "-k" && opt != "+o" && opt != "-o")
-    return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + ar[2]); // ERR_UNKNOWNMODE
+    return prepareResp(cli, "472 " + opt + " :is unknown mode char to me for " + val); // ERR_UNKNOWNMODE
   if(val == "" && opt != "+i" && opt != "-i" && opt != "+t" && opt != "-t" && opt != "-l" && opt != "-k" && opt != "+o" && opt != "-o")
     return prepareResp(cli, "461 MODE :Not enough parameters");                          // ERR_NEEDMOREPARAMS
   if(opt == "+k" && getCh(ar[1])->pass != "")
     return prepareResp(cli, "467 " + ar[1] + " :Channel key already set");               // ERR_KEYSET
   if(opt == "+l" && (atoi(ar[3].c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
-    return prepareResp(cli, "472 " + ar[0] + " " + ar[1] + " " + opt + " " + val + " :is unknown mode char to me"); // ERR_UNKNOWNMODE ?
+    return prepareResp(cli, "472 " + cli->nick + " " + opt + " :is unknown mode char to me"); // ERR_UNKNOWNMODE
   if((opt == "+o" || opt == "-o") && getCliOnCh(val, ar[1]) == NULL)
     return prepareResp(cli, "441 " + val + " " + ar[1] + " :They aren't on that channel!!!"); // ERR_USERNOTINCHANNEL
   if(opt == "+l" && (atoi(val.c_str()) < static_cast<int>(0) || static_cast<unsigned int>(atoi(ar[3].c_str())) > std::numeric_limits<unsigned int>::max()))
@@ -386,8 +386,8 @@ int Server::execModeOneOoption(string opt, string val) {
     getCh(ar[1])->pass = val; // no limitations for a pass ?
   else if(opt == "-k")
     getCh(ar[1])->pass = "";
-  else if(opt == "+l" && atoi(val.c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(ar[3].c_str())) <= std::numeric_limits<unsigned int>::max())
-    getCh(ar[1])->limit = static_cast<int>(strtol(ar[3].c_str(), &notUsed, 10));
+  else if(opt == "+l" && atoi(val.c_str()) >= static_cast<int>(0) && static_cast<unsigned int>(atoi(val.c_str())) <= std::numeric_limits<unsigned int>::max())
+    getCh(ar[1])->limit = static_cast<int>(strtol(val.c_str(), &notUsed, 10));
   else if(opt == "+o")
     getCh(ar[1])->adms.insert(getCli(val));
   else if(opt == "-o" && getAdmOnCh(val, ar[1]) != NULL)
