@@ -207,11 +207,9 @@ Cli* Server::getCli(string nick) {
 Cli* Server::getCliOnCh(string &nick, string chName) {
   if(getCh(chName) == NULL)
     return NULL;
-  for(set<Cli*>::iterator it = chs[chName]->clis.begin(); it != chs[chName]->clis.end(); it++) {
-    cout << "*** " << (*it)->nick << " on chqnnel?\n";
+  for(set<Cli*>::iterator it = chs[chName]->clis.begin(); it != chs[chName]->clis.end(); it++)
     if(toLower((*it)->nick) == toLower(nick))
       return *it;
-  }
   return NULL;
 }
 
