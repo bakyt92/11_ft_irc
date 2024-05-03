@@ -202,7 +202,8 @@ int Server::execJoin() {
         prepareRespAuthorIncluding(getCh(*chName), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " JOIN " + *chName); // ok channel
         if(getCh(*chName)->topic != "")
           prepareResp(cli, "332 " + cli->nick + " " + *chName + " :" + getCh(*chName)->topic); // RPL_TOPIC                      // ok channel
-        prepareResp(cli, ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + *chName + " :" + users(getCh(*chName)));               // RPL_NAMREPLY
+        prepareRespAuthorIncluding(getCh(*chName), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + *chName + " :" + users(getCh(*chName)));
+        // prepareResp(cli, ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + *chName + " :" + users(getCh(*chName)));               // RPL_NAMREPLY
       } 
     }
   }
@@ -223,9 +224,11 @@ int Server::execPart() {
     else {
       if (ar.size() > 2) {
         prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1] + " :" + ar[2]);
+//        prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
       }
       else {
         prepareRespAuthorIncluding(getCh(ar[1]), ":" + cli->nick + "!" + cli->uName + "@" + cli->host + " PART " + ar[1]);
+//        prepareRespAuthorIncluding(getCh(ar[1]), ":localhost 353 " + cli->nick + "!" + cli->uName + "@127.0.0.1" + " = " + ar[1] + " :" + users(getCh(ar[1])));
       }
       eraseCliFromCh(cli->nick, *chName);
     }
