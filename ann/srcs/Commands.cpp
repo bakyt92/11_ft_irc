@@ -53,7 +53,7 @@ int Server::execPass() {
   }
   cli->passOk = true;
   if(cli->passOk && cli->nick != "" && cli->uName != "" && !cli->capInProgress)
-    prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+    prepareResp(cli, "001 :" + cli->nick + ": Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
 
@@ -68,7 +68,7 @@ int Server::execNick() {
       return prepareResp(cli, "433 " + cli->nick + " " + ar[1] + " :Nickname is already in use");         // ERR_NICKNAMEINUSE
   cli->nick = ar[1];
   if (cli->nick != "" && cli->uName != "" && cli->passOk && !cli->capInProgress) // cli->capInProgress значит, что мы прошли регистрацию сразу пачкой команд через irssi, нам не надо отправлять тут сообщение
-    prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+    prepareResp(cli, "001 :" + cli->nick + ": Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
 
@@ -80,7 +80,7 @@ int Server::execUser() {
   cli->uName = ar[1];
   cli->rName = ar[4];
   if(cli->nick != "" && cli->passOk && !cli->capInProgress)
-    prepareResp(cli, "001 :Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
+    prepareResp(cli, "001 :" + cli->nick + ": Welcome to the Internet Relay Network " + cli->nick + "!" + cli->uName + "@" + cli->host); // RPL_WELCOME
   return 0;
 }
 
